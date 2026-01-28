@@ -1,0 +1,16 @@
+name = "antiquariato-shop"
+type = "javascript"
+account_id = ""
+workers_dev = true
+route = ""
+zone_id = ""
+
+# Use this file if deploying Cloudflare Workers functions (optional).
+# For static Cloudflare Pages, this file is not required.
+# Read more: https://developers.cloudflare.com/workers/wrangler/configuration/
+
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+[env.development]
+vars = { ENVIRONMENT = "development" }
