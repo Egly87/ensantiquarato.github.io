@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Catalogo completo — Scopri tutti i pezzi d'antiquariato disponibili, ricerca per categoria e prezzo.">
+  <meta property="og:title" content="Catalogo — Antiquariato Shop">
+  <meta property="og:description" content="Catalogo completo di pezzi d'antiquariato selezionati.">
+  <title>Catalogo — Antiquariato Shop</title>
+  <link rel="canonical" href="https://TUODOMINIO.com/catalogo.html">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/assets/brand/favicon-512.png" type="image/png">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div id="app">
+    <header class="navbar">
+      <div class="navbar-container">
+        <a href="/" class="navbar-brand">
+          <img src="/assets/brand/logo.svg" alt="Antiquariato Shop" class="logo" loading="lazy" width="40" height="40" decoding="async">
+          <span>Antiquariato Shop</span>
+        </a>
+        <nav class="navbar-menu">
+          <a href="/" class="nav-link">Home</a>
+          <a href="/catalogo.html" class="nav-link active">Catalogo</a>
+          <a href="/contatti.html" class="nav-link">Contatti</a>
+          <a href="/privacy.html" class="nav-link">Privacy</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="catalog-hero">
+        <h1>Catalogo Completo</h1>
+        <p>Scorri tutti i pezzi disponibili, ricerca e filtra per categoria.</p>
+      </section>
+
+      <section class="container catalog-section">
+        <aside class="filters">
+          <h3>Filtri</h3>
+          
+          <div class="filter-group">
+            <label for="search">Ricerca</label>
+            <input type="text" id="search" placeholder="Nome, autore...">
+          </div>
+
+          <div class="filter-group">
+            <label for="category">Categoria</label>
+            <select id="category">
+              <option value="">Tutte</option>
+              <option value="mobili">Mobili</option>
+              <option value="arte">Arte</option>
+              <option value="ceramica">Ceramica</option>
+              <option value="orologeria">Orologeria</option>
+              <option value="gioielli">Gioielli</option>
+              <option value="oggetti">Oggetti & Curiosità</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="sort">Ordina per</label>
+            <select id="sort">
+              <option value="recenti">Più Recenti</option>
+              <option value="prezzo-asc">Prezzo: Basso → Alto</option>
+              <option value="prezzo-desc">Prezzo: Alto → Basso</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="status">Stato</label>
+            <select id="status">
+              <option value="">Tutti</option>
+              <option value="available">Disponibile</option>
+              <option value="reserved">Riservato</option>
+              <option value="sold">Venduto</option>
+            </select>
+          </div>
+
+          <button id="reset-filters" class="btn btn-outline" style="width:100%;">Azzera Filtri</button>
+        </aside>
+
+        <section class="catalog-main">
+          <div class="catalog-header">
+            <p id="result-count" class="result-count">Caricamento...</p>
+          </div>
+          <div id="catalog-products" class="products-grid">
+            <!-- Caricato da app.js -->
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h4>Antiquariato Shop</h4>
+            <p>Scopri pezzi unici della storia.</p>
+          </div>
+          <div class="footer-section">
+            <h4>Link Veloci</h4>
+            <ul>
+              <li><a href="/catalogo.html">Catalogo</a></li>
+              <li><a href="/contatti.html">Contatti</a></li>
+              <li><a href="/privacy.html">Privacy</a></li>
+              <li><a href="/termini.html">Termini</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2026 Antiquariato Shop. Tutti i diritti riservati.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/js/app.js" defer></script>
+</body>
+</html>

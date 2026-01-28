@@ -1,0 +1,113 @@
+[
+  {
+    "id": 1,
+    "name": "Comò Luigi XVI Intarsiato",
+    "category": "mobili",
+    "description": "Comò in legno intarsiato con decorazioni in osso e madreperla. Fine '800, restaurato a mano. Condizioni ottimali.",
+    "price": 2400.00,
+    "year": "1880-1890",
+    "dimensions": "L 120cm × H 90cm × P 50cm",
+    "status": "available",
+    "featured": true,
+    "image": "assets/products/1_1.webp",
+    "gallery": [
+      "assets/products/1_1.webp",
+      "assets/products/1_2.webp"
+    ],
+    "stripeLinkBuy": "https://buy.stripe.com/placeholder-como",
+    "paypalBuy": "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&item_name=Como+Luigi+XVI&amount=2400.00",
+    "whatsappText": "Mi interessa il Comò Luigi XVI Intarsiato..."
+  },
+  {
+    "id": 2,
+    "name": "Dipinto Olio su Tela Romantico",
+    "category": "arte",
+    "description": "Paesaggio romantico, olio su tela. Firmato, XIX secolo. Cornice dorata originale.",
+    "price": 1800.00,
+    "year": "1850-1870",
+    "dimensions": "L 80cm × H 60cm",
+    "status": "available",
+    "featured": true,
+    "image": "assets/products/2_1.webp",
+    "gallery": [
+      "assets/products/2_1.webp"
+    ],
+    "stripeLinkBuy": "https://buy.stripe.com/placeholder-dipinto",
+    "paypalBuy": "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&item_name=Dipinto+Olio&amount=1800.00",
+    "whatsappText": "Mi interessa il Dipinto Olio su Tela..."
+  },
+  {
+    "id": 3,
+    "name": "Servizio Porcellana Meissen",
+    "category": "ceramica",
+    "description": "Servizio da tè completo (12 pz) in porcellana Meissen. Decorazioni a mano in blu cobalto. XIX secolo.",
+    "price": 950.00,
+    "year": "1840-1860",
+    "dimensions": "Varie (teiera H 15cm)",
+    "status": "reserved",
+    "featured": false,
+    "image": "assets/products/3_1.webp",
+    "gallery": [
+      "assets/products/3_1.webp",
+      "assets/products/3_2.webp"
+    ],
+    "stripeLinkBuy": "",
+    "paypalBuy": "",
+    "whatsappText": "Informazioni sul Servizio Porcellana Meissen"
+  },
+  {
+    "id": 4,
+    "name": "Orologio da Tavolo Art Déco",
+    "category": "orologeria",
+    "description": "Orologio da tavolo in ottone dorato con quadrante in marmo. Movimento meccanico perfettamente funzionante. 1920-1930.",
+    "price": 680.00,
+    "year": "1920-1930",
+    "dimensions": "L 25cm × H 35cm",
+    "status": "available",
+    "featured": false,
+    "image": "assets/products/4_1.webp",
+    "gallery": [
+      "assets/products/4_1.webp"
+    ],
+    "stripeLinkBuy": "https://buy.stripe.com/placeholder-orologio",
+    "paypalBuy": "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&item_name=Orologio+Art+Deco&amount=680.00",
+    "whatsappText": "Mi interessa l'Orologio da Tavolo Art Déco..."
+  },
+  {
+    "id": 5,
+    "name": "Candelabro Cristallo Boemia",
+    "category": "oggetti",
+    "description": "Candelabro a tre bracci in cristallo rosso di Boemia. Senza restauri, condizioni originali. XIX secolo.",
+    "price": 450.00,
+    "year": "1870-1890",
+    "dimensions": "L 35cm × H 25cm",
+    "status": "sold",
+    "featured": false,
+    "image": "assets/products/5_1.webp",
+    "gallery": [
+      "assets/products/5_1.webp"
+    ],
+    "stripeLinkBuy": "",
+    "paypalBuy": "",
+    "whatsappText": ""
+  },
+  {
+    "id": 6,
+    "name": "Collana Oro e Granati Vittoriana",
+    "category": "gioielli",
+    "description": "Collana in oro giallo 18kt con granati naturali. Granatiera vittoriana con chiusura originale. Perfettamente funzionante.",
+    "price": 1200.00,
+    "year": "1880-1900",
+    "dimensions": "Lunghezza 45cm",
+    "status": "available",
+    "featured": false,
+    "image": "assets/products/6_1.webp",
+    "gallery": [
+      "assets/products/6_1.webp",
+      "assets/products/6_2.webp"
+    ],
+    "stripeLinkBuy": "https://buy.stripe.com/placeholder-collana",
+    "paypalBuy": "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&item_name=Collana+Granati&amount=1200.00",
+    "whatsappText": "Mi interessa la Collana Oro e Granati Vittoriana..."
+  }
+]

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hero 1920x1080 - dark textured scene with subtle gold accent -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="hg" x1="0" x2="1">
+      <stop offset="0%" stop-color="#131313"/>
+      <stop offset="100%" stop-color="#0f0f0f"/>
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#hg)"/>
+  <!-- subtle platform -->
+  <ellipse cx="960" cy="760" rx="420" ry="70" fill="#0b0b0b" opacity="0.6"/>
+  <rect x="80" y="160" width="1760" height="760" rx="10" fill="none" stroke="#1f1f1f"/>
+  <!-- gold accent line bottom-left -->
+  <rect x="140" y="920" width="200" height="4" fill="#D4AF37"/>
+</svg>

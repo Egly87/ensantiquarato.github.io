@@ -1,0 +1,33 @@
+{
+  "name": "Antiquariato Shop",
+  "short_name": "Antiquariato",
+  "description": "Scopri pezzi unici e rari della storia. Arredamento, oggetti e opere d'epoca selezionati con cura.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#1a1a1a",
+  "background_color": "#0f0f0f",
+  "icons": [
+    {
+      "src": "/assets/brand/favicon-512.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/brand/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "antique"],
+  "screenshots": [
+    {
+      "src": "/assets/brand/og-1200x630.jpg",
+      "sizes": "1200x630",
+      "type": "image/jpeg"
+    }
+  ]
+}

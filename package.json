@@ -1,0 +1,11 @@
+{
+  "name": "antiquariato-shop-utils",
+  "version": "1.0.0",
+  "description": "Utility scripts for image conversion for Antiquariato Shop",
+  "scripts": {
+    "convert-images": "node scripts/convert_images.js ./assets/products/originals ./assets/products"
+  },
+  "dependencies": {
+    "sharp": "^0.32.0"
+  }
+}

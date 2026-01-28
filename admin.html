@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin — Generatore Prodotti (Locale)</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    /* Small admin overrides inside page to avoid new CSS files */
+    .admin-banner{background:#7f1d1d;color:#fff;padding:8px;text-align:center;font-weight:700}
+    .admin-wrap{max-width:1100px;margin:20px auto;padding:16px}
+    .admin-grid{display:grid;grid-template-columns:1fr;gap:12px}
+    .admin-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(min-width:900px){.admin-grid{grid-template-columns:2fr 1fr}.admin-row{grid-template-columns:1fr 1fr}}
+    label{display:block;margin-bottom:6px;font-weight:600}
+    .field{margin-bottom:10px}
+    .small-note{font-size:0.85rem;color:var(--text-secondary)}
+    textarea.json-out{height:220px;font-family:monospace;white-space:pre-wrap}
+    .images-list{display:flex;flex-direction:column;gap:6px}
+    .images-row{display:flex;gap:8px;align-items:center}
+    .muted{color:var(--text-secondary)}
+    .admin-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .stats{background:var(--bg-secondary);border:1px solid var(--border-color);padding:12px;border-radius:8px}
+    .error{color:#ff6b6b;font-weight:700;font-size:0.95rem}
+  </style>
+</head>
+<body>
+  <div class="admin-banner">TOOL LOCALE: non pubblicare questa pagina online. Uso locale/offline per gestione catalogo.</div>
+
+  <main class="admin-wrap">
+    <h1 class="text-gold">Admin — Generatore Prodotti (Locale)</h1>
+    <p class="small-note">Compila il form per generare il blocco JSON di un nuovo prodotto. Usa la sezione a destra per caricare/aggiornare il file `products.json` sul tuo computer.</p>
+
+    <div class="admin-grid">
+      <section>
+        <form id="product-form" novalidate>
+          <div class="admin-row">
+            <div>
+              <div class="field">
+                <label for="title">Title <span class="muted">(obbligatorio)</span></label>
+                <input id="title" name="title" required>
+                <div id="err-title" class="error" style="display:none"></div>
+              </div>
+
+              <div class="field">
+                <label for="category">Category <span class="muted">(obbligatorio)</span></label>
+                <select id="category" name="category">
+                  <option value="">-- Seleziona o scrivi --</option>
+                  <option value="mobili">mobili</option>
+                  <option value="arte">arte</option>
+                  <option value="ceramica">ceramica</option>
+                  <option value="orologeria">orologeria</option>
+                  <option value="gioielli">gioielli</option>
+                  <option value="oggetti">oggetti</option>
+                </select>
+                <input id="category-free" placeholder="Oppure scrivi categoria..." style="margin-top:6px">
+                <div id="err-category" class="error" style="display:none"></div>
+              </div>
+
+              <div class="field">
+                <label for="price">Price (EUR)</label>
+                <input id="price" name="price" type="number" step="0.01" min="0">
+              </div>
+
+              <div class="field">
+                <label for="currency">Currency</label>
+                <input id="currency" name="currency" value="EUR">
+              </div>
+
+              <div class="field">
+                <label>Status</label>
+                <select id="status" name="status">
+                  <option value="available">available</option>
+                  <option value="reserved">reserved</option>
+                  <option value="sold">sold</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label><input type="checkbox" id="featured"> Featured</label>
+              </div>
+
+              <div class="field">
+                <label for="short">Short Description</label>
+                <textarea id="short" rows="3"></textarea>
+              </div>
+
+            </div>
+
+            <div>
+              <div class="field">
+                <label for="createdAt">Created At</label>
+                <input id="createdAt" type="date">
+              </div>
+
+              <div class="field">
+                <label for="id">ID (slug)</label>
+                <input id="id-field" placeholder="generato automaticamente">
+                <div class="small-note">Generato da Title: slug. Puoi modificare.</div>
+              </div>
+
+              <fieldset style="border:0;padding:0;margin:0">
+                <legend style="font-weight:700;margin-bottom:8px">Details (opzionali)</legend>
+                <div class="field">
+                  <label for="era">Era</label>
+                  <input id="era">
+                </div>
+                <div class="field">
+                  <label for="materials">Materials</label>
+                  <input id="materials">
+                </div>
+                <div class="field">
+                  <label for="dimensions">Dimensions</label>
+                  <input id="dimensions">
+                </div>
+                <div class="field">
+                  <label for="condition">Condition</label>
+                  <input id="condition">
+                </div>
+                <div class="field">
+                  <label for="provenance">Provenance</label>
+                  <input id="provenance">
+                </div>
+              </fieldset>
+
+              <div class="field">
+                <label>Images</label>
+                <div id="images" class="images-list"></div>
+                <button type="button" id="add-image" class="btn btn-outline">+ Aggiungi immagine</button>
+              </div>
+
+              <div class="field">
+                <label for="stripe">Stripe Payment Link</label>
+                <input id="stripe">
+              </div>
+              <div class="field">
+                <label for="paypal">PayPal Link</label>
+                <input id="paypal">
+              </div>
+
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <div id="form-errors" class="error" style="display:none"></div>
+            <div class="admin-actions">
+              <button id="generate" type="button" class="btn btn-primary">Genera JSON</button>
+              <button id="copy-json" type="button" class="btn btn-secondary">Copia JSON</button>
+              <button id="reset-form" type="button" class="btn btn-outline">Reset form</button>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <label>JSON prodotto</label>
+            <textarea id="json-output" class="json-out" readonly></textarea>
+          </div>
+        </form>
+      </section>
+
+      <aside>
+        <div class="stats">
+          <h3 class="text-gold">Aggiorna products.json (Bonus)</h3>
+          <p class="small-note">Carica il tuo `products.json` per aggiungere il prodotto e scaricare il file aggiornato (nessuna scrittura automatica).</p>
+
+          <div class="field">
+            <input type="file" id="file-input" accept="application/json">
+          </div>
+          <div id="file-info" class="small-note">Nessun file caricato</div>
+          <div style="margin-top:8px">
+            <button id="add-to-file" class="btn btn-primary">Aggiungi prodotto al file</button>
+            <button id="download-file" class="btn btn-secondary">Scarica products.json aggiornato</button>
+          </div>
+
+          <hr style="margin:12px 0;border-color:var(--border-color)">
+          <div id="file-stats" class="muted">—</div>
+          <div id="file-errors" class="error" style="display:none"></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    // Admin JS - no external libs
+    (function(){
+      const qs = sel => document.querySelector(sel);
+      const title = qs('#title');
+      const category = qs('#category');
+      const categoryFree = qs('#category-free');
+      const price = qs('#price');
+      const currency = qs('#currency');
+      const status = qs('#status');
+      const featured = qs('#featured');
+      const shortDesc = qs('#short');
+      const createdAt = qs('#createdAt');
+      const idField = qs('#id-field');
+      const imagesDiv = qs('#images');
+      const addImageBtn = qs('#add-image');
+      const stripe = qs('#stripe');
+      const paypal = qs('#paypal');
+      const generateBtn = qs('#generate');
+      const copyBtn = qs('#copy-json');
+      const resetBtn = qs('#reset-form');
+      const jsonOut = qs('#json-output');
+      const formErrors = qs('#form-errors');
+
+      const fileInput = qs('#file-input');
+      const fileInfo = qs('#file-info');
+      const addToFileBtn = qs('#add-to-file');
+      const downloadFileBtn = qs('#download-file');
+      const fileStats = qs('#file-stats');
+      const fileErrors = qs('#file-errors');
+
+      let currentFile = null; // parsed JSON array
+
+      // init createdAt default
+      const today = new Date().toISOString().slice(0,10);
+      createdAt.value = today;
+
+      // slugify
+      function slugify(s){
+        return String(s).toLowerCase().trim()
+          .replace(/[^a-z0-9\s-]/g,'')
+          .replace(/\s+/g,'-')
+          .replace(/-+/g,'-');
+      }
+
+      // images list management
+      function addImageRow(value){
+        const row = document.createElement('div'); row.className='images-row';
+        const input = document.createElement('input'); input.value = value||''; input.style.flex='1';
+        const rm = document.createElement('button'); rm.type='button'; rm.className='btn btn-outline'; rm.textContent='Rimuovi';
+        rm.addEventListener('click',()=>{ imagesDiv.removeChild(row); });
+        row.appendChild(input); row.appendChild(rm); imagesDiv.appendChild(row);
+      }
+      addImageBtn.addEventListener('click', ()=> addImageRow(''));
+
+      // form validation
+      function validateForm(){
+        let ok=true; formErrors.style.display='none'; formErrors.textContent='';
+        if(!title.value.trim()){ qs('#err-title').style.display='block'; qs('#err-title').textContent='Titolo obbligatorio'; ok=false;} else { qs('#err-title').style.display='none'; }
+        const cat = (categoryFree.value.trim()||category.value).trim();
+        if(!cat){ qs('#err-category').style.display='block'; qs('#err-category').textContent='Categoria obbligatoria'; ok=false;} else { qs('#err-category').style.display='none'; }
+
+        if(status.value==='available'){
+          // price optional, links optional
+        }
+
+        return ok;
+      }
+
+      function collectForm(){
+        const cat = (categoryFree.value.trim()||category.value).trim();
+        const imgs = Array.from(imagesDiv.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean);
+        const generatedId = slugify(idField.value.trim() || title.value || 'item');
+        const obj = {
+          id: generatedId,
+          name: title.value.trim(),
+          category: cat,
+          description: shortDesc.value.trim(),
+          price: price.value ? Number(price.value) : null,
+          currency: currency.value || 'EUR',
+          year: document.getElementById('era').value || '',
+          materials: document.getElementById('materials').value || '',
+          dimensions: document.getElementById('dimensions').value || '',
+          condition: document.getElementById('condition').value || '',
+          provenance: document.getElementById('provenance').value || '',
+          status: status.value,
+          featured: !!featured.checked,
+          createdAt: createdAt.value,
+          image: imgs[0] || '',
+          gallery: imgs,
+          stripeLinkBuy: stripe.value.trim()||'',
+          paypalBuy: paypal.value.trim()||'',
+          whatsappText: ''
+        };
+        return obj;
+      }
+
+      generateBtn.addEventListener('click', ()=>{
+        if(!validateForm()) return; const obj = collectForm();
+        jsonOut.value = JSON.stringify(obj,null,2);
+      });
+
+      copyBtn.addEventListener('click', async ()=>{
+        try{
+          await navigator.clipboard.writeText(jsonOut.value);
+          copyBtn.textContent='Copiato!'; setTimeout(()=>copyBtn.textContent='Copia JSON',1500);
+        }catch(e){ alert('Impossibile copiare automaticamente. Copia manuale dalla textarea.'); }
+      });
+
+      resetBtn.addEventListener('click', ()=>{
+        document.getElementById('product-form').reset(); imagesDiv.innerHTML=''; jsonOut.value=''; createdAt.value=today; idField.value='';
+      });
+
+      // File input handling
+      fileInput.addEventListener('change', (ev)=>{
+        const f = ev.target.files[0];
+        if(!f) return; fileInfo.textContent = 'Caricamento...'; fileErrors.style.display='none';
+        const reader = new FileReader();
+        reader.onload = () => {
+          try{
+            const parsed = JSON.parse(reader.result);
+            if(!Array.isArray(parsed)) throw new Error('Il JSON non è un array di prodotti');
+            currentFile = parsed;
+            fileInfo.textContent = `File caricato: ${f.name}`;
+            const cats = Array.from(new Set(parsed.map(p=>p.category).filter(Boolean)));
+            fileStats.textContent = `${parsed.length} prodotti — ${cats.length} categorie: ${cats.join(', ')}`;
+          }catch(err){ currentFile=null; fileInfo.textContent='Errore nel file'; fileErrors.style.display='block'; fileErrors.textContent=err.message; }
+        };
+        reader.readAsText(f);
+      });
+
+      // addToFile: insert product into currentFile (with id uniqueness)
+      addToFileBtn.addEventListener('click', ()=>{
+        if(!currentFile){ alert('Carica prima un products.json'); return; }
+        if(!jsonOut.value){ alert('Genera prima il JSON del prodotto'); return; }
+        const newProd = JSON.parse(jsonOut.value);
+        // ensure id unique
+        const ids = currentFile.map(p=>p.id);
+        let base = newProd.id || slugify(newProd.name||'item');
+        let candidate = base; let n=2;
+        while(ids.includes(candidate)){
+          candidate = `${base}-${n++}`;
+        }
+        if(candidate!==base){ alert(`ID duplicato. Usato nuovo id: ${candidate}`); newProd.id = candidate; }
+        currentFile.push(newProd);
+        fileStats.textContent = `${currentFile.length} prodotti — categorie: ${Array.from(new Set(currentFile.map(p=>p.category).filter(Boolean))).join(', ')}`;
+        jsonOut.value = JSON.stringify(newProd,null,2);
+        fileInfo.textContent = 'Prodotto aggiunto all\'array in memoria. Premi Scarica products.json aggiornato.';
+      });
+
+      downloadFileBtn.addEventListener('click', ()=>{
+        if(!currentFile){ alert('Nessun products.json caricato.'); return; }
+        const blob = new Blob([JSON.stringify(currentFile,null,2)],{type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download='products.updated.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      });
+
+      // generate id auto when title changes
+      title.addEventListener('input', ()=>{
+        const s = slugify(title.value);
+        if(!idField.value) idField.value = s;
+      });
+
+      // initial small image row
+      addImageRow('assets/products/example.jpg');
+
+    })();
+  </script>
+</body>
+</html>

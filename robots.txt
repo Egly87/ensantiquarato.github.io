@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /private/
+
+Sitemap: https://TUODOMINIO.com/sitemap.xml
+
+User-agent: AdsBot-Google
+Allow: /
+
+Crawl-delay: 1

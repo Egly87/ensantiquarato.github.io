@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Antiquariato Shop — Scopri pezzi unici e rari della storia. Arredamento, oggetti e opere d'epoca selezionate con cura.">
+  <meta name="theme-color" content="#1a1a1a">
+  <meta property="og:title" content="Antiquariato Shop">
+  <meta property="og:description" content="Scopri pezzi unici e rari della storia.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://TUODOMINIO.com">
+  <meta property="og:image" content="https://TUODOMINIO.com/assets/brand/og-1200x630.webp">
+  <title>Antiquariato Shop — Pezzi unici e rari</title>
+  <link rel="canonical" href="https://TUODOMINIO.com/">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/assets/brand/favicon-512.png" type="image/png">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div id="app">
+    <header class="navbar">
+      <div class="navbar-container">
+        <a href="/" class="navbar-brand">
+          <img src="/assets/brand/logo.svg" alt="Antiquariato Shop" class="logo" loading="lazy" width="40" height="40" decoding="async">
+          <span>Antiquariato Shop</span>
+        </a>
+        <nav class="navbar-menu">
+          <a href="/" class="nav-link active">Home</a>
+          <a href="/catalogo.html" class="nav-link">Catalogo</a>
+          <a href="/contatti.html" class="nav-link">Contatti</a>
+          <a href="/privacy.html" class="nav-link">Privacy</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-content">
+          <h1>Pezzi Unici della Storia</h1>
+          <p>Scopri una selezione curata di mobili, oggetti e opere d'epoca. Ogni pezzo ha una storia da raccontare.</p>
+          <a href="/catalogo.html" class="btn btn-primary">Esplora il Catalogo</a>
+        </div>
+        <div class="hero-image">
+          <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+            <rect fill="#2a2a2a" width="400" height="300"/>
+            <text x="200" y="150" text-anchor="middle" fill="#D4AF37" font-size="20" font-family="serif">Immagine Hero</text>
+          </svg>
+        </div>
+      </section>
+
+      <section class="featured">
+        <div class="container">
+          <h2>In Evidenza</h2>
+          <div id="featured-products" class="products-grid">
+            <!-- Caricato da app.js -->
+          </div>
+        </div>
+      </section>
+
+      <section class="cta">
+        <h2>Cerchi qualcosa di specifico?</h2>
+        <p>Visita il nostro catalogo completo o contattaci per richieste speciali.</p>
+        <div class="cta-buttons">
+          <a href="/catalogo.html" class="btn btn-secondary">Catalogo Completo</a>
+          <a href="/contatti.html" class="btn btn-outline">Contattaci</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h4>Antiquariato Shop</h4>
+            <p>Scopri pezzi unici della storia.</p>
+          </div>
+          <div class="footer-section">
+            <h4>Link Veloci</h4>
+            <ul>
+              <li><a href="/catalogo.html">Catalogo</a></li>
+              <li><a href="/contatti.html">Contatti</a></li>
+              <li><a href="/privacy.html">Privacy</a></li>
+              <li><a href="/termini.html">Termini</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2026 Antiquariato Shop. Tutti i diritti riservati.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(e => console.log('SW:', e));</script>
+  <script src="/js/app.js" defer></script>
+</body>
+</html>
