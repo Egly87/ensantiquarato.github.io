@@ -204,6 +204,8 @@ Breakpoints:
 
 ## 🚀 Deploy su Cloudflare Pages
 
+**→ Leggi [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) per istruzioni complete.**
+
 ### Metodo 1: GitHub (Consigliato)
 1. **Push su GitHub**:
    ```bash
