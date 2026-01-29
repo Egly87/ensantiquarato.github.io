@@ -13,6 +13,23 @@ const app = {
   },
 
   loadProducts() {
+    // Carica da localStorage first (admin), fallback a JSON
+    const storageKey = 'antiquariato_products';
+    const stored = localStorage.getItem(storageKey);
+    
+    if (stored) {
+      try {
+        const data = JSON.parse(stored);
+        this.products = data;
+        this.filteredProducts = data;
+        this.detectPage();
+        return;
+      } catch (e) {
+        console.warn('Errore parsing localStorage, riprovo con JSON');
+      }
+    }
+
+    // Fallback a JSON statico
     fetch('/data/products.json')
       .then(r => r.json())
       .then(data => {
@@ -193,13 +210,14 @@ const app = {
 
     const buySection = product.status === 'available' ? `
       <div class="action-buttons">
-        <a href="${product.stripeLinkBuy}" class="btn btn-primary" target="_blank">Acquista con Stripe</a>
-        <a href="${product.paypalBuy}" class="btn btn-secondary" target="_blank">Acquista con PayPal</a>
+        <button class="btn btn-primary" onclick="app.addToCart(${product.id})">🛒 Aggiungi al Carrello</button>
+        <a href="${product.stripeLinkBuy}" class="btn btn-secondary" target="_blank">💳 Stripe</a>
+        <a href="${product.paypalBuy}" class="btn btn-secondary" target="_blank">🅿️ PayPal</a>
       </div>
     ` : '';
 
     const inquiryBtn = product.status !== 'available' ? `
-      <a href="https://wa.me/39${product.whatsappText}" class="product-inquiry-btn" target="_blank">Richiedi Informazioni</a>
+      <a href="https://wa.me/39?text=${encodeURIComponent(product.whatsappText)}" class="product-inquiry-btn" target="_blank">💬 Richiedi Informazioni</a>
     ` : '';
 
     const mainImgEsc = mainImg.replace(/"/g, '&quot;');
@@ -348,6 +366,51 @@ const app = {
         alert('Questo form è un placeholder. Configura un backend per l\'invio email.');
       });
     }
+  },
+
+  // ========================
+  // CARRELLO
+  // ========================
+
+  addToCart(productId) {
+    const product = this.products.find(p => p.id === productId);
+    if (!product) return;
+
+    const CART_KEY = 'antiquariato_cart';
+    const cart = JSON.parse(localStorage.getItem(CART_KEY) || '[]');
+    
+    const existingItem = cart.find(item => item.productId === productId);
+    if (existingItem) {
+      existingItem.quantity += 1;
+    } else {
+      cart.push({ productId, quantity: 1 });
+    }
+
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    this.showNotification(`✅ ${product.name} aggiunto al carrello!`);
+  },
+
+  showNotification(message) {
+    const notif = document.createElement('div');
+    notif.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #d4af37;
+      color: #000;
+      padding: 15px 20px;
+      border-radius: 4px;
+      font-weight: 600;
+      z-index: 9999;
+      animation: slideIn 0.3s ease;
+    `;
+    notif.textContent = message;
+    document.body.appendChild(notif);
+    setTimeout(() => notif.remove(), 3000);
+  },
+
+  goToCart() {
+    window.location.href = '/carrello.html';
   }
 };
 

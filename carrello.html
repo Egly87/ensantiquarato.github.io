@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Carrello e Pagamento - Antiquariato Shop">
+  <title>Carrello - Antiquariato Shop</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    .checkout-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+    }
+    @media (max-width: 768px) {
+      .checkout-container {
+        grid-template-columns: 1fr;
+      }
+    }
+    .checkout-section {
+      background: #2a2a2a;
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .checkout-section h2 {
+      color: #d4af37;
+      margin-top: 0;
+    }
+    .cart-item {
+      display: flex;
+      gap: 15px;
+      padding: 15px 0;
+      border-bottom: 1px solid #444;
+      align-items: flex-start;
+    }
+    .cart-item:last-child {
+      border-bottom: none;
+    }
+    .cart-item img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    .cart-item-info {
+      flex: 1;
+    }
+    .cart-item-name {
+      color: #e0e0e0;
+      margin: 0 0 5px 0;
+    }
+    .cart-item-price {
+      color: #d4af37;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .quantity-control {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .quantity-btn {
+      background: #444;
+      border: none;
+      color: #e0e0e0;
+      width: 30px;
+      height: 30px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .quantity-btn:hover {
+      background: #555;
+    }
+    .remove-btn {
+      background: #dc3545;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85em;
+    }
+    .summary {
+      background: #1a1a1a;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 20px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      color: #e0e0e0;
+    }
+    .summary-total {
+      border-top: 1px solid #444;
+      padding-top: 10px;
+      font-size: 1.2em;
+      color: #d4af37;
+      font-weight: 600;
+    }
+    .payment-methods {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .payment-btn {
+      padding: 12px;
+      border: 2px solid #444;
+      background: transparent;
+      color: #e0e0e0;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .payment-btn.active {
+      border-color: #d4af37;
+      background: #d4af37;
+      color: #000;
+    }
+    .payment-btn:hover {
+      border-color: #d4af37;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #e0e0e0;
+      font-weight: 500;
+      font-size: 0.9em;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      background: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-family: inherit;
+    }
+    .stripe-container {
+      background: #1a1a1a;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+    }
+    .btn-checkout {
+      width: 100%;
+      padding: 12px;
+      background: #d4af37;
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 1em;
+      transition: all 0.3s ease;
+    }
+    .btn-checkout:hover {
+      background: #e0c158;
+    }
+    .btn-checkout:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    .empty-cart {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+    .empty-cart-icon {
+      font-size: 3em;
+      margin-bottom: 20px;
+    }
+    .alert {
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="navbar">
+      <div class="navbar-container">
+        <a href="/" class="navbar-brand">
+          <img src="/assets/brand/logo.svg" alt="Antiquariato Shop" class="logo" loading="lazy" width="40" height="40" decoding="async">
+          <span>Antiquariato Shop</span>
+        </a>
+        <nav class="navbar-menu">
+          <a href="/" class="nav-link">Home</a>
+          <a href="/catalogo.html" class="nav-link">Catalogo</a>
+          <a href="/carrello.html" class="nav-link active">Carrello</a>
+          <a href="/contatti.html" class="nav-link">Contatti</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="checkout-container" style="margin-top: 30px;">
+      <!-- Carrello Items -->
+      <div class="checkout-section">
+        <h2>🛒 Il Tuo Carrello</h2>
+        <div id="cart-items"></div>
+        <div id="empty-message" class="empty-cart" style="display: none;">
+          <div class="empty-cart-icon">🛍️</div>
+          <h3>Carrello vuoto</h3>
+          <p>Aggiungi prodotti dal <a href="/catalogo.html" style="color: #d4af37;">catalogo</a></p>
+        </div>
+      </div>
+
+      <!-- Checkout -->
+      <div class="checkout-section">
+        <h2>💳 Pagamento</h2>
+        <div id="alert-container"></div>
+
+        <div id="payment-section" style="display: none;">
+          <div class="summary">
+            <div class="summary-row">
+              <span>Subtotale:</span>
+              <span id="subtotal">€0.00</span>
+            </div>
+            <div class="summary-row">
+              <span>Spedizione:</span>
+              <span id="shipping">€0.00</span>
+            </div>
+            <div class="summary-row summary-total">
+              <span>Totale:</span>
+              <span id="total">€0.00</span>
+            </div>
+          </div>
+
+          <!-- Metodi di pagamento -->
+          <h3 style="color: #e0e0e0; margin-top: 20px; margin-bottom: 15px;">Scegli metodo di pagamento:</h3>
+          
+          <div class="payment-methods">
+            <button class="payment-btn active" onclick="selectPaymentMethod('stripe')">
+              💳 Carta Crediticia
+            </button>
+            <button class="payment-btn" onclick="selectPaymentMethod('paypal')">
+              🅿️ PayPal
+            </button>
+          </div>
+
+          <!-- Form dati cliente -->
+          <h3 style="color: #e0e0e0; margin-bottom: 15px;">Dati Personali:</h3>
+          <form id="checkout-form">
+            <div class="form-group">
+              <label for="email">Email *</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+              <label for="name">Nome Completo *</label>
+              <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+              <label for="phone">Telefono</label>
+              <input type="tel" id="phone" name="phone">
+            </div>
+
+            <!-- Stripe Payment Element -->
+            <div id="stripe-container" class="stripe-container" style="display: none;">
+              <div id="card-element"></div>
+            </div>
+
+            <!-- PayPal Container -->
+            <div id="paypal-container" style="display: none; margin: 20px 0;"></div>
+
+            <button type="submit" class="btn-checkout" id="checkout-btn">Completa Pagamento</button>
+          </form>
+
+          <p style="font-size: 0.85em; color: #999; margin-top: 15px; text-align: center;">
+            I tuoi dati sono protetti e mai condivisi.
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <footer style="text-align: center; padding: 20px; color: #666; margin-top: 40px;">
+      <p>© 2026 Antiquariato Shop</p>
+    </footer>
+  </div>
+
+  <script>
+    const CART_KEY = 'antiquariato_cart';
+    const PRODUCTS_KEY = 'antiquariato_products';
+    let stripe = null;
+    let elements = null;
+    let cardElement = null;
+
+    // Carica Stripe
+    function initStripe() {
+      const stripeKey = prompt('Inserisci la tua Stripe Publishable Key (da https://dashboard.stripe.com/)');
+      if (stripeKey) {
+        stripe = Stripe(stripeKey);
+        elements = stripe.elements();
+        cardElement = elements.create('card');
+      }
+    }
+
+    function getCart() {
+      const json = localStorage.getItem(CART_KEY);
+      return json ? JSON.parse(json) : [];
+    }
+
+    function getProducts() {
+      const json = localStorage.getItem(PRODUCTS_KEY);
+      return json ? JSON.parse(json) : [];
+    }
+
+    function saveCart(cart) {
+      localStorage.setItem(CART_KEY, JSON.stringify(cart));
+      renderCart();
+    }
+
+    function showAlert(message, type = 'success') {
+      const alertContainer = document.getElementById('alert-container');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+      alert.textContent = message;
+      alertContainer.innerHTML = '';
+      alertContainer.appendChild(alert);
+      if (type === 'success') {
+        setTimeout(() => alert.remove(), 4000);
+      }
+    }
+
+    function updateTotals() {
+      const cart = getCart();
+      const products = getProducts();
+      
+      let subtotal = 0;
+      cart.forEach(item => {
+        const product = products.find(p => p.id === item.productId);
+        if (product) {
+          subtotal += product.price * item.quantity;
+        }
+      });
+
+      const shipping = subtotal > 0 ? 10 : 0; // €10 shipping
+      const total = subtotal + shipping;
+
+      document.getElementById('subtotal').textContent = `€${subtotal.toFixed(2)}`;
+      document.getElementById('shipping').textContent = `€${shipping.toFixed(2)}`;
+      document.getElementById('total').textContent = `€${total.toFixed(2)}`;
+      
+      return { subtotal, shipping, total };
+    }
+
+    function renderCart() {
+      const cart = getCart();
+      const products = getProducts();
+      const container = document.getElementById('cart-items');
+      const emptyMessage = document.getElementById('empty-message');
+      const paymentSection = document.getElementById('payment-section');
+
+      if (cart.length === 0) {
+        container.innerHTML = '';
+        emptyMessage.style.display = 'block';
+        paymentSection.style.display = 'none';
+        return;
+      }
+
+      emptyMessage.style.display = 'none';
+      paymentSection.style.display = 'block';
+
+      container.innerHTML = cart.map(item => {
+        const product = products.find(p => p.id === item.productId);
+        if (!product) return '';
+
+        return `
+          <div class="cart-item">
+            <img src="${product.image}" alt="${product.name}" onerror="this.src='/assets/brand/placeholder.png'">
+            <div class="cart-item-info">
+              <h4 class="cart-item-name">${product.name}</h4>
+              <div class="cart-item-price">€${product.price.toFixed(2)}</div>
+              <div class="quantity-control">
+                <button class="quantity-btn" onclick="updateQuantity(${item.productId}, ${item.quantity - 1})">−</button>
+                <span style="color: #e0e0e0; min-width: 40px; text-align: center;">${item.quantity}</span>
+                <button class="quantity-btn" onclick="updateQuantity(${item.productId}, ${item.quantity + 1})">+</button>
+                <button class="remove-btn" onclick="removeFromCart(${item.productId})">Rimuovi</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      updateTotals();
+    }
+
+    function updateQuantity(productId, quantity) {
+      const cart = getCart();
+      if (quantity <= 0) {
+        removeFromCart(productId);
+        return;
+      }
+      const item = cart.find(i => i.productId === productId);
+      if (item) {
+        item.quantity = quantity;
+        saveCart(cart);
+      }
+    }
+
+    function removeFromCart(productId) {
+      const cart = getCart();
+      const filtered = cart.filter(i => i.productId !== productId);
+      saveCart(filtered);
+    }
+
+    function selectPaymentMethod(method) {
+      document.querySelectorAll('.payment-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      const stripeContainer = document.getElementById('stripe-container');
+      const paypalContainer = document.getElementById('paypal-container');
+
+      if (method === 'stripe') {
+        stripeContainer.style.display = 'block';
+        paypalContainer.style.display = 'none';
+        if (!cardElement && stripe) {
+          cardElement.mount('#card-element');
+        }
+      } else {
+        stripeContainer.style.display = 'none';
+        paypalContainer.style.display = 'block';
+        // PayPal integration would go here
+        paypalContainer.innerHTML = `
+          <p style="color: #999; text-align: center;">
+            🔗 PayPal integration coming soon. 
+            <a href="https://www.paypal.com/myaccount/transfer" target="_blank" style="color: #d4af37;">
+              Oppure contattaci direttamente
+            </a>
+          </p>
+        `;
+      }
+    }
+
+    // Form submission
+    document.getElementById('checkout-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (stripe && cardElement) {
+        // Stripe payment processing
+        showAlert('⏳ Elaborazione pagamento in corso...', 'success');
+        
+        const { token, error } = await stripe.createToken(cardElement);
+        if (error) {
+          showAlert(`❌ Errore: ${error.message}`, 'error');
+        } else {
+          // Send to backend
+          console.log('Token:', token);
+          showAlert('✅ Pagamento elaborato! Ti contatteremo a breve.', 'success');
+          setTimeout(() => {
+            localStorage.removeItem(CART_KEY);
+            window.location.href = '/';
+          }, 2000);
+        }
+      } else {
+        // Non-Stripe payment (WhatsApp, etc)
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const phone = document.getElementById('phone').value;
+        const cart = getCart();
+        const products = getProducts();
+        
+        let cartText = 'Prodotti:\n';
+        cart.forEach(item => {
+          const product = products.find(p => p.id === item.productId);
+          if (product) {
+            cartText += `- ${product.name} × ${item.quantity}\n`;
+          }
+        });
+
+        const message = `Ciao! Vorrei acquistare i seguenti prodotti:\n\n${cartText}\nNome: ${name}\nEmail: ${email}\nTelefono: ${phone}`;
+        const whatsappNumber = '39'; // Sostituire con numero reale
+        const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+        
+        window.open(whatsappUrl, '_blank');
+        showAlert('✅ Messaggio WhatsApp preparato!', 'success');
+      }
+    });
+
+    // Initialize on load
+    renderCart();
+    // Uncomment per abilitare Stripe: initStripe();
+  </script>
+</body>
+</html>
