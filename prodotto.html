@@ -3,71 +3,92 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Dettagli del prodotto — Antiquariato Shop.">
-  <meta property="og:title" content="Prodotto — Antiquariato Shop">
+  <meta name="description" content="Dettagli del prodotto — ENS Antiquariato.">
+  <meta name="theme-color" content="#f6f1e7">
+  <meta property="og:title" content="Prodotto — ENS Antiquariato">
   <meta property="og:description" content="Scopri i dettagli di questo straordinario pezzo d'antiquariato.">
-  <title>Prodotto — Antiquariato Shop</title>
-  <link rel="canonical" href="https://TUODOMINIO.com/prodotto.html">
-  <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/assets/brand/favicon-512.png" type="image/png">
-  <link rel="stylesheet" href="/css/styles.css">
+  <meta property="og:type" content="product">
+  <meta property="og:url" content="https://ensantiquarato.github.io/prodotto.html">
+  <meta property="og:image" content="https://ensantiquarato.github.io/assets/brand/og-1200x630.jpg">
+  <title>Prodotto — ENS Antiquariato</title>
+  <link rel="canonical" href="https://ensantiquarato.github.io/prodotto.html">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/brand/favicon-512.png" type="image/png">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
   <div id="app">
     <header class="navbar">
       <div class="navbar-container">
-        <a href="/" class="navbar-brand">
-          <img src="/assets/brand/logo.svg" alt="Antiquariato Shop" class="logo" loading="lazy" width="40" height="40" decoding="async">
-          <span>Antiquariato Shop</span>
+        <a href="index.html" class="navbar-brand">
+          <img src="assets/brand/logo.svg" alt="ENS Antiquariato" class="logo" loading="lazy" width="42" height="42" decoding="async">
+          <span>ENS Antiquariato</span>
         </a>
         <nav class="navbar-menu">
-          <a href="/" class="nav-link">Home</a>
-          <a href="/catalogo.html" class="nav-link">Catalogo</a>
-          <a href="/contatti.html" class="nav-link">Contatti</a>
-          <a href="/carrello.html" class="nav-link">🛒 Carrello</a>
-          <a href="/admin-products.html" class="nav-link" style="color: #d4af37;">⚙️ Admin</a>
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="catalogo.html" class="nav-link">Catalogo</a>
+          <a href="chi-siamo.html" class="nav-link">Chi siamo</a>
+          <a href="contatti.html" class="nav-link">Contatti</a>
+          <a href="carrello.html" class="nav-link cta">Carrello</a>
         </nav>
       </div>
     </header>
 
     <main>
       <div class="container product-container">
-        <a href="/catalogo.html" class="back-link">← Torna al Catalogo</a>
-        
+        <div class="breadcrumbs">Catalogo / Dettaglio</div>
+        <a href="catalogo.html" class="back-link">← Torna al catalogo</a>
+
         <div id="product-detail" class="product-detail">
           <!-- Caricato da app.js -->
         </div>
       </div>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-title">
+            <span>Potrebbe piacerti</span>
+            <h2>Altri pezzi selezionati</h2>
+          </div>
+          <div id="related-products" class="products-grid">
+            <!-- Caricato da app.js -->
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer class="footer">
       <div class="container">
         <div class="footer-content">
           <div class="footer-section">
-            <h4>Antiquariato Shop</h4>
-            <p>Scopri pezzi unici della storia.</p>
+            <h4>ENS Antiquariato</h4>
+            <p>Selezione curata di pezzi autentici per collezionisti e interior design.</p>
           </div>
           <div class="footer-section">
-            <h4>Link Veloci</h4>
+            <h4>Esplora</h4>
             <ul>
-              <li><a href="/catalogo.html">Catalogo</a></li>
-              <li><a href="/contatti.html">Contatti</a></li>
-              <li><a href="/privacy.html">Privacy</a></li>
-              <li><a href="/termini.html">Termini</a></li>
+              <li><a href="catalogo.html">Catalogo</a></li>
+              <li><a href="chi-siamo.html">Chi siamo</a></li>
+              <li><a href="contatti.html">Contatti</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h4>Supporto</h4>
+            <ul>
+              <li><a href="termini.html">Termini e condizioni</a></li>
+              <li><a href="privacy.html">Privacy</a></li>
+              <li><a href="carrello.html">Carrello</a></li>
             </ul>
           </div>
         </div>
         <div class="footer-bottom">
-          <p>&copy; 2026 Antiquariato Shop. Tutti i diritti riservati.</p>
+          <p>&copy; 2026 ENS Antiquariato. Tutti i diritti riservati.</p>
         </div>
       </div>
     </footer>
   </div>
 
-  <script type="application/ld+json" id="product-schema">
-  {}
-  </script>
-
-  <script src="/js/app.js" defer></script>
+  <script type="application/ld+json" id="product-schema">{}</script>
+  <script src="js/app.js" defer></script>
 </body>
 </html>

@@ -3,61 +3,69 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Contattaci per informazioni su prodotti, richieste speciali o restauri.">
-  <meta property="og:title" content="Contatti — Antiquariato Shop">
-  <title>Contatti — Antiquariato Shop</title>
-  <link rel="canonical" href="https://TUODOMINIO.com/contatti.html">
-  <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/assets/brand/favicon-512.png" type="image/png">
-  <link rel="stylesheet" href="/css/styles.css">
+  <meta name="description" content="Contattaci per informazioni su prodotti, richieste speciali o consulenze di antiquariato.">
+  <meta name="theme-color" content="#f6f1e7">
+  <meta property="og:title" content="Contatti — ENS Antiquariato">
+  <meta property="og:description" content="Scrivici per richieste speciali, consulenze o valutazioni.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ensantiquarato.github.io/contatti.html">
+  <meta property="og:image" content="https://ensantiquarato.github.io/assets/brand/og-1200x630.jpg">
+  <title>Contatti — ENS Antiquariato</title>
+  <link rel="canonical" href="https://ensantiquarato.github.io/contatti.html">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/brand/favicon-512.png" type="image/png">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
   <div id="app">
     <header class="navbar">
       <div class="navbar-container">
-        <a href="/" class="navbar-brand">
-          <img src="/assets/brand/logo.svg" alt="Antiquariato Shop" class="logo" loading="lazy" width="40" height="40" decoding="async">
-          <span>Antiquariato Shop</span>
+        <a href="index.html" class="navbar-brand">
+          <img src="assets/brand/logo.svg" alt="ENS Antiquariato" class="logo" loading="lazy" width="42" height="42" decoding="async">
+          <span>ENS Antiquariato</span>
         </a>
         <nav class="navbar-menu">
-          <a href="/" class="nav-link">Home</a>
-          <a href="/catalogo.html" class="nav-link">Catalogo</a>
-          <a href="/contatti.html" class="nav-link active">Contatti</a>
-          <a href="/carrello.html" class="nav-link">🛒 Carrello</a>
-          <a href="/admin-products.html" class="nav-link" style="color: #d4af37;">⚙️ Admin</a>
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="catalogo.html" class="nav-link">Catalogo</a>
+          <a href="chi-siamo.html" class="nav-link">Chi siamo</a>
+          <a href="contatti.html" class="nav-link active">Contatti</a>
+          <a href="carrello.html" class="nav-link cta">Carrello</a>
         </nav>
       </div>
     </header>
 
     <main>
       <section class="hero-simple">
-        <h1>Contatti</h1>
-        <p>Contattaci per informazioni, richieste speciali o per vendere un pezzo.</p>
+        <div class="container">
+          <span class="hero-kicker">Parliamo del tuo progetto</span>
+          <h1>Contatti</h1>
+          <p>Scrivici per richieste speciali, consulenze o per vendere un pezzo. Rispondiamo rapidamente con proposte concrete.</p>
+        </div>
       </section>
 
       <section class="container contact-section">
         <div class="contact-grid">
           <div class="contact-card">
             <h3>Email</h3>
-            <p><a href="mailto:info@TUODOMINIO.com" class="contact-link">info@TUODOMINIO.com</a></p>
-            <p class="small">Risponderemo entro 24 ore.</p>
+            <p><a href="mailto:egli87@yahoo.com" class="contact-link">egli87@yahoo.com</a></p>
+            <p class="small">Risposta entro 24 ore lavorative.</p>
           </div>
 
           <div class="contact-card">
             <h3>Telefono</h3>
-            <p><a href="tel:+39XXXXXXXXX" class="contact-link">+39 XXX XXX XXXX</a></p>
-            <p class="small">Lun-Ven, 10:00-18:00</p>
+            <p><a href="tel:+393296627575" class="contact-link">+39 329 662 7575</a></p>
+            <p class="small">Lun-Ven, 10:00-18:00 (su appuntamento).</p>
           </div>
 
           <div class="contact-card">
             <h3>WhatsApp</h3>
-            <p><a href="https://wa.me/39XXXXXXXXX" class="contact-link" target="_blank">Scrivi su WhatsApp</a></p>
-            <p class="small">Risposte rapide per richieste urgenti.</p>
+            <p><a href="https://wa.me/393296627575" class="contact-link" target="_blank" rel="noopener">Scrivi su WhatsApp</a></p>
+            <p class="small">Per foto extra e dettagli rapidi.</p>
           </div>
         </div>
 
         <div class="contact-form-container">
-          <h2>Inviaci un Messaggio</h2>
+          <h2>Richiesta rapida</h2>
           <form id="contact-form" class="contact-form">
             <div class="form-group">
               <label for="name">Nome</label>
@@ -76,7 +84,7 @@
               <textarea id="message" name="message" rows="6" required></textarea>
             </div>
             <button type="submit" class="btn btn-primary">Invia</button>
-            <p class="form-note">Nota: questo form è un placeholder. Configura il backend per l'invio email o usa un servizio come Formspree.</p>
+            <p class="form-note">Nota: questo form e' un placeholder. Configura un servizio email (Formspree, Netlify Forms o simili).</p>
           </form>
         </div>
       </section>
@@ -86,26 +94,33 @@
       <div class="container">
         <div class="footer-content">
           <div class="footer-section">
-            <h4>Antiquariato Shop</h4>
-            <p>Scopri pezzi unici della storia.</p>
+            <h4>ENS Antiquariato</h4>
+            <p>Selezione curata di pezzi autentici per collezionisti e interior design.</p>
           </div>
           <div class="footer-section">
-            <h4>Link Veloci</h4>
+            <h4>Esplora</h4>
             <ul>
-              <li><a href="/catalogo.html">Catalogo</a></li>
-              <li><a href="/contatti.html">Contatti</a></li>
-              <li><a href="/privacy.html">Privacy</a></li>
-              <li><a href="/termini.html">Termini</a></li>
+              <li><a href="catalogo.html">Catalogo</a></li>
+              <li><a href="chi-siamo.html">Chi siamo</a></li>
+              <li><a href="contatti.html">Contatti</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h4>Supporto</h4>
+            <ul>
+              <li><a href="termini.html">Termini e condizioni</a></li>
+              <li><a href="privacy.html">Privacy</a></li>
+              <li><a href="carrello.html">Carrello</a></li>
             </ul>
           </div>
         </div>
         <div class="footer-bottom">
-          <p>&copy; 2026 Antiquariato Shop. Tutti i diritti riservati.</p>
+          <p>&copy; 2026 ENS Antiquariato. Tutti i diritti riservati.</p>
         </div>
       </div>
     </footer>
   </div>
 
-  <script src="/js/app.js" defer></script>
+  <script src="js/app.js" defer></script>
 </body>
 </html>

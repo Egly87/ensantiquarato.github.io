@@ -1,9 +1,11 @@
 User-agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /admin.html
+Disallow: /admin-products.html
 Disallow: /private/
 
-Sitemap: https://TUODOMINIO.com/sitemap.xml
+Sitemap: https://ensantiquarato.github.io/sitemap.xml
 
 User-agent: AdsBot-Google
 Allow: /

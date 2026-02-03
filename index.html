@@ -3,67 +3,179 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Antiquariato Shop — Scopri pezzi unici e rari della storia. Arredamento, oggetti e opere d'epoca selezionate con cura.">
-  <meta name="theme-color" content="#1a1a1a">
-  <meta property="og:title" content="Antiquariato Shop">
-  <meta property="og:description" content="Scopri pezzi unici e rari della storia.">
+  <meta name="description" content="ENS Antiquariato — pezzi autentici selezionati con cura. Arredi, arte e oggetti d'epoca con provenienza e assistenza dedicata.">
+  <meta name="theme-color" content="#f6f1e7">
+  <meta property="og:title" content="ENS Antiquariato">
+  <meta property="og:description" content="Pezzi autentici, selezionati con cura. Scopri collezioni d'epoca con assistenza dedicata.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://TUODOMINIO.com">
-  <meta property="og:image" content="https://TUODOMINIO.com/assets/brand/og-1200x630.webp">
-  <title>Antiquariato Shop — Pezzi unici e rari</title>
-  <link rel="canonical" href="https://TUODOMINIO.com/">
-  <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/assets/brand/favicon-512.png" type="image/png">
-  <link rel="stylesheet" href="/css/styles.css">
+  <meta property="og:url" content="https://ensantiquarato.github.io">
+  <meta property="og:image" content="https://ensantiquarato.github.io/assets/brand/og-1200x630.jpg">
+  <title>ENS Antiquariato — Pezzi autentici selezionati</title>
+  <link rel="canonical" href="https://ensantiquarato.github.io/">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/brand/favicon-512.png" type="image/png">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
   <div id="app">
     <header class="navbar">
       <div class="navbar-container">
-        <a href="/" class="navbar-brand">
-          <img src="/assets/brand/logo.svg" alt="Antiquariato Shop" class="logo" loading="lazy" width="40" height="40" decoding="async">
-          <span>Antiquariato Shop</span>
+        <a href="index.html" class="navbar-brand">
+          <img src="assets/brand/logo.svg" alt="ENS Antiquariato" class="logo" loading="lazy" width="42" height="42" decoding="async">
+          <span>ENS Antiquariato</span>
         </a>
         <nav class="navbar-menu">
-          <a href="/" class="nav-link active">Home</a>
-          <a href="/catalogo.html" class="nav-link">Catalogo</a>
-          <a href="/contatti.html" class="nav-link">Contatti</a>
-          <a href="/carrello.html" class="nav-link">🛒 Carrello</a>
-          <a href="/admin-products.html" class="nav-link" style="color: #d4af37;">⚙️ Admin</a>
+          <a href="index.html" class="nav-link active">Home</a>
+          <a href="catalogo.html" class="nav-link">Catalogo</a>
+          <a href="chi-siamo.html" class="nav-link">Chi siamo</a>
+          <a href="contatti.html" class="nav-link">Contatti</a>
+          <a href="carrello.html" class="nav-link cta">Carrello</a>
         </nav>
       </div>
     </header>
 
     <main>
       <section class="hero">
-        <div class="hero-content">
-          <h1>Pezzi Unici della Storia</h1>
-          <p>Scopri una selezione curata di mobili, oggetti e opere d'epoca. Ogni pezzo ha una storia da raccontare.</p>
-          <a href="/catalogo.html" class="btn btn-primary">Esplora il Catalogo</a>
-        </div>
-        <div class="hero-image">
-          <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
-            <rect fill="#2a2a2a" width="400" height="300"/>
-            <text x="200" y="150" text-anchor="middle" fill="#D4AF37" font-size="20" font-family="serif">Immagine Hero</text>
-          </svg>
+        <div class="container hero-grid">
+          <div class="reveal">
+            <span class="hero-kicker">Antiquariato selezionato</span>
+            <h1 class="hero-title">Pezzi autentici che raccontano la storia</h1>
+            <p class="hero-copy">Una selezione curata di arredi, arte e oggetti d'epoca. Ogni pezzo e' verificato, descritto con trasparenza e supportato da assistenza dedicata.</p>
+            <div class="hero-actions">
+              <a href="catalogo.html" class="btn btn-primary">Esplora il catalogo</a>
+              <a href="contatti.html" class="btn btn-secondary">Prenota una consulenza</a>
+            </div>
+            <div class="hero-highlights">
+              <div class="hero-highlight">
+                <span>Autenticita</span>
+                <strong>Selezione con provenienza</strong>
+              </div>
+              <div class="hero-highlight">
+                <span>Assistenza</span>
+                <strong>Consulenza personalizzata</strong>
+              </div>
+              <div class="hero-highlight">
+                <span>Spedizioni</span>
+                <strong>Imballo professionale</strong>
+              </div>
+            </div>
+          </div>
+          <div class="hero-image reveal">
+            <picture>
+              <source type="image/webp" srcset="assets/brand/hero-1920x1080.webp">
+              <img src="assets/brand/hero-1920x1080.jpg" alt="Selezione di antiquariato" loading="eager" width="960" height="720" decoding="async">
+            </picture>
+          </div>
         </div>
       </section>
 
-      <section class="featured">
+      <section class="trust-strip">
+        <div class="container trust-items">
+          <div class="trust-item">
+            <h4>Autenticita verificata</h4>
+            <p>Ogni pezzo e' descritto con dettagli su periodo, materiali e condizioni.</p>
+          </div>
+          <div class="trust-item">
+            <h4>Restauro conservativo</h4>
+            <p>Interventi rispettosi dell'epoca, indicati in modo trasparente.</p>
+          </div>
+          <div class="trust-item">
+            <h4>Spedizioni assicurate</h4>
+            <p>Imballi professionali e opzioni di consegna dedicata.</p>
+          </div>
+          <div class="trust-item">
+            <h4>Pagamenti protetti</h4>
+            <p>Acquista in sicurezza con Stripe o PayPal, senza costi nascosti.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
         <div class="container">
-          <h2>In Evidenza</h2>
+          <div class="section-title">
+            <span>Collezioni</span>
+            <h2>Esplora per categoria</h2>
+          </div>
+          <div class="card-grid">
+            <a class="collection-card" href="catalogo.html#categoria=mobili">
+              <img src="assets/products/1_1.webp" alt="Mobili d'epoca">
+              <div>
+                <h3>Mobili d'epoca</h3>
+                <p>Comodini, tavoli e comò con lavorazioni artigianali.</p>
+                <span>Scopri</span>
+              </div>
+            </a>
+            <a class="collection-card" href="catalogo.html#categoria=arte">
+              <img src="assets/products/2_1.webp" alt="Arte e dipinti">
+              <div>
+                <h3>Arte e dipinti</h3>
+                <p>Tele, cornici e opere che raccontano il loro tempo.</p>
+                <span>Scopri</span>
+              </div>
+            </a>
+            <a class="collection-card" href="catalogo.html#categoria=gioielli">
+              <img src="assets/products/6_1.webp" alt="Gioielli d'epoca">
+              <div>
+                <h3>Gioielli d'epoca</h3>
+                <p>Preziosi con materiali autentici e lavorazioni rare.</p>
+                <span>Scopri</span>
+              </div>
+            </a>
+            <a class="collection-card" href="catalogo.html#categoria=oggetti">
+              <img src="assets/products/5_1.webp" alt="Oggetti e curiosita">
+              <div>
+                <h3>Oggetti e curiosita</h3>
+                <p>Pezzi unici per collezionisti e ambienti ricercati.</p>
+                <span>Scopri</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="featured section">
+        <div class="container">
+          <div class="section-title">
+            <span>In evidenza</span>
+            <h2>Selezione del mese</h2>
+          </div>
           <div id="featured-products" class="products-grid">
             <!-- Caricato da app.js -->
           </div>
         </div>
       </section>
 
+      <section class="section">
+        <div class="container">
+          <div class="section-title">
+            <span>Servizi</span>
+            <h2>Un supporto completo</h2>
+          </div>
+          <div class="card-grid">
+            <div class="card">
+              <h3>Valutazioni e consulenza</h3>
+              <p>Aiutiamo a scegliere il pezzo giusto per stile, periodo e budget.</p>
+            </div>
+            <div class="card">
+              <h3>Restauro e cura</h3>
+              <p>Interventi conservativi per mantenere il valore storico.</p>
+            </div>
+            <div class="card">
+              <h3>Consegna dedicata</h3>
+              <p>Imballo professionale e spedizioni assicurate in Italia e UE.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="cta">
-        <h2>Cerchi qualcosa di specifico?</h2>
-        <p>Visita il nostro catalogo completo o contattaci per richieste speciali.</p>
-        <div class="cta-buttons">
-          <a href="/catalogo.html" class="btn btn-secondary">Catalogo Completo</a>
-          <a href="/contatti.html" class="btn btn-outline">Contattaci</a>
+        <div class="container">
+          <h2>Vuoi un pezzo su misura per il tuo spazio?</h2>
+          <p>Raccontaci cosa cerchi: ti proponiamo alternative reali, foto e dettagli approfonditi.</p>
+          <div class="cta-buttons">
+            <a href="catalogo.html" class="btn btn-primary">Vai al catalogo</a>
+            <a href="contatti.html" class="btn btn-outline">Parla con noi</a>
+          </div>
         </div>
       </section>
     </main>
@@ -72,27 +184,34 @@
       <div class="container">
         <div class="footer-content">
           <div class="footer-section">
-            <h4>Antiquariato Shop</h4>
-            <p>Scopri pezzi unici della storia.</p>
+            <h4>ENS Antiquariato</h4>
+            <p>Selezione curata di pezzi autentici per collezionisti e interior design.</p>
           </div>
           <div class="footer-section">
-            <h4>Link Veloci</h4>
+            <h4>Esplora</h4>
             <ul>
-              <li><a href="/catalogo.html">Catalogo</a></li>
-              <li><a href="/contatti.html">Contatti</a></li>
-              <li><a href="/privacy.html">Privacy</a></li>
-              <li><a href="/termini.html">Termini</a></li>
+              <li><a href="catalogo.html">Catalogo</a></li>
+              <li><a href="chi-siamo.html">Chi siamo</a></li>
+              <li><a href="contatti.html">Contatti</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h4>Supporto</h4>
+            <ul>
+              <li><a href="termini.html">Termini e condizioni</a></li>
+              <li><a href="privacy.html">Privacy</a></li>
+              <li><a href="carrello.html">Carrello</a></li>
             </ul>
           </div>
         </div>
         <div class="footer-bottom">
-          <p>&copy; 2026 Antiquariato Shop. Tutti i diritti riservati.</p>
+          <p>&copy; 2026 ENS Antiquariato. Tutti i diritti riservati.</p>
         </div>
       </div>
     </footer>
   </div>
 
-  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(e => console.log('SW:', e));</script>
-  <script src="/js/app.js" defer></script>
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(e => console.log('SW:', e));</script>
+  <script src="js/app.js" defer></script>
 </body>
 </html>

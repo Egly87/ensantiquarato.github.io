@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Minimal monogram logo (AS) - gold on transparent -->
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
-  <rect width="100%" height="100%" fill="none"/>
-  <g fill="#D4AF37" font-family="Playfair Display, serif" font-weight="700" text-anchor="middle">
-    <text x="400" y="430" font-size="320">AS</text>
-  </g>
+<!-- ENS Antiquariato - monogram seal -->
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="seal" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#f9f4ea"/>
+      <stop offset="100%" stop-color="#efe5d7"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" fill="none"/>
+  <circle cx="100" cy="100" r="92" fill="url(#seal)" stroke="#b07a3a" stroke-width="6"/>
+  <circle cx="100" cy="100" r="78" fill="none" stroke="#cdbca6" stroke-width="2"/>
+  <circle cx="100" cy="36" r="4" fill="#b07a3a"/>
+  <circle cx="100" cy="164" r="4" fill="#b07a3a"/>
+  <line x1="64" y1="36" x2="136" y2="36" stroke="#cdbca6" stroke-width="2"/>
+  <line x1="64" y1="164" x2="136" y2="164" stroke="#cdbca6" stroke-width="2"/>
+  <text x="100" y="112" text-anchor="middle" font-family="Iowan Old Style, Palatino Linotype, serif" font-size="42" font-weight="700" letter-spacing="6" fill="#201c18">ENS</text>
 </svg>

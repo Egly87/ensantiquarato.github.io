@@ -3,46 +3,53 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Catalogo completo — Scopri tutti i pezzi d'antiquariato disponibili, ricerca per categoria e prezzo.">
-  <meta property="og:title" content="Catalogo — Antiquariato Shop">
+  <meta name="description" content="Catalogo completo — pezzi d'antiquariato selezionati. Filtra per categoria, stato e prezzo.">
+  <meta name="theme-color" content="#f6f1e7">
+  <meta property="og:title" content="Catalogo — ENS Antiquariato">
   <meta property="og:description" content="Catalogo completo di pezzi d'antiquariato selezionati.">
-  <title>Catalogo — Antiquariato Shop</title>
-  <link rel="canonical" href="https://TUODOMINIO.com/catalogo.html">
-  <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/assets/brand/favicon-512.png" type="image/png">
-  <link rel="stylesheet" href="/css/styles.css">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ensantiquarato.github.io/catalogo.html">
+  <meta property="og:image" content="https://ensantiquarato.github.io/assets/brand/og-1200x630.jpg">
+  <title>Catalogo — ENS Antiquariato</title>
+  <link rel="canonical" href="https://ensantiquarato.github.io/catalogo.html">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/brand/favicon-512.png" type="image/png">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
   <div id="app">
     <header class="navbar">
       <div class="navbar-container">
-        <a href="/" class="navbar-brand">
-          <img src="/assets/brand/logo.svg" alt="Antiquariato Shop" class="logo" loading="lazy" width="40" height="40" decoding="async">
-          <span>Antiquariato Shop</span>
+        <a href="index.html" class="navbar-brand">
+          <img src="assets/brand/logo.svg" alt="ENS Antiquariato" class="logo" loading="lazy" width="42" height="42" decoding="async">
+          <span>ENS Antiquariato</span>
         </a>
         <nav class="navbar-menu">
-          <a href="/" class="nav-link">Home</a>
-          <a href="/catalogo.html" class="nav-link active">Catalogo</a>
-          <a href="/contatti.html" class="nav-link">Contatti</a>
-          <a href="/carrello.html" class="nav-link">🛒 Carrello</a>
-          <a href="/admin-products.html" class="nav-link" style="color: #d4af37;">⚙️ Admin</a>
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="catalogo.html" class="nav-link active">Catalogo</a>
+          <a href="chi-siamo.html" class="nav-link">Chi siamo</a>
+          <a href="contatti.html" class="nav-link">Contatti</a>
+          <a href="carrello.html" class="nav-link cta">Carrello</a>
         </nav>
       </div>
     </header>
 
     <main>
       <section class="catalog-hero">
-        <h1>Catalogo Completo</h1>
-        <p>Scorri tutti i pezzi disponibili, ricerca e filtra per categoria.</p>
+        <div class="container">
+          <span class="hero-kicker">Catalogo completo</span>
+          <h1>Selezione di antiquariato autentico</h1>
+          <p>Filtra per categoria, stato e prezzo. Ogni scheda contiene dettagli su periodo, dimensioni e condizioni.</p>
+        </div>
       </section>
 
       <section class="container catalog-section">
         <aside class="filters">
           <h3>Filtri</h3>
-          
+
           <div class="filter-group">
             <label for="search">Ricerca</label>
-            <input type="text" id="search" placeholder="Nome, autore...">
+            <input type="text" id="search" placeholder="Nome, autore, materiale...">
           </div>
 
           <div class="filter-group">
@@ -54,16 +61,16 @@
               <option value="ceramica">Ceramica</option>
               <option value="orologeria">Orologeria</option>
               <option value="gioielli">Gioielli</option>
-              <option value="oggetti">Oggetti & Curiosità</option>
+              <option value="oggetti">Oggetti e curiosita</option>
             </select>
           </div>
 
           <div class="filter-group">
             <label for="sort">Ordina per</label>
             <select id="sort">
-              <option value="recenti">Più Recenti</option>
-              <option value="prezzo-asc">Prezzo: Basso → Alto</option>
-              <option value="prezzo-desc">Prezzo: Alto → Basso</option>
+              <option value="recenti">Piu recenti</option>
+              <option value="prezzo-asc">Prezzo: basso → alto</option>
+              <option value="prezzo-desc">Prezzo: alto → basso</option>
             </select>
           </div>
 
@@ -77,7 +84,7 @@
             </select>
           </div>
 
-          <button id="reset-filters" class="btn btn-outline" style="width:100%;">Azzera Filtri</button>
+          <button id="reset-filters" class="btn btn-outline" style="width:100%;">Azzera filtri</button>
         </aside>
 
         <section class="catalog-main">
@@ -95,26 +102,33 @@
       <div class="container">
         <div class="footer-content">
           <div class="footer-section">
-            <h4>Antiquariato Shop</h4>
-            <p>Scopri pezzi unici della storia.</p>
+            <h4>ENS Antiquariato</h4>
+            <p>Selezione curata di pezzi autentici per collezionisti e interior design.</p>
           </div>
           <div class="footer-section">
-            <h4>Link Veloci</h4>
+            <h4>Esplora</h4>
             <ul>
-              <li><a href="/catalogo.html">Catalogo</a></li>
-              <li><a href="/contatti.html">Contatti</a></li>
-              <li><a href="/privacy.html">Privacy</a></li>
-              <li><a href="/termini.html">Termini</a></li>
+              <li><a href="catalogo.html">Catalogo</a></li>
+              <li><a href="chi-siamo.html">Chi siamo</a></li>
+              <li><a href="contatti.html">Contatti</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h4>Supporto</h4>
+            <ul>
+              <li><a href="termini.html">Termini e condizioni</a></li>
+              <li><a href="privacy.html">Privacy</a></li>
+              <li><a href="carrello.html">Carrello</a></li>
             </ul>
           </div>
         </div>
         <div class="footer-bottom">
-          <p>&copy; 2026 Antiquariato Shop. Tutti i diritti riservati.</p>
+          <p>&copy; 2026 ENS Antiquariato. Tutti i diritti riservati.</p>
         </div>
       </div>
     </footer>
   </div>
 
-  <script src="/js/app.js" defer></script>
+  <script src="js/app.js" defer></script>
 </body>
 </html>
