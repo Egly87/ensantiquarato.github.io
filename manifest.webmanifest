@@ -1,7 +1,7 @@
 {
-  "name": "ENS Antiquariato & Usato",
+  "name": "ENS Vintage",
   "short_name": "ENS",
-  "description": "Marketplace di annunci: antiquariato e usato. Cerca per zona e categoria, salva i preferiti e contatta il venditore.",
+  "description": "Marketplace di annunci: vintage, antiquariato e usato. Cerca per zona e categoria, salva i preferiti e contatta il venditore.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

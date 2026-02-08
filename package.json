@@ -1,7 +1,7 @@
 {
-  "name": "antiquariato-shop-utils",
+  "name": "ens-vintage-utils",
   "version": "1.0.0",
-  "description": "Utility scripts for image conversion for Antiquariato Shop",
+  "description": "Utility scripts for image conversion for ENS Vintage",
   "scripts": {
     "convert-images": "node scripts/convert_images.js ./assets/products/originals ./assets/products"
   },

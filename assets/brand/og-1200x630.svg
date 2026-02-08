@@ -11,9 +11,9 @@
   <rect x="60" y="60" width="1080" height="510" rx="8" fill="none" stroke="#2a2a2a" />
 
   <!-- left title -->
-  <text x="100" y="240" font-family="Playfair Display, serif" font-size="56" fill="#F5E9C6">Antiquariato Shop</text>
+  <text x="100" y="240" font-family="Playfair Display, serif" font-size="56" fill="#F5E9C6">ENS Vintage</text>
   <rect x="100" y="260" width="80" height="4" fill="#D4AF37"/>
-  <text x="100" y="320" font-family="Montserrat, sans-serif" font-size="22" fill="#bfb6a1">Curated antique pieces — Italy</text>
+  <text x="100" y="320" font-family="Montserrat, sans-serif" font-size="22" fill="#bfb6a1">Vintage, antiquariato e usato — Italia</text>
 
   <!-- subtle decorative vignette on right -->
   <g transform="translate(820,120)">

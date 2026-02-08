@@ -1,5 +1,5 @@
 // ========================
-// ANTIQUARIATO SHOP - App.js
+// ENS VINTAGE - App.js
 // ========================
 
 const app = {
@@ -389,7 +389,7 @@ const app = {
       "image": product.image,
       "brand": {
         "@type": "Brand",
-        "name": "ENS"
+        "name": "ENS Vintage"
       },
       "offers": {
         "@type": "Offer",
@@ -407,7 +407,7 @@ const app = {
   },
 
   updatePageMeta(product) {
-    document.title = `${product.name} — ENS`;
+    document.title = `${product.name} — ENS Vintage`;
 
     const ogTitle = document.querySelector('meta[property="og:title"]');
     if (ogTitle) ogTitle.setAttribute('content', product.name);
