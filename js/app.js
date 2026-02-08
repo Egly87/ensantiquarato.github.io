@@ -549,6 +549,9 @@ const app = {
       const sort = document.getElementById('sort');
       const status = document.getElementById('status');
       const resetBtn = document.getElementById('reset-filters');
+      const openFiltersBtn = document.getElementById('filters-open');
+      const closeFiltersBtn = document.getElementById('filters-close');
+      const filtersBackdrop = document.getElementById('filters-backdrop');
 
       [search, section, location, onlyFavorites, category, sort, status].forEach(el => {
         if (el) el.addEventListener('change', () => this.applyFilters());
@@ -565,6 +568,16 @@ const app = {
         if (sort) sort.value = 'recenti';
         if (status) status.value = '';
         this.applyFilters();
+      });
+
+      const openFilters = () => document.body.classList.add('filters-open');
+      const closeFilters = () => document.body.classList.remove('filters-open');
+
+      if (openFiltersBtn) openFiltersBtn.addEventListener('click', openFilters);
+      if (closeFiltersBtn) closeFiltersBtn.addEventListener('click', closeFilters);
+      if (filtersBackdrop) filtersBackdrop.addEventListener('click', closeFilters);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeFilters();
       });
     }
 

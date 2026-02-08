@@ -46,7 +46,10 @@
 
       <section class="container catalog-section">
         <aside class="filters">
-          <h3>Filtri</h3>
+          <div class="filters-titlebar">
+            <h3>Filtri</h3>
+            <button id="filters-close" type="button" class="btn btn-ghost filters-close" aria-label="Chiudi filtri">Chiudi</button>
+          </div>
 
           <div class="filter-group">
             <label for="search">Ricerca</label>
@@ -121,6 +124,7 @@
         <section class="catalog-main">
           <div class="catalog-header">
             <p id="result-count" class="result-count">Caricamento...</p>
+            <button id="filters-open" type="button" class="btn btn-outline filters-open">Filtri</button>
           </div>
           <div id="catalog-products" class="products-grid">
             <!-- Caricato da app.js -->
@@ -128,6 +132,8 @@
         </section>
       </section>
     </main>
+
+    <div id="filters-backdrop" class="filters-backdrop" aria-hidden="true"></div>
 
     <footer class="footer">
       <div class="container">
