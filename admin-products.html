@@ -189,6 +189,44 @@
     .token-input {
       min-width: 320px;
     }
+    .config-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    @media (min-width: 900px) {
+      .config-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .config-grid .form-group {
+      margin-bottom: 0;
+    }
+    .helper-note {
+      font-size: 0.9em;
+      color: #bdbdbd;
+      margin-top: 8px;
+    }
+    .draft-box {
+      width: 100%;
+      min-height: 140px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    .upload-preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .upload-preview img {
+      width: 100%;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid #333;
+      background: #0f0f0f;
+    }
     .status-note {
       font-size: 0.9em;
       color: #a9a9a9;
@@ -230,27 +268,59 @@
           <label for="products-file-input">Importa products.json:</label>
           <input type="file" id="products-file-input" accept="application/json">
         </div>
-        <div class="file-inline">
-          <label for="gh-token">Accesso Admin (Token GitHub):</label>
-          <input type="password" id="gh-token" class="token-input" placeholder="github_pat_..." autocomplete="off" spellcheck="false" inputmode="text">
-          <label style="display:inline-flex;align-items:center;gap:8px;color:#bbb;">
-            <input type="checkbox" id="gh-remember">
-            Ricorda in questo browser
-          </label>
-        </div>
-        <div class="publish-actions">
-          <button type="button" id="btn-export-json" class="btn-secondary">Scarica products.json</button>
-          <button type="button" id="btn-sync-live" class="btn-secondary">Ricarica da dati pubblicati</button>
-          <button type="button" id="btn-copy-git" class="btn-secondary">Copia comandi Git</button>
-          <button type="button" id="btn-gh-publish" class="btn-secondary">Pubblica online adesso</button>
-        </div>
+	        <div class="file-inline">
+	          <label for="gh-token">Accesso Admin (Token GitHub):</label>
+	          <input type="password" id="gh-token" class="token-input" placeholder="github_pat_..." autocomplete="off" spellcheck="false" inputmode="text">
+	          <label style="display:inline-flex;align-items:center;gap:8px;color:#bbb;">
+	            <input type="checkbox" id="gh-remember">
+	            Ricorda in questo browser
+	          </label>
+	        </div>
+	        <details style="margin-top:10px;">
+	          <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Impostazioni GitHub (repo/dominio)</summary>
+	          <div class="config-grid">
+	            <div class="form-group">
+	              <label for="gh-owner">Owner</label>
+	              <input type="text" id="gh-owner" placeholder="ensantiquarato o Egly87">
+	            </div>
+	            <div class="form-group">
+	              <label for="gh-repo">Repository</label>
+	              <input type="text" id="gh-repo" placeholder="ensantiquarato.github.io">
+	            </div>
+	            <div class="form-group">
+	              <label for="gh-branch">Branch</label>
+	              <input type="text" id="gh-branch" placeholder="main">
+	            </div>
+	            <div class="form-group">
+	              <label for="gh-products-path">Path prodotti</label>
+	              <input type="text" id="gh-products-path" placeholder="data/products.json">
+	            </div>
+	          </div>
+	          <p class="helper-note">Consiglio: usa token fine-grained, solo su questo repo, permesso <code>Contents: Read and write</code>, scadenza breve.</p>
+	        </details>
+	        <div class="publish-actions">
+	          <button type="button" id="btn-export-json" class="btn-secondary">Scarica products.json</button>
+	          <button type="button" id="btn-sync-live" class="btn-secondary">Ricarica da dati pubblicati</button>
+	          <button type="button" id="btn-copy-git" class="btn-secondary">Copia comandi Git</button>
+	          <button type="button" id="btn-gh-publish" class="btn-secondary">Pubblica online adesso</button>
+	        </div>
         <p id="publish-status" class="status-note">Catalogo locale: 0 prodotti.</p>
       </div>
 
-      <!-- Form Aggiunta/Modifica Prodotto -->
-      <div class="admin-section">
-        <h2>Aggiungi o Modifica Prodotto</h2>
-        <form id="product-form">
+	      <!-- Form Aggiunta/Modifica Prodotto -->
+	      <div class="admin-section">
+	        <h2>Aggiungi o Modifica Prodotto</h2>
+	        <details style="margin-bottom:12px;">
+	          <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Compila automaticamente con ChatGPT (bozza JSON)</summary>
+	          <p class="helper-note">Carica le foto qui in chat, ti preparo una bozza JSON. Incollala qui e clicca <strong>Applica bozza</strong> per riempire il form.</p>
+	          <textarea id="draft-json" class="draft-box" placeholder="{\n  &quot;name&quot;: &quot;...&quot;,\n  &quot;category&quot;: &quot;mobili&quot;,\n  &quot;description&quot;: &quot;...&quot;,\n  &quot;price&quot;: 0,\n  &quot;year&quot;: &quot;...&quot;,\n  &quot;dimensions&quot;: &quot;...&quot;,\n  &quot;status&quot;: &quot;available&quot;,\n  &quot;featured&quot;: false,\n  &quot;image&quot;: &quot;assets/products/...&quot;,\n  &quot;gallery&quot;: [&quot;assets/products/...&quot;],\n  &quot;stripeLinkBuy&quot;: &quot;&quot;,\n  &quot;paypalBuy&quot;: &quot;&quot;,\n  &quot;whatsappText&quot;: &quot;...&quot;\n}"></textarea>
+	          <div class="publish-actions" style="margin-top:10px;">
+	            <button type="button" id="btn-apply-draft" class="btn-secondary">Applica bozza</button>
+	            <button type="button" id="btn-clear-draft" class="btn-secondary">Pulisci bozza</button>
+	          </div>
+	          <p class="helper-note">Dopo l'approvazione, salva il prodotto e poi clicca <strong>Pubblica online adesso</strong> in alto.</p>
+	        </details>
+	        <form id="product-form">
           <div class="form-row">
             <div class="form-group">
               <label for="name">Nome Prodotto *</label>
@@ -328,15 +398,35 @@
             <input type="url" id="image-url" name="image" placeholder="assets/products/...">
           </div>
 
-          <div class="form-group">
-            <label for="gallery-urls">URL Galleria (separati da virgola)</label>
-            <input type="text" id="gallery-urls" name="gallery" placeholder="assets/products/1.jpg, assets/products/2.jpg">
-          </div>
+	          <div class="form-group">
+	            <label for="gallery-urls">URL Galleria (separati da virgola)</label>
+	            <input type="text" id="gallery-urls" name="gallery" placeholder="assets/products/1.jpg, assets/products/2.jpg">
+	          </div>
 
-          <div style="display: flex; gap: 10px;">
-            <button type="submit" class="btn-primary" id="btn-save-product">💾 Salva Prodotto</button>
-            <button type="button" class="btn-primary" style="background: #666;" id="btn-clear">🗑️ Pulisci Form</button>
-          </div>
+	          <details style="margin: 10px 0 0;">
+	            <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Carica foto su GitHub (riempie immagine + galleria)</summary>
+	            <p class="helper-note">Seleziona le foto dal telefono/PC: verranno caricate in <code>assets/products/</code> sul repo GitHub (serve Token GitHub in alto).</p>
+	            <div class="form-row">
+	              <div class="form-group">
+	                <label for="gh-image-prefix">Nome file base (opzionale)</label>
+	                <input type="text" id="gh-image-prefix" placeholder="es: como-luigi-xvi">
+	              </div>
+	              <div class="form-group">
+	                <label for="gh-images-input">Foto (multiple)</label>
+	                <input type="file" id="gh-images-input" accept="image/*" multiple>
+	              </div>
+	            </div>
+	            <div class="publish-actions">
+	              <button type="button" id="btn-gh-upload-images" class="btn-secondary">Carica foto su GitHub</button>
+	            </div>
+	            <div id="gh-upload-preview" class="upload-preview"></div>
+	            <p id="gh-upload-status" class="status-note">Nessuna foto caricata.</p>
+	          </details>
+
+	          <div style="display: flex; gap: 10px;">
+	            <button type="submit" class="btn-primary" id="btn-save-product">💾 Salva Prodotto</button>
+	            <button type="button" class="btn-primary" style="background: #666;" id="btn-clear">🗑️ Pulisci Form</button>
+	          </div>
         </form>
       </div>
 
@@ -353,15 +443,20 @@
   </div>
 
   <script>
-    // Gestione LocalStorage per prodotti
-    const STORAGE_KEY = 'antiquariato_products';
-    const LIVE_DATA_PATH = 'data/products.json';
-    const PUBLIC_SITE_BASE = 'https://egly87.github.io/ensantiquarato.github.io/';
-    const GITHUB_OWNER = 'Egly87';
-    const GITHUB_REPO = 'ensantiquarato.github.io';
-    const GITHUB_BRANCH = 'main';
-    const GITHUB_PRODUCTS_PATH = 'data/products.json';
-    const GITHUB_TOKEN_STORAGE_KEY = 'ens_admin_github_token';
+	    // Gestione LocalStorage per prodotti
+	    const STORAGE_KEY = 'antiquariato_products';
+	    const LIVE_DATA_PATH = 'data/products.json';
+	    const GITHUB_TOKEN_STORAGE_KEY = 'ens_admin_github_token';
+	    const GITHUB_CONFIG_STORAGE_KEY = 'ens_admin_github_config';
+	    const PUBLIC_SITE_BASE = new URL('./', window.location.href).toString();
+
+	    const DEFAULT_GITHUB_CONFIG = {
+	      owner: 'Egly87',
+	      repo: 'ensantiquarato.github.io',
+	      branch: 'main',
+	      productsPath: 'data/products.json',
+	      imagesDir: 'assets/products'
+	    };
 
     function loadProducts() {
       try {
@@ -396,9 +491,41 @@
       }
     }
 
-    function generateId() {
-      return Math.max(0, ...loadProducts().map(p => p.id || 0)) + 1;
-    }
+	    function generateId() {
+	      return Math.max(0, ...loadProducts().map(p => p.id || 0)) + 1;
+	    }
+
+	    function slugify(s) {
+	      return String(s || '')
+	        .toLowerCase()
+	        .trim()
+	        .replace(/[^a-z0-9\s-]/g, '')
+	        .replace(/\s+/g, '-')
+	        .replace(/-+/g, '-');
+	    }
+
+	    function loadGithubConfig() {
+	      try {
+	        const raw = localStorage.getItem(GITHUB_CONFIG_STORAGE_KEY);
+	        if (!raw) return { ...DEFAULT_GITHUB_CONFIG };
+	        const parsed = JSON.parse(raw);
+	        return { ...DEFAULT_GITHUB_CONFIG, ...(parsed || {}) };
+	      } catch {
+	        return { ...DEFAULT_GITHUB_CONFIG };
+	      }
+	    }
+
+	    function saveGithubConfig(cfg) {
+	      const safe = {
+	        owner: String(cfg.owner || '').trim() || DEFAULT_GITHUB_CONFIG.owner,
+	        repo: String(cfg.repo || '').trim() || DEFAULT_GITHUB_CONFIG.repo,
+	        branch: String(cfg.branch || '').trim() || DEFAULT_GITHUB_CONFIG.branch,
+	        productsPath: String(cfg.productsPath || '').trim() || DEFAULT_GITHUB_CONFIG.productsPath,
+	        imagesDir: String(cfg.imagesDir || '').trim() || DEFAULT_GITHUB_CONFIG.imagesDir
+	      };
+	      localStorage.setItem(GITHUB_CONFIG_STORAGE_KEY, JSON.stringify(safe));
+	      return safe;
+	    }
 
     function loadGithubToken() {
       return sessionStorage.getItem(GITHUB_TOKEN_STORAGE_KEY)
@@ -415,9 +542,23 @@
       else sessionStorage.setItem(GITHUB_TOKEN_STORAGE_KEY, token);
     }
 
-    function base64EncodeUnicode(str) {
-      return btoa(unescape(encodeURIComponent(str)));
-    }
+	    function base64EncodeUnicode(str) {
+	      return btoa(unescape(encodeURIComponent(str)));
+	    }
+
+	    async function fileToBase64(file) {
+	      return new Promise((resolve, reject) => {
+	        const reader = new FileReader();
+	        reader.onerror = () => reject(new Error('Impossibile leggere il file'));
+	        reader.onload = () => {
+	          const result = String(reader.result || '');
+	          const comma = result.indexOf(',');
+	          if (comma === -1) return reject(new Error('Formato base64 non valido'));
+	          resolve(result.slice(comma + 1));
+	        };
+	        reader.readAsDataURL(file);
+	      });
+	    }
 
     async function githubRequest(url, { method = 'GET', token = '', body = null } = {}) {
       const headers = {
@@ -444,45 +585,89 @@
       return data;
     }
 
-    async function publishProductsToGithub(products) {
-      const token = loadGithubToken();
-      if (!token) {
-        throw new Error('Inserisci il Token GitHub per pubblicare online.');
-      }
-      const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PRODUCTS_PATH}`;
+	    async function publishProductsToGithub(products) {
+	      const cfg = loadGithubConfig();
+	      const token = loadGithubToken();
+	      if (!token) {
+	        throw new Error('Inserisci il Token GitHub per pubblicare online.');
+	      }
+	      const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.productsPath}`;
 
-      // 1) Get current sha
-      const current = await githubRequest(`${url}?ref=${encodeURIComponent(GITHUB_BRANCH)}`, { token });
-      const sha = current && current.sha ? current.sha : null;
-      if (!sha) throw new Error('Impossibile leggere lo SHA del file remoto.');
+	      // 1) Get current sha
+	      const current = await githubRequest(`${url}?ref=${encodeURIComponent(cfg.branch)}`, { token });
+	      const sha = current && current.sha ? current.sha : null;
+	      if (!sha) throw new Error('Impossibile leggere lo SHA del file remoto.');
 
       // 2) Upload new content
       const json = JSON.stringify(products, null, 2) + '\n';
       const now = new Date();
       const stamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-      const payload = {
-        message: `Aggiorna annunci (${stamp})`,
-        content: base64EncodeUnicode(json),
-        sha,
-        branch: GITHUB_BRANCH
-      };
+	      const payload = {
+	        message: `Aggiorna annunci (${stamp})`,
+	        content: base64EncodeUnicode(json),
+	        sha,
+	        branch: cfg.branch
+	      };
 
       try {
         return await githubRequest(url, { method: 'PUT', token, body: payload });
       } catch (err) {
-        // If there was a race (file updated), refresh sha and retry once.
-        if (String(err.message || '').includes('409')) {
-          const refreshed = await githubRequest(`${url}?ref=${encodeURIComponent(GITHUB_BRANCH)}`, { token });
-          const newSha = refreshed && refreshed.sha ? refreshed.sha : null;
-          if (!newSha) throw err;
-          payload.sha = newSha;
-          return await githubRequest(url, { method: 'PUT', token, body: payload });
-        }
+	        // If there was a race (file updated), refresh sha and retry once.
+	        if (String(err.message || '').includes('409')) {
+	          const refreshed = await githubRequest(`${url}?ref=${encodeURIComponent(cfg.branch)}`, { token });
+	          const newSha = refreshed && refreshed.sha ? refreshed.sha : null;
+	          if (!newSha) throw err;
+	          payload.sha = newSha;
+	          return await githubRequest(url, { method: 'PUT', token, body: payload });
+	        }
         throw err;
       }
-    }
+	    }
 
-    async function loadLiveProducts() {
+	    async function uploadImagesToGithub(files, baseName) {
+	      const cfg = loadGithubConfig();
+	      const token = loadGithubToken();
+	      if (!token) throw new Error('Inserisci il Token GitHub per caricare le foto.');
+	      if (!files || !files.length) throw new Error('Seleziona almeno una foto.');
+
+	      const base = slugify(baseName) || `p${Date.now()}`;
+	      const uploadedPaths = [];
+
+	      for (let i = 0; i < files.length; i++) {
+	        const file = files[i];
+	        const orig = String(file.name || '');
+	        const extMatch = orig.toLowerCase().match(/\.[a-z0-9]+$/);
+	        const ext = extMatch ? extMatch[0] : '.jpg';
+	        const filename = `${base}-${i + 1}${ext}`;
+		        const path = `${cfg.imagesDir.replace(/\/$/, '')}/${filename}`.replace(/^\/+/, '');
+	        const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}`;
+
+	        // Check if exists -> sha
+	        let sha = null;
+	        try {
+	          const current = await githubRequest(`${url}?ref=${encodeURIComponent(cfg.branch)}`, { token });
+	          sha = current && current.sha ? current.sha : null;
+	        } catch (err) {
+	          // 404 is fine (create new)
+	          if (!String(err.message || '').includes('404')) throw err;
+	        }
+
+	        const base64 = await fileToBase64(file);
+	        const payload = {
+	          message: `Carica foto prodotto: ${filename}`,
+	          content: base64,
+	          branch: cfg.branch
+	        };
+	        if (sha) payload.sha = sha;
+
+	        await githubRequest(url, { method: 'PUT', token, body: payload });
+	        uploadedPaths.push(path);
+	      }
+
+	      return uploadedPaths;
+	    }
+
+	    async function loadLiveProducts() {
       const response = await fetch(LIVE_DATA_PATH);
       if (!response.ok) {
         throw new Error('Impossibile leggere data/products.json');
@@ -571,30 +756,31 @@
     }
 
     // Form submission
-    document.getElementById('product-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const form = e.target;
-      const formData = new FormData(form);
-      
-      const product = {
-        id: parseInt(formData.get('id')) || generateId(),
-        name: formData.get('name'),
-        category: formData.get('category'),
-        description: formData.get('description'),
-        price: parseFloat(formData.get('price')),
-        year: formData.get('year'),
-        dimensions: formData.get('dimensions'),
-        status: formData.get('status'),
-        featured: formData.get('featured') ? true : false,
-        image: formData.get('image'),
-        gallery: formData.get('gallery')
-          .split(',')
-          .map(url => url.trim())
-          .filter(url => url),
-        stripeLinkBuy: formData.get('stripeLinkBuy'),
-        paypalBuy: formData.get('paypalBuy'),
-        whatsappText: formData.get('whatsappText')
-      };
+	    document.getElementById('product-form').addEventListener('submit', (e) => {
+	      e.preventDefault();
+	      const form = e.target;
+	      const formData = new FormData(form);
+	      const parsedPrice = parseFloat(formData.get('price'));
+	      
+	      const product = {
+	        id: parseInt(formData.get('id')) || generateId(),
+	        name: formData.get('name'),
+	        category: formData.get('category'),
+	        description: formData.get('description'),
+	        price: Number.isFinite(parsedPrice) ? parsedPrice : 0,
+	        year: formData.get('year'),
+	        dimensions: formData.get('dimensions'),
+	        status: formData.get('status'),
+	        featured: formData.get('featured') ? true : false,
+	        image: formData.get('image'),
+	        gallery: String(formData.get('gallery') || '')
+	          .split(',')
+	          .map(url => String(url || '').trim())
+	          .filter(url => url),
+	        stripeLinkBuy: formData.get('stripeLinkBuy'),
+	        paypalBuy: formData.get('paypalBuy'),
+	        whatsappText: formData.get('whatsappText')
+	      };
 
       let products = loadProducts();
       const index = products.findIndex(p => p.id === product.id);
@@ -666,37 +852,153 @@
       }
     });
 
-    // GitHub token field (client-side "login")
-    (function initGithubTokenUi() {
-      const tokenInput = document.getElementById('gh-token');
-      const rememberCheckbox = document.getElementById('gh-remember');
-      const stored = loadGithubToken();
-      if (stored) tokenInput.value = stored;
-      if (localStorage.getItem(GITHUB_TOKEN_STORAGE_KEY)) rememberCheckbox.checked = true;
+	    // GitHub token field (client-side "login")
+	    (function initGithubTokenUi() {
+	      const tokenInput = document.getElementById('gh-token');
+	      const rememberCheckbox = document.getElementById('gh-remember');
+	      const ownerInput = document.getElementById('gh-owner');
+	      const repoInput = document.getElementById('gh-repo');
+	      const branchInput = document.getElementById('gh-branch');
+	      const productsPathInput = document.getElementById('gh-products-path');
 
-      tokenInput.addEventListener('change', () => {
-        const token = tokenInput.value.trim();
-        saveGithubToken(token, rememberCheckbox.checked);
-      });
-      rememberCheckbox.addEventListener('change', () => {
-        const token = tokenInput.value.trim();
-        saveGithubToken(token, rememberCheckbox.checked);
-      });
-    })();
+	      const stored = loadGithubToken();
+	      if (stored) tokenInput.value = stored;
+	      if (localStorage.getItem(GITHUB_TOKEN_STORAGE_KEY)) rememberCheckbox.checked = true;
 
-    document.getElementById('btn-gh-publish').addEventListener('click', async () => {
-      if (!confirm('Pubblicare online adesso? Questo aggiorna data/products.json su GitHub e rende gli annunci visibili sul sito.')) return;
-      try {
-        const products = loadProducts();
-        const result = await publishProductsToGithub(products);
-        const commitUrl = result && result.commit && result.commit.html_url ? result.commit.html_url : '';
-        showAlert(commitUrl ? `Pubblicato online! Commit: ${commitUrl}` : 'Pubblicato online!');
-      } catch (err) {
-        showAlert(err.message || 'Errore durante la pubblicazione.', 'error');
-      }
-    });
+	      const cfg = loadGithubConfig();
+	      if (ownerInput) ownerInput.value = cfg.owner;
+	      if (repoInput) repoInput.value = cfg.repo;
+	      if (branchInput) branchInput.value = cfg.branch;
+	      if (productsPathInput) productsPathInput.value = cfg.productsPath;
 
-    function renderProducts() {
+	      tokenInput.addEventListener('change', () => {
+	        const token = tokenInput.value.trim();
+	        saveGithubToken(token, rememberCheckbox.checked);
+	      });
+	      rememberCheckbox.addEventListener('change', () => {
+	        const token = tokenInput.value.trim();
+	        saveGithubToken(token, rememberCheckbox.checked);
+	      });
+
+	      function persistCfg() {
+	        saveGithubConfig({
+	          owner: ownerInput ? ownerInput.value : '',
+	          repo: repoInput ? repoInput.value : '',
+	          branch: branchInput ? branchInput.value : '',
+	          productsPath: productsPathInput ? productsPathInput.value : ''
+	        });
+	      }
+	      [ownerInput, repoInput, branchInput, productsPathInput].forEach((el) => {
+	        if (!el) return;
+	        el.addEventListener('change', persistCfg);
+	      });
+	    })();
+
+	    document.getElementById('btn-gh-publish').addEventListener('click', async () => {
+	      if (!confirm('Pubblicare online adesso? Questo aggiorna data/products.json su GitHub e rende gli annunci visibili sul sito.')) return;
+	      try {
+	        const products = loadProducts();
+	        const result = await publishProductsToGithub(products);
+	        const commitUrl = result && result.commit && result.commit.html_url ? result.commit.html_url : '';
+	        showAlert(commitUrl ? `Pubblicato online! Commit: ${commitUrl}` : 'Pubblicato online!');
+	      } catch (err) {
+	        showAlert(err.message || 'Errore durante la pubblicazione.', 'error');
+	      }
+	    });
+
+	    // Draft apply (ChatGPT -> form)
+	    function applyDraftToForm(draft) {
+	      if (!draft || typeof draft !== 'object') throw new Error('Bozza non valida.');
+
+	      if (draft.id != null) {
+	        let idInput = document.querySelector('input[name="id"]');
+	        if (!idInput) {
+	          idInput = document.createElement('input');
+	          idInput.type = 'hidden';
+	          idInput.name = 'id';
+	          document.getElementById('product-form').appendChild(idInput);
+	        }
+	        idInput.value = String(draft.id);
+	      }
+
+	      if (draft.name) document.getElementById('name').value = String(draft.name);
+	      if (draft.category) document.getElementById('category').value = String(draft.category);
+	      if (draft.description) document.getElementById('description').value = String(draft.description);
+	      if (draft.price != null) document.getElementById('price').value = String(draft.price);
+	      if (draft.year) document.getElementById('year').value = String(draft.year);
+	      if (draft.dimensions) document.getElementById('dimensions').value = String(draft.dimensions);
+	      if (draft.status) document.getElementById('status').value = String(draft.status);
+	      document.getElementById('featured').checked = !!draft.featured;
+	      if (draft.stripeLinkBuy != null) document.getElementById('stripe-link').value = String(draft.stripeLinkBuy || '');
+	      if (draft.paypalBuy != null) document.getElementById('paypal-link').value = String(draft.paypalBuy || '');
+	      if (draft.whatsappText != null) document.getElementById('whatsapp-text').value = String(draft.whatsappText || '');
+	      if (draft.image) document.getElementById('image-url').value = String(draft.image);
+	      if (Array.isArray(draft.gallery)) document.getElementById('gallery-urls').value = draft.gallery.join(', ');
+
+	      document.getElementById('btn-save-product').textContent = draft.id ? '💾 Aggiorna Prodotto' : '💾 Salva Prodotto';
+	    }
+
+	    document.getElementById('btn-apply-draft')?.addEventListener('click', () => {
+	      const txt = document.getElementById('draft-json')?.value.trim();
+	      if (!txt) return;
+	      try {
+	        const parsed = JSON.parse(txt);
+	        applyDraftToForm(parsed);
+	        showAlert('Bozza applicata al form.');
+	        window.scrollTo({ top: 0, behavior: 'smooth' });
+	      } catch (err) {
+	        showAlert(err.message || 'Errore parsing bozza JSON.', 'error');
+	      }
+	    });
+
+	    document.getElementById('btn-clear-draft')?.addEventListener('click', () => {
+	      const draftEl = document.getElementById('draft-json');
+	      if (draftEl) draftEl.value = '';
+	      showAlert('Bozza pulita.');
+	    });
+
+	    // GitHub image upload -> fills image + gallery
+	    const imagesInput = document.getElementById('gh-images-input');
+	    const imagesPreview = document.getElementById('gh-upload-preview');
+	    const imagesStatus = document.getElementById('gh-upload-status');
+	    if (imagesInput) {
+	      imagesInput.addEventListener('change', () => {
+	        const files = Array.from(imagesInput.files || []);
+	        if (imagesPreview) {
+	          imagesPreview.innerHTML = files.map((f) => {
+	            const url = URL.createObjectURL(f);
+	            return `<img src="${url}" alt="${f.name}">`;
+	          }).join('');
+	        }
+	        if (imagesStatus) {
+	          imagesStatus.textContent = files.length ? `${files.length} foto selezionate (pronte per upload).` : 'Nessuna foto caricata.';
+	        }
+	      });
+	    }
+
+	    document.getElementById('btn-gh-upload-images')?.addEventListener('click', async () => {
+	      const files = Array.from(document.getElementById('gh-images-input')?.files || []);
+	      const prefixEl = document.getElementById('gh-image-prefix');
+	      const prefix = (prefixEl && prefixEl.value.trim())
+	        || slugify(document.getElementById('name')?.value)
+	        || `p${Date.now()}`;
+
+	      try {
+	        if (imagesStatus) imagesStatus.textContent = 'Upload in corso...';
+	        const paths = await uploadImagesToGithub(files, prefix);
+	        if (paths.length) {
+	          document.getElementById('image-url').value = paths[0];
+	          document.getElementById('gallery-urls').value = paths.join(', ');
+	        }
+	        if (imagesStatus) imagesStatus.textContent = `Upload completato: ${paths.length} file. Campi immagine/galleria aggiornati.`;
+	        showAlert('Foto caricate su GitHub e collegate al prodotto.');
+	      } catch (err) {
+	        if (imagesStatus) imagesStatus.textContent = 'Upload fallito.';
+	        showAlert(err.message || 'Errore upload immagini.', 'error');
+	      }
+	    });
+
+	    function renderProducts() {
       const products = loadProducts();
       const container = document.getElementById('products-list');
       const count = document.getElementById('product-count');
