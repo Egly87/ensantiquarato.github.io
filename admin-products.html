@@ -240,18 +240,18 @@
       <div class="navbar-container">
         <a href="index.html" class="navbar-brand">
           <img src="assets/brand/logo.svg" alt="ENS Antiquariato" class="logo" loading="lazy" width="40" height="40" decoding="async">
-          <span>ENS Antiquariato - Admin</span>
+          <span>ENS - Admin Annunci</span>
         </a>
         <nav class="navbar-menu">
           <a href="index.html" class="nav-link">Home</a>
-          <a href="catalogo.html" class="nav-link">Catalogo</a>
+          <a href="catalogo.html" class="nav-link">Annunci</a>
           <a href="admin-products.html" class="nav-link active">Admin</a>
         </nav>
       </div>
     </header>
 
     <main class="admin-container">
-      <h1 style="color: #d4af37; margin-bottom: 30px;">📦 Gestione Prodotti</h1>
+      <h1 style="color: #d4af37; margin-bottom: 30px;">📣 Gestione Annunci</h1>
 
       <div id="alert-container"></div>
 
@@ -259,10 +259,9 @@
         <h2>Pubblica Annunci Online</h2>
         <p>Questa pagina modifica il catalogo locale del browser. Per pubblicare davvero gli annunci sul sito online:</p>
         <ul>
-          <li>modifica prodotti qui;</li>
-          <li>scarica il file <code>products.json</code> aggiornato;</li>
-          <li>sostituisci il file in <code>data/products.json</code> nel progetto;</li>
-          <li>esegui commit e push su GitHub.</li>
+          <li>modifica gli annunci qui;</li>
+          <li>inserisci il Token GitHub e clicca <strong>Pubblica online adesso</strong>;</li>
+          <li>in alternativa: scarica <code>products.json</code> e fai commit/push manuale.</li>
         </ul>
         <div class="file-inline">
           <label for="products-file-input">Importa products.json:</label>
@@ -304,16 +303,16 @@
 	          <button type="button" id="btn-copy-git" class="btn-secondary">Copia comandi Git</button>
 	          <button type="button" id="btn-gh-publish" class="btn-secondary">Pubblica online adesso</button>
 	        </div>
-        <p id="publish-status" class="status-note">Catalogo locale: 0 prodotti.</p>
+        <p id="publish-status" class="status-note">Annunci locali: 0.</p>
       </div>
 
 	      <!-- Form Aggiunta/Modifica Prodotto -->
 	      <div class="admin-section">
-	        <h2>Aggiungi o Modifica Prodotto</h2>
+	        <h2>Aggiungi o Modifica Annuncio</h2>
 	        <details style="margin-bottom:12px;">
 	          <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Compila automaticamente con ChatGPT (bozza JSON)</summary>
 	          <p class="helper-note">Carica le foto qui in chat, ti preparo una bozza JSON. Incollala qui e clicca <strong>Applica bozza</strong> per riempire il form.</p>
-	          <textarea id="draft-json" class="draft-box" placeholder="{\n  &quot;name&quot;: &quot;...&quot;,\n  &quot;category&quot;: &quot;mobili&quot;,\n  &quot;description&quot;: &quot;...&quot;,\n  &quot;price&quot;: 0,\n  &quot;year&quot;: &quot;...&quot;,\n  &quot;dimensions&quot;: &quot;...&quot;,\n  &quot;status&quot;: &quot;available&quot;,\n  &quot;featured&quot;: false,\n  &quot;image&quot;: &quot;assets/products/...&quot;,\n  &quot;gallery&quot;: [&quot;assets/products/...&quot;],\n  &quot;stripeLinkBuy&quot;: &quot;&quot;,\n  &quot;paypalBuy&quot;: &quot;&quot;,\n  &quot;whatsappText&quot;: &quot;...&quot;\n}"></textarea>
+	          <textarea id="draft-json" class="draft-box" placeholder="{\n  &quot;name&quot;: &quot;...&quot;,\n  &quot;section&quot;: &quot;usato&quot;,\n  &quot;category&quot;: &quot;moda&quot;,\n  &quot;location&quot;: &quot;Roma&quot;,\n  &quot;condition&quot;: &quot;Ottimo&quot;,\n  &quot;postedAt&quot;: &quot;2026-02-08&quot;,\n  &quot;description&quot;: &quot;...&quot;,\n  &quot;price&quot;: 0,\n  &quot;year&quot;: &quot;...&quot;,\n  &quot;dimensions&quot;: &quot;...&quot;,\n  &quot;status&quot;: &quot;available&quot;,\n  &quot;featured&quot;: false,\n  &quot;image&quot;: &quot;assets/products/...&quot;,\n  &quot;gallery&quot;: [&quot;assets/products/...&quot;],\n  &quot;stripeLinkBuy&quot;: &quot;&quot;,\n  &quot;paypalBuy&quot;: &quot;&quot;,\n  &quot;whatsappText&quot;: &quot;...&quot;\n}"></textarea>
 	          <div class="publish-actions" style="margin-top:10px;">
 	            <button type="button" id="btn-apply-draft" class="btn-secondary">Applica bozza</button>
 	            <button type="button" id="btn-clear-draft" class="btn-secondary">Pulisci bozza</button>
@@ -323,7 +322,7 @@
 	        <form id="product-form">
           <div class="form-row">
             <div class="form-group">
-              <label for="name">Nome Prodotto *</label>
+              <label for="name">Titolo *</label>
               <input type="text" id="name" name="name" required>
             </div>
             <div class="form-group">
@@ -336,7 +335,30 @@
                 <option value="orologeria">Orologeria</option>
                 <option value="oggetti">Oggetti</option>
                 <option value="gioielli">Gioielli</option>
+                <option value="moda">Moda</option>
+                <option value="elettronica">Elettronica</option>
+                <option value="casa">Casa</option>
+                <option value="sport">Sport e tempo libero</option>
+                <option value="auto">Auto e moto</option>
+                <option value="bimbi">Bimbi</option>
+                <option value="collezionismo">Collezionismo</option>
+                <option value="libri">Libri</option>
+                <option value="altro">Altro</option>
               </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="section">Sezione *</label>
+              <select id="section" name="section" required>
+                <option value="antiquariato">Antiquariato</option>
+                <option value="usato">Usato</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="location">Zona</label>
+              <input type="text" id="location" name="location" placeholder="Citta, provincia o regione">
             </div>
           </div>
 
@@ -359,6 +381,17 @@
           <div class="form-group">
             <label for="dimensions">Dimensioni</label>
             <input type="text" id="dimensions" name="dimensions" placeholder="L 120cm × H 90cm × P 50cm">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="condition">Condizione</label>
+              <input type="text" id="condition" name="condition" placeholder="Nuovo, ottimo, buono, da sistemare...">
+            </div>
+            <div class="form-group">
+              <label for="postedAt">Data annuncio</label>
+              <input type="date" id="postedAt" name="postedAt">
+            </div>
           </div>
 
           <div class="form-row">
@@ -432,13 +465,13 @@
 
       <!-- Lista Prodotti -->
       <div class="admin-section">
-        <h2>Prodotti Attuali (<span id="product-count">0</span>)</h2>
+        <h2>Annunci Attuali (<span id="product-count">0</span>)</h2>
         <div id="products-list" class="products-grid"></div>
       </div>
     </main>
 
     <footer style="text-align: center; padding: 20px; color: #666; margin-top: 40px;">
-      <p>© 2026 ENS Antiquariato - Admin Panel</p>
+      <p>© 2026 ENS - Admin</p>
     </footer>
   </div>
 
@@ -487,7 +520,7 @@
       const count = loadProducts().length;
       const statusEl = document.getElementById('publish-status');
       if (statusEl) {
-        statusEl.textContent = `Catalogo locale: ${count} prodotti.`;
+        statusEl.textContent = `Annunci locali: ${count}.`;
       }
     }
 
@@ -738,7 +771,10 @@
       const adText = [
         `${product.name}`,
         `Prezzo: ${formatPriceForAd(product)}`,
+        `Sezione: ${product.section || 'antiquariato'}`,
         `Categoria: ${product.category || 'N/D'}`,
+        `Zona: ${product.location || 'N/D'}`,
+        `Condizione: ${product.condition || 'N/D'}`,
         `Periodo: ${product.year || 'N/D'}`,
         product.description || '',
         `Link: ${buildProductUrl(product.id)}`,
@@ -761,11 +797,16 @@
 	      const form = e.target;
 	      const formData = new FormData(form);
 	      const parsedPrice = parseFloat(formData.get('price'));
+	      const postedAtRaw = String(formData.get('postedAt') || '').trim();
 	      
 	      const product = {
 	        id: parseInt(formData.get('id')) || generateId(),
 	        name: formData.get('name'),
+	        section: String(formData.get('section') || '').trim() || 'antiquariato',
 	        category: formData.get('category'),
+	        location: String(formData.get('location') || '').trim(),
+	        condition: String(formData.get('condition') || '').trim(),
+	        postedAt: postedAtRaw || new Date().toISOString().slice(0, 10),
 	        description: formData.get('description'),
 	        price: Number.isFinite(parsedPrice) ? parsedPrice : 0,
 	        year: formData.get('year'),
@@ -784,6 +825,13 @@
 
       let products = loadProducts();
       const index = products.findIndex(p => p.id === product.id);
+      const existing = index >= 0 ? products[index] : null;
+
+      // Preserve stable fields on update if the form left them empty.
+      if (existing) {
+        if (!product.postedAt && existing.postedAt) product.postedAt = existing.postedAt;
+        if (!product.section && existing.section) product.section = existing.section;
+      }
       
       if (index >= 0) {
         products[index] = product;
@@ -795,12 +843,16 @@
 
       saveProducts(products);
       form.reset();
+      const postedAtEl = document.getElementById('postedAt');
+      if (postedAtEl) postedAtEl.value = new Date().toISOString().slice(0, 10);
       document.getElementById('product-form').querySelector('input[name="id"]')?.remove();
       document.getElementById('btn-save-product').textContent = '💾 Salva Prodotto';
     });
 
     document.getElementById('btn-clear').addEventListener('click', () => {
       document.getElementById('product-form').reset();
+      const postedAtEl = document.getElementById('postedAt');
+      if (postedAtEl) postedAtEl.value = new Date().toISOString().slice(0, 10);
       document.getElementById('product-form').querySelector('input[name="id"]')?.remove();
       document.getElementById('btn-save-product').textContent = '💾 Salva Prodotto';
     });
@@ -815,7 +867,7 @@
       try {
         const liveProducts = await loadLiveProducts();
         saveProducts(liveProducts);
-        showAlert('Catalogo locale sincronizzato con i dati pubblicati.');
+        showAlert('Annunci locali sincronizzati con i dati pubblicati.');
       } catch (err) {
         showAlert(err.message, 'error');
       }
@@ -922,7 +974,15 @@
 	      }
 
 	      if (draft.name) document.getElementById('name').value = String(draft.name);
+	      if (draft.section != null) document.getElementById('section').value = String(draft.section || 'antiquariato');
 	      if (draft.category) document.getElementById('category').value = String(draft.category);
+	      if (draft.location != null) document.getElementById('location').value = String(draft.location || '');
+	      if (draft.condition != null) document.getElementById('condition').value = String(draft.condition || '');
+	      if (draft.postedAt != null) {
+	        const raw = String(draft.postedAt || '').trim();
+	        const datePart = raw.includes('T') ? raw.slice(0, 10) : raw;
+	        document.getElementById('postedAt').value = datePart;
+	      }
 	      if (draft.description) document.getElementById('description').value = String(draft.description);
 	      if (draft.price != null) document.getElementById('price').value = String(draft.price);
 	      if (draft.year) document.getElementById('year').value = String(draft.year);
@@ -1009,12 +1069,16 @@
         <div class="product-card">
           <img src="${product.image || 'assets/brand/og-1200x630.jpg'}" alt="${product.name}" onerror="this.src='assets/brand/og-1200x630.jpg'">
           <h3>${product.name}</h3>
+          <p><strong>Sezione:</strong> ${product.section || 'antiquariato'}</p>
           <p><strong>Categoria:</strong> ${product.category}</p>
           <p><strong>Prezzo:</strong> €${Number(product.price || 0).toFixed(2)}</p>
           <p><strong>Status:</strong> <span style="color: ${
             product.status === 'available' ? '#4caf50' : 
             product.status === 'reserved' ? '#ff9800' : '#dc3545'
           }">${product.status}</span></p>
+          <p><strong>Zona:</strong> ${product.location || 'N/A'}</p>
+          <p><strong>Condizione:</strong> ${product.condition || 'N/A'}</p>
+          <p><strong>Data:</strong> ${product.postedAt || 'N/A'}</p>
           <p><strong>Periodo:</strong> ${product.year || 'N/A'}</p>
           <div class="product-actions">
             <button class="btn-edit" onclick="editProduct(${product.id})">✏️ Modifica</button>
@@ -1032,7 +1096,13 @@
       if (!product) return;
 
       document.getElementById('name').value = product.name;
+      document.getElementById('section').value = String(product.section || 'antiquariato');
       document.getElementById('category').value = product.category;
+      document.getElementById('location').value = product.location || '';
+      document.getElementById('condition').value = product.condition || '';
+      document.getElementById('postedAt').value = String(product.postedAt || '').includes('T')
+        ? String(product.postedAt).slice(0, 10)
+        : (product.postedAt || '');
       document.getElementById('description').value = product.description;
       document.getElementById('price').value = product.price;
       document.getElementById('year').value = product.year;
@@ -1069,6 +1139,11 @@
     }
 
     // Load products on page load
+    (function initFormDefaults() {
+      const postedAtEl = document.getElementById('postedAt');
+      if (postedAtEl && !postedAtEl.value) postedAtEl.value = new Date().toISOString().slice(0, 10);
+    })();
+
     initializeProductsIfEmpty();
     renderProducts();
   </script>

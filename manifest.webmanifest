@@ -1,7 +1,7 @@
 {
-  "name": "ENS Antiquariato",
+  "name": "ENS Antiquariato & Usato",
   "short_name": "ENS",
-  "description": "Scopri pezzi autentici e selezionati con cura. Arredi, oggetti e opere d'epoca con assistenza dedicata.",
+  "description": "Marketplace di annunci: antiquariato e usato. Cerca per zona e categoria, salva i preferiti e contatta il venditore.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -22,7 +22,7 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["shopping", "antique"],
+  "categories": ["shopping", "marketplace", "antique"],
   "screenshots": [
     {
       "src": "assets/brand/og-1200x630.jpg",

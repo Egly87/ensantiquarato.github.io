@@ -5,8 +5,10 @@
 const app = {
   products: [],
   filteredProducts: [],
+  favorites: new Set(),
 
   init() {
+    this.loadFavorites();
     this.loadProducts();
     this.setupEventListeners();
     this.detectPage();
@@ -37,7 +39,7 @@ const app = {
       })
       .catch(e => {
         console.error('Errore caricamento prodotti:', e);
-        this.showError('Impossibile caricare il catalogo. Riprova piu tardi.');
+        this.showError('Impossibile caricare gli annunci. Riprova piu tardi.');
       });
   },
 
@@ -59,12 +61,20 @@ const app = {
   // ========================
 
   renderHome() {
-    const container = document.getElementById('featured-products');
-    if (!container) return;
+    const featuredContainer = document.getElementById('featured-products');
+    if (featuredContainer) {
+      const featured = this.products.filter(p => p.featured);
+      const list = featured.length ? featured : [...this.products].sort((a, b) => this.getPostedTimestamp(b) - this.getPostedTimestamp(a)).slice(0, 8);
+      featuredContainer.innerHTML = list.map(p => this.renderProductCard(p)).join('');
+    }
 
-    const featured = this.products.filter(p => p.featured);
-    const html = featured.map(p => this.renderProductCard(p)).join('');
-    container.innerHTML = html;
+    const recentContainer = document.getElementById('recent-products');
+    if (recentContainer) {
+      const recent = [...this.products]
+        .sort((a, b) => this.getPostedTimestamp(b) - this.getPostedTimestamp(a))
+        .slice(0, 12);
+      recentContainer.innerHTML = recent.map(p => this.renderProductCard(p)).join('');
+    }
   },
 
   // ========================
@@ -81,32 +91,52 @@ const app = {
     const hash = window.location.hash.replace('#', '');
     if (!hash) return;
     const params = new URLSearchParams(hash);
+    const query = params.get('q') || params.get('query') || '';
     const category = params.get('categoria') || params.get('category');
+    const section = params.get('sezione') || params.get('section');
     const status = params.get('status');
+    const location = params.get('zona') || params.get('location') || params.get('citta') || '';
+    const onlyFavorites = params.get('preferiti') || params.get('favorites') || params.get('favs') || '';
 
     const categoryEl = document.getElementById('category');
+    const sectionEl = document.getElementById('section');
     const statusEl = document.getElementById('status');
+    const searchEl = document.getElementById('search');
+    const locationEl = document.getElementById('location');
+    const onlyFavoritesEl = document.getElementById('only-favorites');
 
+    if (searchEl && query) searchEl.value = query;
     if (categoryEl && category) categoryEl.value = category;
+    if (sectionEl && section) sectionEl.value = section;
     if (statusEl && status) statusEl.value = status;
+    if (locationEl && location) locationEl.value = location;
+    if (onlyFavoritesEl && onlyFavorites) {
+      onlyFavoritesEl.checked = onlyFavorites === '1' || onlyFavorites === 'true' || onlyFavorites === 'yes';
+    }
   },
 
   applyFilters() {
     const search = document.getElementById('search')?.value.toLowerCase() || '';
     const category = document.getElementById('category')?.value || '';
+    const section = document.getElementById('section')?.value || '';
     const status = document.getElementById('status')?.value || '';
+    const location = document.getElementById('location')?.value.toLowerCase() || '';
+    const onlyFavorites = document.getElementById('only-favorites')?.checked || false;
     const sort = document.getElementById('sort')?.value || 'recenti';
 
     this.filteredProducts = this.products.filter(p => {
-      const haystack = [p.name, p.description, p.year, p.dimensions, p.category]
+      const haystack = [p.name, p.description, p.year, p.dimensions, p.category, p.location, p.condition, p.section]
         .filter(Boolean)
         .join(' ')
         .toLowerCase();
 
       const matchSearch = !search || haystack.includes(search);
       const matchCategory = !category || p.category === category;
+      const matchSection = !section || this.getProductSection(p) === section;
       const matchStatus = !status || p.status === status;
-      return matchSearch && matchCategory && matchStatus;
+      const matchLocation = !location || String(p.location || '').toLowerCase().includes(location);
+      const matchFav = !onlyFavorites || this.isFavorite(p.id);
+      return matchSearch && matchCategory && matchSection && matchStatus && matchLocation && matchFav;
     });
 
     switch (sort) {
@@ -118,7 +148,7 @@ const app = {
         break;
       case 'recenti':
       default:
-        this.filteredProducts.sort((a, b) => b.id - a.id);
+        this.filteredProducts.sort((a, b) => this.getPostedTimestamp(b) - this.getPostedTimestamp(a));
     }
 
     this.updateResultCount();
@@ -129,8 +159,8 @@ const app = {
     const container = document.getElementById('catalog-products');
     if (!container) return;
 
-    if (this.filteredProducts.length === 0) {
-      container.innerHTML = '<p class="text-center">Nessun prodotto trovato.</p>';
+      if (this.filteredProducts.length === 0) {
+      container.innerHTML = '<p class="text-center">Nessun annuncio trovato.</p>';
       return;
     }
 
@@ -141,7 +171,8 @@ const app = {
   updateResultCount() {
     const count = document.getElementById('result-count');
     if (count) {
-      count.textContent = `${this.filteredProducts.length} prodotto${this.filteredProducts.length !== 1 ? 'i' : ''} trovato${this.filteredProducts.length !== 1 ? 'i' : ''}`;
+      const n = this.filteredProducts.length;
+      count.textContent = n === 1 ? '1 annuncio trovato' : `${n} annunci trovati`;
     }
   },
 
@@ -151,14 +182,30 @@ const app = {
     const priceDisplay = product.status === 'sold' ? '—' : `€ ${product.price.toFixed(2)}`;
     const featured = product.featured ? `<div class="product-badge badge-featured">In evidenza</div>` : '';
     const categoryLabel = this.formatCategory(product.category);
+    const sectionLabel = this.formatSection(this.getProductSection(product));
+
+    const metaParts = [];
+    if (product.location) metaParts.push(product.location);
+    if (product.condition) metaParts.push(product.condition);
+    const metaLine = metaParts.length ? `<div class="product-meta">${metaParts.join(' · ')}</div>` : '';
+
+    const isFav = this.isFavorite(product.id);
+    const favBtn = `
+      <button class="fav-btn${isFav ? ' active' : ''}" onclick="event.stopPropagation(); app.toggleFavorite(${product.id});" aria-label="${isFav ? 'Rimuovi dai preferiti' : 'Salva tra i preferiti'}">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 21s-7-4.6-9.4-8.6C.6 9 2.3 5.8 5.6 5.2c1.8-.3 3.5.4 4.6 1.7 1.1-1.3 2.8-2 4.6-1.7 3.3.6 5 3.8 3 7.2C19 16.4 12 21 12 21z"/>
+        </svg>
+      </button>
+    `;
 
     const imgSrc = product.image || 'assets/brand/og-1200x630.jpg';
     const webpSrc = imgSrc.endsWith('.webp') ? imgSrc : imgSrc.replace(/\.[a-zA-Z0-9]+$/, '.webp');
     const jpgFallback = imgSrc;
 
-    const shortDesc = product.description.length > 110
-      ? `${product.description.substring(0, 100)}...`
-      : product.description;
+    const desc = String(product.description || '');
+    const shortDesc = desc.length > 110
+      ? `${desc.substring(0, 100)}...`
+      : desc;
 
     return `
       <div class="product-card" onclick="app.goToProduct(${product.id})">
@@ -169,11 +216,13 @@ const app = {
           </picture>
           <div class="product-badge ${statusClass}">${statusText}</div>
           ${featured}
+          ${favBtn}
         </div>
         <div class="product-body">
-          <div class="product-category">${categoryLabel}</div>
+          <div class="product-category">${sectionLabel} · ${categoryLabel}</div>
           <h3 class="product-name">${product.name}</h3>
           <p class="product-description">${shortDesc}</p>
+          ${metaLine}
           <div class="product-footer">
             <span class="product-price${product.status === 'sold' ? ' sold' : ''}">${priceDisplay}</span>
             <span class="text-muted">${product.year || ''}</span>
@@ -237,10 +286,9 @@ const app = {
       if (product.paypalBuy) buyButtons.push(`<a href="${product.paypalBuy}" class="btn btn-secondary" target="_blank" rel="noopener">Paga con PayPal</a>`);
     }
 
-    const inquiryText = product.whatsappText || `Mi interessa ${product.name}`;
-    const inquiryBtn = product.status !== 'available'
-      ? `<a href="https://wa.me/393296627575?text=${encodeURIComponent(inquiryText)}" class="product-inquiry-btn" target="_blank" rel="noopener">Richiedi informazioni</a>`
-      : '';
+    const inquiryText = product.whatsappText || `Ciao! Mi interessa: ${product.name}. E' ancora disponibile?`;
+    const inquiryLabel = product.status === 'available' ? 'Scrivi su WhatsApp' : 'Richiedi informazioni';
+    const inquiryBtn = `<a href="https://wa.me/393296627575?text=${encodeURIComponent(inquiryText)}" class="product-inquiry-btn" target="_blank" rel="noopener">${inquiryLabel}</a>`;
 
     const html = `
       <div class="product-gallery">
@@ -257,23 +305,35 @@ const app = {
 
       <div class="product-info">
         <h1>${product.name}</h1>
-        <div class="product-year">${product.year}</div>
+        <div class="product-year">${product.year || ''}</div>
         <div class="product-badge ${statusClass}">${statusText}</div>
         <div class="product-price-detail${product.status === 'sold' ? ' sold' : ''}">${priceDisplay}</div>
         <p>${product.description}</p>
 
         <div class="product-specs">
           <div class="spec-row">
+            <span class="spec-label">Sezione</span>
+            <span class="spec-value">${this.formatSection(this.getProductSection(product))}</span>
+          </div>
+          <div class="spec-row">
             <span class="spec-label">Categoria</span>
             <span class="spec-value">${this.formatCategory(product.category)}</span>
           </div>
           <div class="spec-row">
-            <span class="spec-label">Periodo</span>
-            <span class="spec-value">${product.year}</span>
+            <span class="spec-label">Anno / periodo</span>
+            <span class="spec-value">${product.year || '—'}</span>
           </div>
           <div class="spec-row">
             <span class="spec-label">Dimensioni</span>
-            <span class="spec-value">${product.dimensions}</span>
+            <span class="spec-value">${product.dimensions || '—'}</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Zona</span>
+            <span class="spec-value">${product.location || '—'}</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Condizione</span>
+            <span class="spec-value">${product.condition || '—'}</span>
           </div>
           <div class="spec-row">
             <span class="spec-label">Stato</span>
@@ -287,8 +347,8 @@ const app = {
         </div>
 
         <div class="product-note">
-          <strong>Autenticita e assistenza</strong>
-          <p>Ogni pezzo e' descritto con trasparenza. Disponibili foto extra, dettagli su provenienza e supporto dedicato prima e dopo l'acquisto.</p>
+          <strong>Annuncio verificato</strong>
+          <p>Descrizione chiara, foto reali e contatto diretto. Disponibili foto extra e dettagli aggiuntivi su richiesta.</p>
         </div>
       </div>
     `;
@@ -329,7 +389,7 @@ const app = {
       "image": product.image,
       "brand": {
         "@type": "Brand",
-        "name": "ENS Antiquariato"
+        "name": "ENS"
       },
       "offers": {
         "@type": "Offer",
@@ -347,16 +407,15 @@ const app = {
   },
 
   updatePageMeta(product) {
-    document.title = `${product.name} — ENS Antiquariato`;
+    document.title = `${product.name} — ENS`;
 
     const ogTitle = document.querySelector('meta[property="og:title"]');
     if (ogTitle) ogTitle.setAttribute('content', product.name);
 
     const metaDesc = document.querySelector('meta[name="description"]');
     const ogDesc = document.querySelector('meta[property="og:description"]');
-    const shortDesc = product.description.length > 160
-      ? product.description.substring(0, 157) + '...'
-      : product.description;
+    const desc = String(product.description || '');
+    const shortDesc = desc.length > 160 ? desc.substring(0, 157) + '...' : desc;
 
     if (metaDesc) metaDesc.setAttribute('content', shortDesc);
     if (ogDesc) ogDesc.setAttribute('content', shortDesc);
@@ -374,6 +433,54 @@ const app = {
   // UTILITY
   // ========================
 
+  loadFavorites() {
+    try {
+      const raw = localStorage.getItem('ens_favorites');
+      const list = raw ? JSON.parse(raw) : [];
+      this.favorites = new Set(Array.isArray(list) ? list : []);
+    } catch {
+      this.favorites = new Set();
+    }
+  },
+
+  saveFavorites() {
+    localStorage.setItem('ens_favorites', JSON.stringify(Array.from(this.favorites)));
+  },
+
+  isFavorite(id) {
+    return this.favorites.has(id);
+  },
+
+  toggleFavorite(id) {
+    if (this.favorites.has(id)) this.favorites.delete(id);
+    else this.favorites.add(id);
+    this.saveFavorites();
+    this.detectPage();
+  },
+
+  getProductSection(product) {
+    if (product && typeof product.section === 'string' && product.section.trim()) {
+      return product.section.trim();
+    }
+    const antiqueCategories = new Set(['mobili', 'arte', 'ceramica', 'orologeria', 'gioielli', 'oggetti']);
+    return antiqueCategories.has(product.category) ? 'antiquariato' : 'usato';
+  },
+
+  formatSection(section) {
+    const map = {
+      antiquariato: 'Antiquariato',
+      usato: 'Usato'
+    };
+    return map[section] || section || '—';
+  },
+
+  getPostedTimestamp(product) {
+    const raw = product && product.postedAt ? String(product.postedAt) : '';
+    const ts = raw ? Date.parse(raw) : NaN;
+    if (Number.isFinite(ts)) return ts;
+    return (product && typeof product.id === 'number') ? product.id : 0;
+  },
+
   getStatusText(status) {
     const map = {
       available: 'Disponibile',
@@ -390,7 +497,16 @@ const app = {
       ceramica: 'Ceramica',
       orologeria: 'Orologeria',
       gioielli: 'Gioielli',
-      oggetti: 'Oggetti e curiosita'
+      oggetti: 'Oggetti e curiosita',
+      moda: 'Moda',
+      elettronica: 'Elettronica',
+      casa: 'Casa',
+      sport: 'Sport e tempo libero',
+      auto: 'Auto e moto',
+      bimbi: 'Bimbi',
+      collezionismo: 'Collezionismo',
+      libri: 'Libri',
+      altro: 'Altro'
     };
     return map[category] || category;
   },
@@ -408,20 +524,43 @@ const app = {
   },
 
   setupEventListeners() {
+    const homeSearchForm = document.getElementById('home-search-form');
+    if (homeSearchForm) {
+      homeSearchForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const q = document.getElementById('home-q')?.value.trim() || '';
+        const section = document.getElementById('home-section')?.value || '';
+        const location = document.getElementById('home-location')?.value.trim() || '';
+        const params = new URLSearchParams();
+        if (q) params.set('q', q);
+        if (section) params.set('section', section);
+        if (location) params.set('location', location);
+        const hash = params.toString();
+        window.location.href = `catalogo.html${hash ? `#${hash}` : ''}`;
+      });
+    }
+
     if (window.location.pathname.includes('catalogo')) {
       const search = document.getElementById('search');
+      const section = document.getElementById('section');
+      const location = document.getElementById('location');
+      const onlyFavorites = document.getElementById('only-favorites');
       const category = document.getElementById('category');
       const sort = document.getElementById('sort');
       const status = document.getElementById('status');
       const resetBtn = document.getElementById('reset-filters');
 
-      [search, category, sort, status].forEach(el => {
+      [search, section, location, onlyFavorites, category, sort, status].forEach(el => {
         if (el) el.addEventListener('change', () => this.applyFilters());
       });
 
       if (search) search.addEventListener('keyup', () => this.applyFilters());
+      if (location) location.addEventListener('keyup', () => this.applyFilters());
       if (resetBtn) resetBtn.addEventListener('click', () => {
         if (search) search.value = '';
+        if (section) section.value = '';
+        if (location) location.value = '';
+        if (onlyFavorites) onlyFavorites.checked = false;
         if (category) category.value = '';
         if (sort) sort.value = 'recenti';
         if (status) status.value = '';
