@@ -117,6 +117,17 @@
       background: #dc3545;
       color: #fff;
     }
+    .btn-ad {
+      background: #1f7a3d;
+      color: #fff;
+      flex: 1;
+      padding: 8px;
+      text-align: center;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85em;
+    }
     .alert {
       padding: 15px;
       border-radius: 4px;
@@ -142,6 +153,44 @@
         grid-template-columns: 1fr;
       }
     }
+    .publish-panel {
+      border: 1px solid #444;
+      background: #171717;
+    }
+    .publish-panel p,
+    .publish-panel li {
+      color: #bbb;
+    }
+    .publish-panel ul {
+      margin: 10px 0 15px 22px;
+    }
+    .publish-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .btn-secondary {
+      background: #4a4a4a;
+      color: #fff;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .file-inline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .status-note {
+      font-size: 0.9em;
+      color: #a9a9a9;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
@@ -164,6 +213,27 @@
       <h1 style="color: #d4af37; margin-bottom: 30px;">📦 Gestione Prodotti</h1>
 
       <div id="alert-container"></div>
+
+      <div class="admin-section publish-panel">
+        <h2>Pubblica Annunci Online</h2>
+        <p>Questa pagina modifica il catalogo locale del browser. Per pubblicare davvero gli annunci sul sito online:</p>
+        <ul>
+          <li>modifica prodotti qui;</li>
+          <li>scarica il file <code>products.json</code> aggiornato;</li>
+          <li>sostituisci il file in <code>data/products.json</code> nel progetto;</li>
+          <li>esegui commit e push su GitHub.</li>
+        </ul>
+        <div class="file-inline">
+          <label for="products-file-input">Importa products.json:</label>
+          <input type="file" id="products-file-input" accept="application/json">
+        </div>
+        <div class="publish-actions">
+          <button type="button" id="btn-export-json" class="btn-secondary">Scarica products.json</button>
+          <button type="button" id="btn-sync-live" class="btn-secondary">Ricarica da dati pubblicati</button>
+          <button type="button" id="btn-copy-git" class="btn-secondary">Copia comandi Git</button>
+        </div>
+        <p id="publish-status" class="status-note">Catalogo locale: 0 prodotti.</p>
+      </div>
 
       <!-- Form Aggiunta/Modifica Prodotto -->
       <div class="admin-section">
@@ -252,7 +322,7 @@
           </div>
 
           <div style="display: flex; gap: 10px;">
-            <button type="submit" class="btn-primary">💾 Salva Prodotto</button>
+            <button type="submit" class="btn-primary" id="btn-save-product">💾 Salva Prodotto</button>
             <button type="button" class="btn-primary" style="background: #666;" id="btn-clear">🗑️ Pulisci Form</button>
           </div>
         </form>
@@ -273,10 +343,17 @@
   <script>
     // Gestione LocalStorage per prodotti
     const STORAGE_KEY = 'antiquariato_products';
+    const LIVE_DATA_PATH = 'data/products.json';
+    const PUBLIC_SITE_BASE = 'https://egly87.github.io/ensantiquarato.github.io/';
 
     function loadProducts() {
-      const json = localStorage.getItem(STORAGE_KEY);
-      return json ? JSON.parse(json) : [];
+      try {
+        const json = localStorage.getItem(STORAGE_KEY);
+        return json ? JSON.parse(json) : [];
+      } catch (err) {
+        console.error(err);
+        return [];
+      }
     }
 
     function saveProducts(products) {
@@ -294,8 +371,104 @@
       setTimeout(() => alert.remove(), 4000);
     }
 
+    function updatePublishStatus() {
+      const count = loadProducts().length;
+      const statusEl = document.getElementById('publish-status');
+      if (statusEl) {
+        statusEl.textContent = `Catalogo locale: ${count} prodotti.`;
+      }
+    }
+
     function generateId() {
       return Math.max(0, ...loadProducts().map(p => p.id || 0)) + 1;
+    }
+
+    async function loadLiveProducts() {
+      const response = await fetch(LIVE_DATA_PATH);
+      if (!response.ok) {
+        throw new Error('Impossibile leggere data/products.json');
+      }
+      const products = await response.json();
+      if (!Array.isArray(products)) {
+        throw new Error('Il file data/products.json non contiene un array');
+      }
+      return products;
+    }
+
+    async function initializeProductsIfEmpty() {
+      const products = loadProducts();
+      if (products.length > 0) {
+        renderProducts();
+        return;
+      }
+      try {
+        const liveProducts = await loadLiveProducts();
+        saveProducts(liveProducts);
+        showAlert('Catalogo inizializzato dai dati pubblicati.');
+      } catch (err) {
+        showAlert(err.message, 'error');
+      }
+    }
+
+    function downloadProductsJson() {
+      const products = loadProducts();
+      const blob = new Blob([JSON.stringify(products, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'products.json';
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function formatPriceForAd(product) {
+      if (typeof product.price === 'number' && !Number.isNaN(product.price)) {
+        return `EUR ${product.price.toFixed(2)}`;
+      }
+      return 'Su richiesta';
+    }
+
+    function buildProductUrl(productId) {
+      return new URL(`prodotto.html?id=${productId}`, PUBLIC_SITE_BASE).toString();
+    }
+
+    async function copyTextToClipboard(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+      const area = document.createElement('textarea');
+      area.value = text;
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand('copy');
+      area.remove();
+    }
+
+    async function copyAdText(productId) {
+      const product = loadProducts().find((p) => p.id === productId);
+      if (!product) {
+        showAlert('Prodotto non trovato.', 'error');
+        return;
+      }
+      const adText = [
+        `${product.name}`,
+        `Prezzo: ${formatPriceForAd(product)}`,
+        `Categoria: ${product.category || 'N/D'}`,
+        `Periodo: ${product.year || 'N/D'}`,
+        product.description || '',
+        `Link: ${buildProductUrl(product.id)}`,
+        `Email: egli87@yahoo.com`,
+        `Contatto: +39 329 662 7575`
+      ].filter(Boolean).join('\n');
+
+      try {
+        await copyTextToClipboard(adText);
+        showAlert('Testo annuncio copiato.');
+      } catch (err) {
+        console.error(err);
+        showAlert('Impossibile copiare il testo annuncio.', 'error');
+      }
     }
 
     // Form submission
@@ -338,11 +511,60 @@
       saveProducts(products);
       form.reset();
       document.getElementById('product-form').querySelector('input[name="id"]')?.remove();
+      document.getElementById('btn-save-product').textContent = '💾 Salva Prodotto';
     });
 
     document.getElementById('btn-clear').addEventListener('click', () => {
       document.getElementById('product-form').reset();
       document.getElementById('product-form').querySelector('input[name="id"]')?.remove();
+      document.getElementById('btn-save-product').textContent = '💾 Salva Prodotto';
+    });
+
+    document.getElementById('btn-export-json').addEventListener('click', () => {
+      downloadProductsJson();
+      showAlert('File products.json scaricato.');
+    });
+
+    document.getElementById('btn-sync-live').addEventListener('click', async () => {
+      if (!confirm('Sostituire il catalogo locale con i dati attualmente pubblicati?')) return;
+      try {
+        const liveProducts = await loadLiveProducts();
+        saveProducts(liveProducts);
+        showAlert('Catalogo locale sincronizzato con i dati pubblicati.');
+      } catch (err) {
+        showAlert(err.message, 'error');
+      }
+    });
+
+    document.getElementById('products-file-input').addEventListener('change', async (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        if (!Array.isArray(parsed)) {
+          throw new Error('Il file selezionato non contiene un array di prodotti.');
+        }
+        saveProducts(parsed);
+        showAlert('Catalogo importato dal file selezionato.');
+      } catch (err) {
+        showAlert(err.message, 'error');
+      }
+    });
+
+    document.getElementById('btn-copy-git').addEventListener('click', async () => {
+      const gitCommands = [
+        'cp ~/Downloads/products.json data/products.json',
+        'git add data/products.json',
+        'git commit -m "Aggiorna annunci"',
+        'git push origin main'
+      ].join('\n');
+      try {
+        await copyTextToClipboard(gitCommands);
+        showAlert('Comandi Git copiati negli appunti.');
+      } catch (err) {
+        showAlert('Impossibile copiare i comandi Git.', 'error');
+      }
     });
 
     function renderProducts() {
@@ -354,10 +576,10 @@
 
       container.innerHTML = products.map(product => `
         <div class="product-card">
-          <img src="${product.image || '/assets/brand/placeholder.png'}" alt="${product.name}" onerror="this.src='/assets/brand/placeholder.png'">
+          <img src="${product.image || 'assets/brand/og-1200x630.jpg'}" alt="${product.name}" onerror="this.src='assets/brand/og-1200x630.jpg'">
           <h3>${product.name}</h3>
           <p><strong>Categoria:</strong> ${product.category}</p>
-          <p><strong>Prezzo:</strong> €${product.price.toFixed(2)}</p>
+          <p><strong>Prezzo:</strong> €${Number(product.price || 0).toFixed(2)}</p>
           <p><strong>Status:</strong> <span style="color: ${
             product.status === 'available' ? '#4caf50' : 
             product.status === 'reserved' ? '#ff9800' : '#dc3545'
@@ -365,10 +587,12 @@
           <p><strong>Periodo:</strong> ${product.year || 'N/A'}</p>
           <div class="product-actions">
             <button class="btn-edit" onclick="editProduct(${product.id})">✏️ Modifica</button>
+            <button class="btn-ad" onclick="copyAdText(${product.id})">📋 Copia Annuncio</button>
             <button class="btn-delete" onclick="deleteProduct(${product.id})">🗑️ Elimina</button>
           </div>
         </div>
       `).join('');
+      updatePublishStatus();
     }
 
     function editProduct(id) {
@@ -388,7 +612,7 @@
       document.getElementById('paypal-link').value = product.paypalBuy;
       document.getElementById('whatsapp-text').value = product.whatsappText;
       document.getElementById('image-url').value = product.image;
-      document.getElementById('gallery-urls').value = product.gallery.join(', ');
+      document.getElementById('gallery-urls').value = Array.isArray(product.gallery) ? product.gallery.join(', ') : '';
 
       // Aggiungi ID nascosto
       let idInput = document.querySelector('input[name="id"]');
@@ -400,7 +624,7 @@
       }
       idInput.value = id;
 
-      document.querySelector('.btn-primary').textContent = '💾 Aggiorna Prodotto';
+      document.getElementById('btn-save-product').textContent = '💾 Aggiorna Prodotto';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -414,6 +638,7 @@
     }
 
     // Load products on page load
+    initializeProductsIfEmpty();
     renderProducts();
   </script>
 </body>

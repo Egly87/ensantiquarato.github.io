@@ -5,7 +5,7 @@ Disallow: /admin.html
 Disallow: /admin-products.html
 Disallow: /private/
 
-Sitemap: https://ensantiquarato.github.io/sitemap.xml
+Sitemap: https://egly87.github.io/ensantiquarato.github.io/sitemap.xml
 
 User-agent: AdsBot-Google
 Allow: /

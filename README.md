@@ -1,6 +1,6 @@
 # Antiquariato Shop - README
 
-**E-commerce statico per antiquariato. Nessun backend, nessun database. Pronto per Cloudflare Pages.**
+**E-commerce statico per antiquariato. Nessun backend, nessun database. Pronto per GitHub Pages (gratis).**
 
 ---
 
@@ -13,6 +13,22 @@ python3 -m http.server 8000
 ```
 
 Visita: **http://localhost:8000**
+
+---
+
+## 🌐 Pubblicazione Gratis (GitHub Pages)
+
+- Repository: `Egly87/ensantiquarato.github.io`
+- URL pubblico: `https://egly87.github.io/ensantiquarato.github.io/`
+- Admin annunci: `https://egly87.github.io/ensantiquarato.github.io/admin-products.html`
+
+Il repository include workflow automatico in `.github/workflows/github-pages.yml`: a ogni push su `main` il sito viene pubblicato su GitHub Pages.
+
+### Flusso annunci consigliato
+1. Apri `admin-products.html` e crea/modifica i prodotti.
+2. Clicca `Scarica products.json`.
+3. Sostituisci `data/products.json` con il file scaricato.
+4. Esegui `git add data/products.json && git commit -m "Aggiorna annunci" && git push origin main`.
 
 ### 2. Alternative per test locale
 
