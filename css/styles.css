@@ -621,6 +621,176 @@ a:hover {
 }
 
 /* ========================
+   MOOD / VINTAGE REEL
+   ======================== */
+
+.mood {
+  padding: 4.5rem 0;
+}
+
+.mood-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.mood-copy p {
+  color: var(--muted);
+  max-width: 62ch;
+}
+
+.mood-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1.4rem;
+}
+
+.mood-kpi {
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-soft);
+  padding: 1rem 1.2rem;
+}
+
+.mood-kpi span {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.mood-kpi strong {
+  display: block;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.vintage-reel {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow);
+  background: #fff;
+  aspect-ratio: 4 / 3;
+}
+
+.vintage-reel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.14;
+  mix-blend-mode: multiply;
+  background:
+    repeating-linear-gradient(0deg, rgba(32, 22, 15, 0.14) 0 1px, transparent 1px 3px),
+    radial-gradient(70% 80% at 30% 20%, rgba(255, 255, 255, 0.25), transparent 60%),
+    radial-gradient(75% 90% at 70% 85%, rgba(32, 22, 15, 0.16), transparent 62%);
+  animation: reel-grain 10s steps(20) infinite;
+}
+
+.vintage-reel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(closest-side, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.18) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(32, 22, 15, 0.1) 100%);
+}
+
+.vintage-reel picture,
+.vintage-reel img {
+  width: 100%;
+  height: 100%;
+}
+
+.vintage-reel img {
+  object-fit: cover;
+  transform-origin: 50% 45%;
+  animation: reel-kenburns 16s ease-in-out infinite alternate;
+}
+
+.reel-badge {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-soft);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink);
+}
+
+.reel-badge .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(176, 122, 58, 0.18);
+}
+
+.mood-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.9rem;
+  margin-top: 1.1rem;
+}
+
+.mood-shot {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #fff;
+  box-shadow: var(--shadow-soft);
+  aspect-ratio: 1 / 1;
+}
+
+.mood-shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: var(--transition);
+}
+
+.mood-shot:hover img {
+  transform: scale(1.04);
+}
+
+@keyframes reel-kenburns {
+  0% {
+    transform: scale(1.02) translate3d(0, 0, 0);
+    filter: saturate(0.98) contrast(1.02);
+  }
+  100% {
+    transform: scale(1.1) translate3d(-2%, -1.2%, 0);
+    filter: saturate(1.02) contrast(1.04);
+  }
+}
+
+@keyframes reel-grain {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-2%, 1.5%, 0);
+  }
+}
+
+/* ========================
    CATALOG
    ======================== */
 
@@ -1266,6 +1436,10 @@ a:hover {
 
 @media (max-width: 980px) {
   .hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mood-grid {
     grid-template-columns: 1fr;
   }
 
