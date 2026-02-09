@@ -309,17 +309,40 @@
 	      <!-- Form Aggiunta/Modifica Prodotto -->
 	      <div class="admin-section">
 	        <h2>Aggiungi o Modifica Annuncio</h2>
-	        <details style="margin-bottom:12px;">
-	          <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Compila automaticamente con ChatGPT (bozza JSON)</summary>
-	          <p class="helper-note">Carica le foto qui in chat, ti preparo una bozza JSON. Incollala qui e clicca <strong>Applica bozza</strong> per riempire il form.</p>
-	          <textarea id="draft-json" class="draft-box" placeholder="{\n  &quot;name&quot;: &quot;...&quot;,\n  &quot;section&quot;: &quot;usato&quot;,\n  &quot;category&quot;: &quot;moda&quot;,\n  &quot;location&quot;: &quot;Roma&quot;,\n  &quot;condition&quot;: &quot;Ottimo&quot;,\n  &quot;postedAt&quot;: &quot;2026-02-08&quot;,\n  &quot;description&quot;: &quot;...&quot;,\n  &quot;price&quot;: 0,\n  &quot;year&quot;: &quot;...&quot;,\n  &quot;dimensions&quot;: &quot;...&quot;,\n  &quot;status&quot;: &quot;available&quot;,\n  &quot;featured&quot;: false,\n  &quot;image&quot;: &quot;assets/products/...&quot;,\n  &quot;gallery&quot;: [&quot;assets/products/...&quot;],\n  &quot;stripeLinkBuy&quot;: &quot;&quot;,\n  &quot;paypalBuy&quot;: &quot;&quot;,\n  &quot;whatsappText&quot;: &quot;...&quot;\n}"></textarea>
-	          <div class="publish-actions" style="margin-top:10px;">
-	            <button type="button" id="btn-apply-draft" class="btn-secondary">Applica bozza</button>
-	            <button type="button" id="btn-clear-draft" class="btn-secondary">Pulisci bozza</button>
-	          </div>
-	          <p class="helper-note">Dopo l'approvazione, salva il prodotto e poi clicca <strong>Pubblica online adesso</strong> in alto.</p>
-	        </details>
 	        <form id="product-form">
+	          <details open style="margin: 0 0 12px;">
+	            <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Step 1 — Carica foto su GitHub (convertite in WebP)</summary>
+	            <p class="helper-note">Seleziona le foto dal telefono/PC: verranno caricate in <code>assets/products/</code> sul repo GitHub (serve Token GitHub in alto). Le convertiamo in <strong>WebP</strong> per essere sicuri che si vedano su tutti i dispositivi.</p>
+	            <div class="form-row">
+	              <div class="form-group">
+	                <label for="gh-image-prefix">Nome file base (opzionale)</label>
+	                <input type="text" id="gh-image-prefix" placeholder="es: giacca-pelle-vintage">
+	              </div>
+	              <div class="form-group">
+	                <label for="gh-images-input">Foto (multiple)</label>
+	                <input type="file" id="gh-images-input" accept="image/*" multiple>
+	              </div>
+	            </div>
+	            <div class="publish-actions">
+	              <button type="button" id="btn-gh-upload-images" class="btn-secondary">Carica foto su GitHub</button>
+	              <button type="button" id="btn-copy-chatgpt-prompt" class="btn-secondary">Copia prompt ChatGPT</button>
+	            </div>
+	            <div id="gh-upload-preview" class="upload-preview"></div>
+	            <p id="gh-upload-status" class="status-note">Nessuna foto caricata.</p>
+	            <div id="gh-upload-links" class="helper-note"></div>
+	          </details>
+
+	          <details style="margin: 0 0 12px;">
+	            <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Step 2 — Compila automaticamente con ChatGPT (bozza JSON)</summary>
+	            <p class="helper-note">Carica le foto qui in chat, ti preparo una bozza JSON. Incollala qui e clicca <strong>Applica bozza</strong> per riempire il form.</p>
+	            <textarea id="draft-json" class="draft-box" placeholder="{\n  &quot;name&quot;: &quot;...&quot;,\n  &quot;section&quot;: &quot;usato&quot;,\n  &quot;category&quot;: &quot;moda&quot;,\n  &quot;location&quot;: &quot;Roma&quot;,\n  &quot;condition&quot;: &quot;Ottimo&quot;,\n  &quot;postedAt&quot;: &quot;2026-02-08&quot;,\n  &quot;description&quot;: &quot;...&quot;,\n  &quot;price&quot;: 0,\n  &quot;year&quot;: &quot;...&quot;,\n  &quot;dimensions&quot;: &quot;...&quot;,\n  &quot;status&quot;: &quot;available&quot;,\n  &quot;featured&quot;: false,\n  &quot;image&quot;: &quot;assets/products/...&quot;,\n  &quot;gallery&quot;: [&quot;assets/products/...&quot;],\n  &quot;stripeLinkBuy&quot;: &quot;&quot;,\n  &quot;paypalBuy&quot;: &quot;&quot;,\n  &quot;whatsappText&quot;: &quot;...&quot;\n}"></textarea>
+	            <div class="publish-actions" style="margin-top:10px;">
+	              <button type="button" id="btn-apply-draft" class="btn-secondary">Applica bozza</button>
+	              <button type="button" id="btn-clear-draft" class="btn-secondary">Pulisci bozza</button>
+	            </div>
+	            <p class="helper-note">Dopo l'approvazione, salva l'annuncio e poi clicca <strong>Pubblica online adesso</strong> in alto.</p>
+	          </details>
+
           <div class="form-row">
             <div class="form-group">
               <label for="name">Titolo *</label>
@@ -427,8 +450,8 @@
           </div>
 
           <div class="form-group">
-            <label for="image-url">URL Immagine Principale</label>
-            <input type="url" id="image-url" name="image" placeholder="assets/products/...">
+            <label for="image-url">Immagine Principale (path)</label>
+            <input type="text" id="image-url" name="image" placeholder="assets/products/..." spellcheck="false" autocapitalize="none">
           </div>
 
 	          <div class="form-group">
@@ -436,28 +459,8 @@
 	            <input type="text" id="gallery-urls" name="gallery" placeholder="assets/products/1.jpg, assets/products/2.jpg">
 	          </div>
 
-	          <details style="margin: 10px 0 0;">
-	            <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Carica foto su GitHub (riempie immagine + galleria)</summary>
-	            <p class="helper-note">Seleziona le foto dal telefono/PC: verranno caricate in <code>assets/products/</code> sul repo GitHub (serve Token GitHub in alto).</p>
-	            <div class="form-row">
-	              <div class="form-group">
-	                <label for="gh-image-prefix">Nome file base (opzionale)</label>
-	                <input type="text" id="gh-image-prefix" placeholder="es: como-luigi-xvi">
-	              </div>
-	              <div class="form-group">
-	                <label for="gh-images-input">Foto (multiple)</label>
-	                <input type="file" id="gh-images-input" accept="image/*" multiple>
-	              </div>
-	            </div>
-	            <div class="publish-actions">
-	              <button type="button" id="btn-gh-upload-images" class="btn-secondary">Carica foto su GitHub</button>
-	            </div>
-	            <div id="gh-upload-preview" class="upload-preview"></div>
-	            <p id="gh-upload-status" class="status-note">Nessuna foto caricata.</p>
-	          </details>
-
 	          <div style="display: flex; gap: 10px;">
-	            <button type="submit" class="btn-primary" id="btn-save-product">💾 Salva Prodotto</button>
+	            <button type="submit" class="btn-primary" id="btn-save-product">💾 Salva annuncio</button>
 	            <button type="button" class="btn-primary" style="background: #666;" id="btn-clear">🗑️ Pulisci Form</button>
 	          </div>
         </form>
@@ -593,6 +596,76 @@
 	      });
 	    }
 
+	    function scaleToMaxSize(width, height, maxSize) {
+	      const w = Number(width) || 0;
+	      const h = Number(height) || 0;
+	      if (!w || !h) return { width: w, height: h };
+	      const maxDim = Math.max(w, h);
+	      if (!maxSize || maxDim <= maxSize) return { width: w, height: h };
+	      const scale = maxSize / maxDim;
+	      return { width: Math.max(1, Math.round(w * scale)), height: Math.max(1, Math.round(h * scale)) };
+	    }
+
+	    function canvasToBlob(canvas, type, quality) {
+	      return new Promise((resolve) => {
+	        canvas.toBlob((blob) => resolve(blob), type, quality);
+	      });
+	    }
+
+	    async function convertImageToWebp(file, { maxSize = 1600, quality = 0.82 } = {}) {
+	      const isWebp = String(file?.type || '').toLowerCase() === 'image/webp'
+	        || String(file?.name || '').toLowerCase().endsWith('.webp');
+	      if (isWebp) return file;
+
+	      // Try createImageBitmap first (handles EXIF orientation on supporting browsers).
+	      let bitmap = null;
+	      if (typeof createImageBitmap === 'function') {
+	        try {
+	          bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+	        } catch {
+	          try { bitmap = await createImageBitmap(file); } catch { bitmap = null; }
+	        }
+	      }
+
+	      try {
+	        let srcW = 0;
+	        let srcH = 0;
+	        if (bitmap) {
+	          srcW = bitmap.width;
+	          srcH = bitmap.height;
+	        } else {
+	          const url = URL.createObjectURL(file);
+	          try {
+	            const img = await new Promise((resolve, reject) => {
+	              const el = new Image();
+	              el.onload = () => resolve(el);
+	              el.onerror = () => reject(new Error('Formato immagine non supportato dal browser'));
+	              el.src = url;
+	            });
+	            srcW = img.naturalWidth || img.width;
+	            srcH = img.naturalHeight || img.height;
+	            bitmap = img;
+	          } finally {
+	            URL.revokeObjectURL(url);
+	          }
+	        }
+
+	        const target = scaleToMaxSize(srcW, srcH, maxSize);
+	        const canvas = document.createElement('canvas');
+	        canvas.width = target.width;
+	        canvas.height = target.height;
+	        const ctx = canvas.getContext('2d', { alpha: false });
+	        if (!ctx) throw new Error('Impossibile creare canvas');
+	        ctx.drawImage(bitmap, 0, 0, target.width, target.height);
+
+	        const blob = await canvasToBlob(canvas, 'image/webp', quality);
+	        if (!blob) throw new Error('Conversione WebP fallita');
+	        return blob;
+	      } finally {
+	        try { if (bitmap && typeof bitmap.close === 'function') bitmap.close(); } catch {}
+	      }
+	    }
+
     async function githubRequest(url, { method = 'GET', token = '', body = null } = {}) {
       const headers = {
         'Accept': 'application/vnd.github+json',
@@ -664,14 +737,11 @@
 	      if (!files || !files.length) throw new Error('Seleziona almeno una foto.');
 
 	      const base = slugify(baseName) || `p${Date.now()}`;
-	      const uploadedPaths = [];
+	      const uploaded = [];
 
 	      for (let i = 0; i < files.length; i++) {
 	        const file = files[i];
-	        const orig = String(file.name || '');
-	        const extMatch = orig.toLowerCase().match(/\.[a-z0-9]+$/);
-	        const ext = extMatch ? extMatch[0] : '.jpg';
-	        const filename = `${base}-${i + 1}${ext}`;
+	        const filename = `${base}-${i + 1}.webp`;
 		        const path = `${cfg.imagesDir.replace(/\/$/, '')}/${filename}`.replace(/^\/+/, '');
 	        const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}`;
 
@@ -685,19 +755,21 @@
 	          if (!String(err.message || '').includes('404')) throw err;
 	        }
 
-	        const base64 = await fileToBase64(file);
+	        const webpBlob = await convertImageToWebp(file, { maxSize: 1600, quality: 0.82 });
+	        const base64 = await fileToBase64(webpBlob);
 	        const payload = {
-	          message: `Carica foto prodotto: ${filename}`,
+	          message: `Carica foto annuncio: ${filename}`,
 	          content: base64,
 	          branch: cfg.branch
 	        };
 	        if (sha) payload.sha = sha;
 
-	        await githubRequest(url, { method: 'PUT', token, body: payload });
-	        uploadedPaths.push(path);
+	        const res = await githubRequest(url, { method: 'PUT', token, body: payload });
+	        const downloadUrl = res && res.content && res.content.download_url ? res.content.download_url : '';
+	        uploaded.push({ path, downloadUrl });
 	      }
 
-	      return uploadedPaths;
+	      return uploaded;
 	    }
 
 	    async function loadLiveProducts() {
@@ -765,7 +837,7 @@
     async function copyAdText(productId) {
       const product = loadProducts().find((p) => p.id === productId);
       if (!product) {
-        showAlert('Prodotto non trovato.', 'error');
+        showAlert('Annuncio non trovato.', 'error');
         return;
       }
       const adText = [
@@ -835,10 +907,10 @@
       
       if (index >= 0) {
         products[index] = product;
-        showAlert('✅ Prodotto aggiornato!');
+        showAlert('✅ Annuncio aggiornato!');
       } else {
         products.push(product);
-        showAlert('✅ Prodotto aggiunto!');
+        showAlert('✅ Annuncio aggiunto!');
       }
 
       saveProducts(products);
@@ -846,7 +918,7 @@
       const postedAtEl = document.getElementById('postedAt');
       if (postedAtEl) postedAtEl.value = new Date().toISOString().slice(0, 10);
       document.getElementById('product-form').querySelector('input[name="id"]')?.remove();
-      document.getElementById('btn-save-product').textContent = '💾 Salva Prodotto';
+      document.getElementById('btn-save-product').textContent = '💾 Salva annuncio';
     });
 
     document.getElementById('btn-clear').addEventListener('click', () => {
@@ -854,7 +926,7 @@
       const postedAtEl = document.getElementById('postedAt');
       if (postedAtEl) postedAtEl.value = new Date().toISOString().slice(0, 10);
       document.getElementById('product-form').querySelector('input[name="id"]')?.remove();
-      document.getElementById('btn-save-product').textContent = '💾 Salva Prodotto';
+      document.getElementById('btn-save-product').textContent = '💾 Salva annuncio';
     });
 
     document.getElementById('btn-export-json').addEventListener('click', () => {
@@ -995,7 +1067,7 @@
 	      if (draft.image) document.getElementById('image-url').value = String(draft.image);
 	      if (Array.isArray(draft.gallery)) document.getElementById('gallery-urls').value = draft.gallery.join(', ');
 
-	      document.getElementById('btn-save-product').textContent = draft.id ? '💾 Aggiorna Prodotto' : '💾 Salva Prodotto';
+	      document.getElementById('btn-save-product').textContent = draft.id ? '💾 Aggiorna annuncio' : '💾 Salva annuncio';
 	    }
 
 	    document.getElementById('btn-apply-draft')?.addEventListener('click', () => {
@@ -1021,9 +1093,13 @@
 	    const imagesInput = document.getElementById('gh-images-input');
 	    const imagesPreview = document.getElementById('gh-upload-preview');
 	    const imagesStatus = document.getElementById('gh-upload-status');
+	    const imagesLinks = document.getElementById('gh-upload-links');
+	    let lastUploadedImages = [];
 	    if (imagesInput) {
 	      imagesInput.addEventListener('change', () => {
 	        const files = Array.from(imagesInput.files || []);
+	        lastUploadedImages = [];
+	        if (imagesLinks) imagesLinks.innerHTML = '';
 	        if (imagesPreview) {
 	          imagesPreview.innerHTML = files.map((f) => {
 	            const url = URL.createObjectURL(f);
@@ -1045,16 +1121,104 @@
 
 	      try {
 	        if (imagesStatus) imagesStatus.textContent = 'Upload in corso...';
-	        const paths = await uploadImagesToGithub(files, prefix);
+	        const uploaded = await uploadImagesToGithub(files, prefix);
+	        const paths = uploaded.map((u) => u.path);
 	        if (paths.length) {
 	          document.getElementById('image-url').value = paths[0];
 	          document.getElementById('gallery-urls').value = paths.join(', ');
 	        }
+	        lastUploadedImages = uploaded.map((u) => ({
+	          path: u.path,
+	          pagesUrl: new URL(u.path, PUBLIC_SITE_BASE).toString(),
+	          rawUrl: u.downloadUrl || ''
+	        }));
+	        if (imagesLinks) {
+	          const list = lastUploadedImages.map((u, idx) => {
+	            const raw = u.rawUrl ? `<a href="${u.rawUrl}" target="_blank" rel="noopener">Raw</a>` : 'Raw';
+	            return `<div><strong>${idx + 1}.</strong> <a href="${u.pagesUrl}" target="_blank" rel="noopener">Pages</a> · ${raw}</div>`;
+	          }).join('');
+	          imagesLinks.innerHTML = `<div style="margin-top:8px;"><strong>Link foto:</strong> (Pages puo' richiedere 1-3 min)</div>${list}`;
+	        }
+	        // If the draft box is empty, prefill it with a skeleton including image/gallery.
+	        const draftEl = document.getElementById('draft-json');
+	        if (draftEl && !draftEl.value.trim() && paths.length) {
+	          const today = new Date().toISOString().slice(0, 10);
+	          const skeleton = {
+	            name: document.getElementById('name')?.value?.trim() || '',
+	            section: document.getElementById('section')?.value || 'usato',
+	            category: document.getElementById('category')?.value || '',
+	            location: document.getElementById('location')?.value?.trim() || '',
+	            condition: '',
+	            postedAt: today,
+	            description: '',
+	            price: 0,
+	            year: '',
+	            dimensions: '',
+	            status: 'available',
+	            featured: false,
+	            image: paths[0],
+	            gallery: paths,
+	            stripeLinkBuy: '',
+	            paypalBuy: '',
+	            whatsappText: ''
+	          };
+	          draftEl.value = JSON.stringify(skeleton, null, 2);
+	        }
 	        if (imagesStatus) imagesStatus.textContent = `Upload completato: ${paths.length} file. Campi immagine/galleria aggiornati.`;
-	        showAlert('Foto caricate su GitHub e collegate al prodotto.');
+	        showAlert("Foto caricate su GitHub e collegate all'annuncio.");
 	      } catch (err) {
 	        if (imagesStatus) imagesStatus.textContent = 'Upload fallito.';
 	        showAlert(err.message || 'Errore upload immagini.', 'error');
+	      }
+	    });
+
+	    document.getElementById('btn-copy-chatgpt-prompt')?.addEventListener('click', async () => {
+	      if (!lastUploadedImages.length) {
+	        showAlert('Carica prima almeno 1 foto (Step 1).', 'error');
+	        return;
+	      }
+	      const today = new Date().toISOString().slice(0, 10);
+	      const imageUrls = lastUploadedImages.map((u) => u.pagesUrl).filter(Boolean);
+	      const rawUrls = lastUploadedImages.map((u) => u.rawUrl).filter(Boolean);
+	      const draft = {
+	        name: document.getElementById('name')?.value?.trim() || '',
+	        section: document.getElementById('section')?.value || 'usato',
+	        category: document.getElementById('category')?.value || '',
+	        location: document.getElementById('location')?.value?.trim() || '',
+	        condition: '',
+	        postedAt: today,
+	        description: '',
+	        price: 0,
+	        year: '',
+	        dimensions: '',
+	        status: 'available',
+	        featured: false,
+	        image: lastUploadedImages[0]?.path || '',
+	        gallery: lastUploadedImages.map((u) => u.path),
+	        stripeLinkBuy: '',
+	        paypalBuy: '',
+	        whatsappText: ''
+	      };
+	      const prompt = [
+	        'Analizza le foto e compila TUTTI i campi per un annuncio su ENS Vintage.',
+	        'Rispondi SOLO con JSON valido (nessun testo fuori dal JSON).',
+	        'Se non riesci a vedere le URL, chiedimi di allegare le immagini direttamente in chat.',
+	        '',
+	        'Bozza JSON (da completare):',
+	        JSON.stringify(draft, null, 2),
+	        '',
+	        'Foto (Pages URL):',
+	        ...imageUrls,
+	        '',
+	        'Foto (Raw URL - alternative):',
+	        ...rawUrls
+	      ].join('\n');
+	      try {
+	        await copyTextToClipboard(prompt);
+	        showAlert('Prompt ChatGPT copiato. Incollalo in chat e allega le foto se richiesto.');
+	      } catch (err) {
+	        console.error(err);
+	        showAlert('Impossibile copiare il prompt.', 'error');
 	      }
 	    });
 
@@ -1125,17 +1289,17 @@
       }
       idInput.value = id;
 
-      document.getElementById('btn-save-product').textContent = '💾 Aggiorna Prodotto';
+      document.getElementById('btn-save-product').textContent = '💾 Aggiorna annuncio';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function deleteProduct(id) {
-      if (!confirm('Sei sicuro di voler eliminare questo prodotto?')) return;
+      if (!confirm("Sei sicuro di voler eliminare questo annuncio?")) return;
 
       let products = loadProducts();
       products = products.filter(p => p.id !== id);
       saveProducts(products);
-      showAlert('✅ Prodotto eliminato!');
+      showAlert('✅ Annuncio eliminato!');
     }
 
     // Load products on page load

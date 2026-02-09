@@ -198,9 +198,9 @@ const app = {
       </button>
     `;
 
-    const imgSrc = product.image || 'assets/brand/og-1200x630.jpg';
-    const webpSrc = imgSrc.endsWith('.webp') ? imgSrc : imgSrc.replace(/\.[a-zA-Z0-9]+$/, '.webp');
-    const jpgFallback = imgSrc;
+    const imgSrc = String(product.image || 'assets/brand/og-1200x630.jpg').replace(/^\//, '');
+    const isWebp = imgSrc.toLowerCase().endsWith('.webp');
+    const pictureSource = isWebp ? `<source type="image/webp" srcset="${imgSrc}">` : '';
 
     const desc = String(product.description || '');
     const shortDesc = desc.length > 110
@@ -211,8 +211,8 @@ const app = {
       <div class="product-card" onclick="app.goToProduct(${product.id})">
         <div class="product-image">
           <picture>
-            <source type="image/webp" srcset="${webpSrc.replace(/^\//, '')}">
-            <img src="${jpgFallback.replace(/^\//, '')}" alt="${product.name}" loading="lazy" width="400" height="300" decoding="async" onerror="this.onerror=null;this.src='assets/brand/og-1200x630.jpg'">
+            ${pictureSource}
+            <img src="${imgSrc}" alt="${product.name}" loading="lazy" width="400" height="300" decoding="async" onerror="this.onerror=null;this.src='assets/brand/og-1200x630.jpg'">
           </picture>
           <div class="product-badge ${statusClass}">${statusText}</div>
           ${featured}
@@ -260,20 +260,22 @@ const app = {
     const statusText = this.getStatusText(product.status);
     const priceDisplay = product.status === 'sold' ? '—' : `€ ${product.price.toFixed(2)}`;
 
-    const mainImg = product.image || (product.gallery && product.gallery[0]) || 'assets/brand/og-1200x630.jpg';
-    const mainWebp = mainImg.endsWith('.webp') ? mainImg : mainImg.replace(/\.[a-zA-Z0-9]+$/, '.webp');
-    const mainJpg = mainImg;
+    const mainImg = String(product.image || (product.gallery && product.gallery[0]) || 'assets/brand/og-1200x630.jpg').replace(/^\//, '');
+    const mainSource = mainImg.toLowerCase().endsWith('.webp')
+      ? `<source type="image/webp" srcset="${mainImg}">`
+      : '';
 
     const galleryList = Array.isArray(product.gallery) && product.gallery.length ? product.gallery : [mainImg];
     const thumbnails = galleryList.map((img, idx) => {
-      const imgSrc = img || 'assets/brand/og-1200x630.jpg';
-      const imgWebp = imgSrc.endsWith('.webp') ? imgSrc : imgSrc.replace(/\.[a-zA-Z0-9]+$/, '.webp');
-      const imgJpg = imgSrc;
+      const imgSrc = String(img || 'assets/brand/og-1200x630.jpg').replace(/^\//, '');
+      const thumbSource = imgSrc.toLowerCase().endsWith('.webp')
+        ? `<source type="image/webp" srcset="${imgSrc}">`
+        : '';
       return `
         <div class="thumbnail${idx === 0 ? ' active' : ''}" onclick="app.changeMainImage(this, '${imgSrc}')">
           <picture>
-            <source type="image/webp" srcset="${imgWebp.replace(/^\//, '')}">
-            <img src="${imgJpg.replace(/^\//, '')}" alt="${product.name} - ${idx + 1}" loading="lazy" width="80" height="80" decoding="async" onerror="this.onerror=null;this.src='assets/brand/og-1200x630.jpg'">
+            ${thumbSource}
+            <img src="${imgSrc}" alt="${product.name} - ${idx + 1}" loading="lazy" width="80" height="80" decoding="async" onerror="this.onerror=null;this.src='assets/brand/og-1200x630.jpg'">
           </picture>
         </div>
       `;
@@ -294,8 +296,8 @@ const app = {
       <div class="product-gallery">
         <div class="product-main-image">
           <picture>
-            <source type="image/webp" srcset="${mainWebp.replace(/^\//, '')}">
-            <img src="${mainJpg.replace(/^\//, '')}" alt="${product.name}" loading="lazy" width="800" height="450" decoding="async" onerror="this.onerror=null;this.src='assets/brand/og-1200x630.jpg'">
+            ${mainSource}
+            <img src="${mainImg}" alt="${product.name}" loading="lazy" width="800" height="450" decoding="async" onerror="this.onerror=null;this.src='assets/brand/og-1200x630.jpg'">
           </picture>
         </div>
         <div class="product-gallery-thumbnails">
@@ -373,10 +375,11 @@ const app = {
 
     const main = document.querySelector('.product-main-image img');
     const source = document.querySelector('.product-main-image source');
-    if (main) main.src = `${src.replace(/^\//, '')}`;
+    const safe = String(src || '').replace(/^\//, '');
+    if (main) main.src = safe;
     if (source) {
-      const webp = src.endsWith('.webp') ? src : src.replace(/\.[a-zA-Z0-9]+$/, '.webp');
-      source.srcset = `${webp.replace(/^\//, '')}`;
+      if (safe.toLowerCase().endsWith('.webp')) source.srcset = safe;
+      else source.removeAttribute('srcset');
     }
   },
 
