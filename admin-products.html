@@ -275,6 +275,24 @@
 	            Ricorda in questo browser
 	          </label>
 	        </div>
+	        <div class="file-inline">
+	          <label for="ai-key">AI (OpenAI API Key):</label>
+	          <input type="password" id="ai-key" class="token-input" placeholder="sk-..." autocomplete="off" spellcheck="false" inputmode="text">
+	          <label style="display:inline-flex;align-items:center;gap:8px;color:#bbb;">
+	            <input type="checkbox" id="ai-remember">
+	            Ricorda in questo browser
+	          </label>
+	        </div>
+	        <details style="margin-top:10px;">
+	          <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Impostazioni AI (modello)</summary>
+	          <div class="config-grid">
+	            <div class="form-group">
+	              <label for="ai-model">Model</label>
+	              <input type="text" id="ai-model" placeholder="gpt-4o-mini">
+	            </div>
+	          </div>
+	          <p class="helper-note">Nota: l'AI automatica richiede una chiave API OpenAI (ha un costo a consumo). Senza chiave, usa <strong>Condividi prompt</strong> e incolla il JSON.</p>
+	        </details>
 	        <details style="margin-top:10px;">
 	          <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Impostazioni GitHub (repo/dominio)</summary>
 	          <div class="config-grid">
@@ -294,6 +312,12 @@
 	              <label for="gh-products-path">Path prodotti</label>
 	              <input type="text" id="gh-products-path" placeholder="data/products.json">
 	            </div>
+	            <div class="form-group">
+	              <label style="display:inline-flex;align-items:center;gap:10px;color:#bbb;margin-top:6px;">
+	                <input type="checkbox" id="gh-use-raw">
+	                Usa Raw URL per le foto (consigliato)
+	              </label>
+	            </div>
 	          </div>
 	          <p class="helper-note">Consiglio: usa token fine-grained, solo su questo repo, permesso <code>Contents: Read and write</code>, scadenza breve.</p>
 	        </details>
@@ -302,6 +326,12 @@
 	          <button type="button" id="btn-sync-live" class="btn-secondary">Ricarica da dati pubblicati</button>
 	          <button type="button" id="btn-copy-git" class="btn-secondary">Copia comandi Git</button>
 	          <button type="button" id="btn-gh-publish" class="btn-secondary">Pubblica online adesso</button>
+	        </div>
+	        <div class="file-inline" style="margin-top:10px;">
+	          <label style="display:inline-flex;align-items:center;gap:10px;color:#bbb;">
+	            <input type="checkbox" id="auto-publish">
+	            Auto-pubblica quando salvo un annuncio
+	          </label>
 	        </div>
         <p id="publish-status" class="status-note">Annunci locali: 0.</p>
       </div>
@@ -325,6 +355,7 @@
 	            </div>
 	            <div class="publish-actions">
 	              <button type="button" id="btn-gh-upload-images" class="btn-secondary">Carica foto su GitHub</button>
+	              <button type="button" id="btn-ai-autofill" class="btn-secondary">Auto-compila (AI)</button>
 	              <button type="button" id="btn-copy-chatgpt-prompt" class="btn-secondary">Copia prompt ChatGPT</button>
 	              <button type="button" id="btn-share-chatgpt-prompt" class="btn-secondary">Condividi prompt</button>
 	            </div>
@@ -485,6 +516,9 @@
 	    const LIVE_DATA_PATH = 'data/products.json';
 	    const GITHUB_TOKEN_STORAGE_KEY = 'ens_admin_github_token';
 	    const GITHUB_CONFIG_STORAGE_KEY = 'ens_admin_github_config';
+	    const OPENAI_KEY_STORAGE_KEY = 'ens_admin_openai_key';
+	    const OPENAI_CFG_STORAGE_KEY = 'ens_admin_openai_cfg';
+	    const AUTO_PUBLISH_STORAGE_KEY = 'ens_admin_auto_publish';
 	    const PUBLIC_SITE_BASE = new URL('./', window.location.href).toString();
 
 	    const DEFAULT_GITHUB_CONFIG = {
@@ -492,7 +526,13 @@
 	      repo: 'ensantiquarato.github.io',
 	      branch: 'main',
 	      productsPath: 'data/products.json',
-	      imagesDir: 'assets/products'
+	      imagesDir: 'assets/products',
+	      useRawUrls: true
+	    };
+
+	    const DEFAULT_OPENAI_CONFIG = {
+	      model: 'gpt-4o-mini',
+	      endpoint: 'https://api.openai.com/v1/chat/completions'
 	    };
 
     function loadProducts() {
@@ -558,7 +598,8 @@
 	        repo: String(cfg.repo || '').trim() || DEFAULT_GITHUB_CONFIG.repo,
 	        branch: String(cfg.branch || '').trim() || DEFAULT_GITHUB_CONFIG.branch,
 	        productsPath: String(cfg.productsPath || '').trim() || DEFAULT_GITHUB_CONFIG.productsPath,
-	        imagesDir: String(cfg.imagesDir || '').trim() || DEFAULT_GITHUB_CONFIG.imagesDir
+	        imagesDir: String(cfg.imagesDir || '').trim() || DEFAULT_GITHUB_CONFIG.imagesDir,
+	        useRawUrls: cfg.useRawUrls === false ? false : true
 	      };
 	      localStorage.setItem(GITHUB_CONFIG_STORAGE_KEY, JSON.stringify(safe));
 	      return safe;
@@ -578,6 +619,50 @@
       if (remember) localStorage.setItem(GITHUB_TOKEN_STORAGE_KEY, token);
       else sessionStorage.setItem(GITHUB_TOKEN_STORAGE_KEY, token);
     }
+
+	    function loadOpenAIKey() {
+	      return sessionStorage.getItem(OPENAI_KEY_STORAGE_KEY)
+	        || localStorage.getItem(OPENAI_KEY_STORAGE_KEY)
+	        || '';
+	    }
+
+	    function saveOpenAIKey(key, remember) {
+	      sessionStorage.removeItem(OPENAI_KEY_STORAGE_KEY);
+	      localStorage.removeItem(OPENAI_KEY_STORAGE_KEY);
+	      if (!key) return;
+	      if (remember) localStorage.setItem(OPENAI_KEY_STORAGE_KEY, key);
+	      else sessionStorage.setItem(OPENAI_KEY_STORAGE_KEY, key);
+	    }
+
+	    function loadOpenAIConfig() {
+	      try {
+	        const raw = localStorage.getItem(OPENAI_CFG_STORAGE_KEY);
+	        if (!raw) return { ...DEFAULT_OPENAI_CONFIG };
+	        const parsed = JSON.parse(raw);
+	        return { ...DEFAULT_OPENAI_CONFIG, ...(parsed || {}) };
+	      } catch {
+	        return { ...DEFAULT_OPENAI_CONFIG };
+	      }
+	    }
+
+	    function saveOpenAIConfig(cfg) {
+	      const safe = {
+	        model: String(cfg.model || '').trim() || DEFAULT_OPENAI_CONFIG.model,
+	        endpoint: String(cfg.endpoint || '').trim() || DEFAULT_OPENAI_CONFIG.endpoint
+	      };
+	      localStorage.setItem(OPENAI_CFG_STORAGE_KEY, JSON.stringify(safe));
+	      return safe;
+	    }
+
+	    function loadAutoPublish() {
+	      const raw = localStorage.getItem(AUTO_PUBLISH_STORAGE_KEY);
+	      if (raw === null || raw === undefined || raw === '') return true;
+	      return raw === '1' || raw === 'true' || raw === 'yes';
+	    }
+
+	    function saveAutoPublish(enabled) {
+	      localStorage.setItem(AUTO_PUBLISH_STORAGE_KEY, enabled ? '1' : '0');
+	    }
 
 	    function base64EncodeUnicode(str) {
 	      return btoa(unescape(encodeURIComponent(str)));
@@ -864,7 +949,7 @@
     }
 
     // Form submission
-	    document.getElementById('product-form').addEventListener('submit', (e) => {
+	    document.getElementById('product-form').addEventListener('submit', async (e) => {
 	      e.preventDefault();
 	      const form = e.target;
 	      const formData = new FormData(form);
@@ -905,15 +990,35 @@
         if (!product.section && existing.section) product.section = existing.section;
       }
       
+      let saveLabel = '';
       if (index >= 0) {
         products[index] = product;
-        showAlert('✅ Annuncio aggiornato!');
+        saveLabel = '✅ Annuncio aggiornato';
       } else {
         products.push(product);
-        showAlert('✅ Annuncio aggiunto!');
+        saveLabel = '✅ Annuncio aggiunto';
       }
 
       saveProducts(products);
+
+      const autoPublish = !!document.getElementById('auto-publish')?.checked;
+      if (autoPublish) {
+        try {
+          // Persist token even if mobile doesn't fire "change" reliably.
+          const tokenInput = document.getElementById('gh-token');
+          const remember = document.getElementById('gh-remember');
+          if (tokenInput) saveGithubToken(tokenInput.value.trim(), !!remember?.checked);
+
+          const result = await publishProductsToGithub(products);
+          const commitUrl = result && result.commit && result.commit.html_url ? result.commit.html_url : '';
+          showAlert(commitUrl ? `${saveLabel} e pubblicato online! Commit: ${commitUrl}` : `${saveLabel} e pubblicato online!`);
+        } catch (err) {
+          showAlert(`${saveLabel}. Pubblicazione fallita: ${err.message || 'Errore'}`, 'error');
+        }
+      } else {
+        showAlert(`${saveLabel}!`);
+      }
+
       form.reset();
       const postedAtEl = document.getElementById('postedAt');
       if (postedAtEl) postedAtEl.value = new Date().toISOString().slice(0, 10);
@@ -980,40 +1085,81 @@
 	    (function initGithubTokenUi() {
 	      const tokenInput = document.getElementById('gh-token');
 	      const rememberCheckbox = document.getElementById('gh-remember');
+	      const aiKeyInput = document.getElementById('ai-key');
+	      const aiRememberCheckbox = document.getElementById('ai-remember');
+	      const aiModelInput = document.getElementById('ai-model');
+	      const autoPublishCheckbox = document.getElementById('auto-publish');
 	      const ownerInput = document.getElementById('gh-owner');
 	      const repoInput = document.getElementById('gh-repo');
 	      const branchInput = document.getElementById('gh-branch');
 	      const productsPathInput = document.getElementById('gh-products-path');
+	      const useRawCheckbox = document.getElementById('gh-use-raw');
 
 	      const stored = loadGithubToken();
 	      if (stored) tokenInput.value = stored;
-	      if (localStorage.getItem(GITHUB_TOKEN_STORAGE_KEY)) rememberCheckbox.checked = true;
+	      // Default ON: users want fewer steps on mobile.
+	      rememberCheckbox.checked = !!localStorage.getItem(GITHUB_TOKEN_STORAGE_KEY) || !sessionStorage.getItem(GITHUB_TOKEN_STORAGE_KEY);
+
+	      const storedAi = loadOpenAIKey();
+	      if (storedAi) aiKeyInput.value = storedAi;
+	      aiRememberCheckbox.checked = !!localStorage.getItem(OPENAI_KEY_STORAGE_KEY) || !sessionStorage.getItem(OPENAI_KEY_STORAGE_KEY);
+
+	      if (autoPublishCheckbox) {
+	        autoPublishCheckbox.checked = loadAutoPublish();
+	        autoPublishCheckbox.addEventListener('change', () => saveAutoPublish(!!autoPublishCheckbox.checked));
+	      }
 
 	      const cfg = loadGithubConfig();
 	      if (ownerInput) ownerInput.value = cfg.owner;
 	      if (repoInput) repoInput.value = cfg.repo;
 	      if (branchInput) branchInput.value = cfg.branch;
 	      if (productsPathInput) productsPathInput.value = cfg.productsPath;
+	      if (useRawCheckbox) useRawCheckbox.checked = cfg.useRawUrls !== false;
 
-	      tokenInput.addEventListener('change', () => {
+	      const aiCfg = loadOpenAIConfig();
+	      if (aiModelInput) aiModelInput.value = aiCfg.model;
+
+	      function persistToken() {
 	        const token = tokenInput.value.trim();
 	        saveGithubToken(token, rememberCheckbox.checked);
-	      });
+	      }
+	      tokenInput.addEventListener('input', persistToken);
+	      tokenInput.addEventListener('change', persistToken);
 	      rememberCheckbox.addEventListener('change', () => {
-	        const token = tokenInput.value.trim();
-	        saveGithubToken(token, rememberCheckbox.checked);
+	        persistToken();
 	      });
+
+	      function persistAiKey() {
+	        const key = aiKeyInput.value.trim();
+	        saveOpenAIKey(key, aiRememberCheckbox.checked);
+	      }
+	      aiKeyInput.addEventListener('input', persistAiKey);
+	      aiKeyInput.addEventListener('change', persistAiKey);
+	      aiRememberCheckbox.addEventListener('change', persistAiKey);
+
+	      function persistAiCfg() {
+	        saveOpenAIConfig({
+	          model: aiModelInput ? aiModelInput.value : '',
+	          endpoint: DEFAULT_OPENAI_CONFIG.endpoint
+	        });
+	      }
+	      if (aiModelInput) {
+	        aiModelInput.addEventListener('input', persistAiCfg);
+	        aiModelInput.addEventListener('change', persistAiCfg);
+	      }
 
 	      function persistCfg() {
 	        saveGithubConfig({
 	          owner: ownerInput ? ownerInput.value : '',
 	          repo: repoInput ? repoInput.value : '',
 	          branch: branchInput ? branchInput.value : '',
-	          productsPath: productsPathInput ? productsPathInput.value : ''
+	          productsPath: productsPathInput ? productsPathInput.value : '',
+	          useRawUrls: useRawCheckbox ? !!useRawCheckbox.checked : true
 	        });
 	      }
-	      [ownerInput, repoInput, branchInput, productsPathInput].forEach((el) => {
+	      [ownerInput, repoInput, branchInput, productsPathInput, useRawCheckbox].forEach((el) => {
 	        if (!el) return;
+	        el.addEventListener('input', persistCfg);
 	        el.addEventListener('change', persistCfg);
 	      });
 	    })();
@@ -1121,11 +1267,20 @@
 
 	      try {
 	        if (imagesStatus) imagesStatus.textContent = 'Upload in corso...';
+	        // Persist token/config even if mobile doesn't fire "change" reliably.
+	        try {
+	          const tokenInput = document.getElementById('gh-token');
+	          const remember = document.getElementById('gh-remember');
+	          if (tokenInput) saveGithubToken(tokenInput.value.trim(), !!remember?.checked);
+	        } catch {}
 	        const uploaded = await uploadImagesToGithub(files, prefix);
+	        const cfg = loadGithubConfig();
+	        const useRaw = cfg.useRawUrls !== false;
 	        const paths = uploaded.map((u) => u.path);
-	        if (paths.length) {
-	          document.getElementById('image-url').value = paths[0];
-	          document.getElementById('gallery-urls').value = paths.join(', ');
+	        const values = uploaded.map((u) => (useRaw && u.downloadUrl) ? u.downloadUrl : u.path);
+	        if (values.length) {
+	          document.getElementById('image-url').value = values[0];
+	          document.getElementById('gallery-urls').value = values.join(', ');
 	        }
 	        lastUploadedImages = uploaded.map((u) => ({
 	          path: u.path,
@@ -1141,7 +1296,7 @@
 	        }
 	        // If the draft box is empty, prefill it with a skeleton including image/gallery.
 	        const draftEl = document.getElementById('draft-json');
-	        if (draftEl && !draftEl.value.trim() && paths.length) {
+	        if (draftEl && !draftEl.value.trim() && values.length) {
 	          const today = new Date().toISOString().slice(0, 10);
 	          const skeleton = {
 	            name: document.getElementById('name')?.value?.trim() || '',
@@ -1156,8 +1311,8 @@
 	            dimensions: '',
 	            status: 'available',
 	            featured: false,
-	            image: paths[0],
-	            gallery: paths,
+	            image: values[0],
+	            gallery: values,
 	            stripeLinkBuy: '',
 	            paypalBuy: '',
 	            whatsappText: ''
@@ -1166,9 +1321,33 @@
 	        }
 	        if (imagesStatus) imagesStatus.textContent = `Upload completato: ${paths.length} file. Campi immagine/galleria aggiornati.`;
 	        showAlert("Foto caricate su GitHub e collegate all'annuncio.");
+
+	        // One-tap flow: if AI key is present, auto-fill right after upload.
+	        try {
+	          const hasAiKey = !!loadOpenAIKey() || !!document.getElementById('ai-key')?.value?.trim();
+	          if (hasAiKey) {
+	            if (imagesStatus) imagesStatus.textContent = `Upload completato: ${paths.length} file. Avvio compilazione AI...`;
+	            await runAiAutofill();
+	            showAlert('Campi compilati automaticamente con AI. Controlla e salva.');
+	          }
+	        } catch (err) {
+	          showAlert(err.message || 'AI: compilazione fallita.', 'error');
+	        }
 	      } catch (err) {
 	        if (imagesStatus) imagesStatus.textContent = 'Upload fallito.';
 	        showAlert(err.message || 'Errore upload immagini.', 'error');
+	      }
+	    });
+
+	    document.getElementById('btn-ai-autofill')?.addEventListener('click', async () => {
+	      try {
+	        if (imagesStatus) imagesStatus.textContent = 'Compilazione AI in corso...';
+	        await runAiAutofill();
+	        if (imagesStatus) imagesStatus.textContent = 'Compilazione AI completata.';
+	        showAlert('Campi compilati automaticamente con AI. Controlla e salva.');
+	      } catch (err) {
+	        if (imagesStatus) imagesStatus.textContent = 'Compilazione AI fallita.';
+	        showAlert(err.message || 'AI: compilazione fallita.', 'error');
 	      }
 	    });
 
@@ -1176,6 +1355,15 @@
 	      if (!lastUploadedImages.length) {
 	        throw new Error('Carica prima almeno 1 foto (Step 1).');
 	      }
+	      const parseGalleryCsv = (csv) => String(csv || '')
+	        .split(',')
+	        .map((s) => s.trim())
+	        .filter(Boolean);
+
+	      const currentImage = document.getElementById('image-url')?.value?.trim() || '';
+	      const currentGallery = parseGalleryCsv(document.getElementById('gallery-urls')?.value || '');
+	      const effectiveGallery = currentGallery.length ? currentGallery : (currentImage ? [currentImage] : []);
+
 	      const today = new Date().toISOString().slice(0, 10);
 	      const imageUrls = lastUploadedImages.map((u) => u.pagesUrl).filter(Boolean);
 	      const rawUrls = lastUploadedImages.map((u) => u.rawUrl).filter(Boolean);
@@ -1192,8 +1380,8 @@
 	        dimensions: '',
 	        status: 'available',
 	        featured: false,
-	        image: lastUploadedImages[0]?.path || '',
-	        gallery: lastUploadedImages.map((u) => u.path),
+	        image: currentImage || (lastUploadedImages[0]?.rawUrl || lastUploadedImages[0]?.path || ''),
+	        gallery: effectiveGallery,
 	        stripeLinkBuy: '',
 	        paypalBuy: '',
 	        whatsappText: ''
@@ -1214,6 +1402,206 @@
 	      ].join('\n');
 	    }
 
+	    function stripJsonFromText(text) {
+	      const t = String(text || '').trim();
+	      if (!t) return '';
+	      // Remove common markdown fences if present.
+	      const fenceStart = t.indexOf('```');
+	      if (fenceStart !== -1) {
+	        const firstBrace = t.indexOf('{');
+	        const lastBrace = t.lastIndexOf('}');
+	        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+	          return t.slice(firstBrace, lastBrace + 1);
+	        }
+	      }
+	      return t;
+	    }
+
+	    function parseGalleryCsv(csv) {
+	      return String(csv || '')
+	        .split(',')
+	        .map((s) => s.trim())
+	        .filter(Boolean);
+	    }
+
+	    function getEffectiveImageAndGallery() {
+	      const image = document.getElementById('image-url')?.value?.trim() || '';
+	      const gallery = parseGalleryCsv(document.getElementById('gallery-urls')?.value || '');
+	      const effectiveGallery = gallery.length ? gallery : (image ? [image] : []);
+	      return { image, gallery: effectiveGallery };
+	    }
+
+	    function normalizeCategory(value) {
+	      const allowed = new Set([
+	        'mobili', 'arte', 'ceramica', 'orologeria', 'oggetti', 'gioielli',
+	        'moda', 'elettronica', 'casa', 'sport', 'auto', 'bimbi',
+	        'collezionismo', 'libri', 'altro'
+	      ]);
+	      const raw = String(value || '').trim().toLowerCase();
+	      if (allowed.has(raw)) return raw;
+	      return '';
+	    }
+
+	    function normalizeSection(value, category) {
+	      const raw = String(value || '').trim().toLowerCase();
+	      if (raw === 'antiquariato' || raw === 'usato') return raw;
+	      // Fallback: antique categories default to antiquariato
+	      const antique = new Set(['mobili', 'arte', 'ceramica', 'orologeria', 'gioielli', 'oggetti']);
+	      if (antique.has(String(category || '').trim().toLowerCase())) return 'antiquariato';
+	      return 'usato';
+	    }
+
+	    function coercePrice(value) {
+	      if (typeof value === 'number' && Number.isFinite(value)) return value;
+	      const s = String(value || '').replace(',', '.').replace(/[^0-9.]/g, '');
+	      const n = parseFloat(s);
+	      return Number.isFinite(n) ? n : 0;
+	    }
+
+	    async function openaiCreateDraftFromImages({ apiKey, model, endpoint, baseDraft, imageUrls }) {
+	      const system = [
+	        'Sei un assistente esperto di annunci per un marketplace italiano (usato, vintage, antiquariato).',
+	        'Devi rispondere SOLO con JSON valido, senza testo extra e senza markdown.',
+	        'Non inventare dettagli non visibili: se sei incerto, usa \"da verificare\" e metti price=0.',
+	        'Mantieni i campi \"image\" e \"gallery\" esattamente come nella bozza JSON fornita.'
+	      ].join(' ');
+
+	      const allowedCategories = [
+	        'mobili', 'arte', 'ceramica', 'orologeria', 'oggetti', 'gioielli',
+	        'moda', 'elettronica', 'casa', 'sport', 'auto', 'bimbi',
+	        'collezionismo', 'libri', 'altro'
+	      ];
+
+	      const userText = [
+	        'Compila TUTTI i campi dell\'annuncio in base alle foto.',
+	        'Regole:',
+	        `- category deve essere UNA di: ${allowedCategories.join(', ')}`,
+	        '- section: \"antiquariato\" oppure \"usato\".',
+	        '- condition: breve (es: \"Nuovo\", \"Ottimo\", \"Buono\", \"Da sistemare\").',
+	        '- description: dettagliata, onesta, in italiano.',
+	        '- price: numero in EUR (se non sicuro, 0).',
+	        '- year: periodo/anni (se stimati, scrivi \"da verificare\").',
+	        '- dimensions: dimensioni (se non visibili, \"\").',
+	        '- status: \"available\".',
+	        '',
+	        'Bozza JSON (da completare):',
+	        JSON.stringify(baseDraft, null, 2)
+	      ].join('\n');
+
+	      const content = [
+	        { type: 'text', text: userText },
+	        ...imageUrls.map((url) => ({ type: 'image_url', image_url: { url } }))
+	      ];
+
+	      const payload = {
+	        model,
+	        temperature: 0.2,
+	        max_tokens: 900,
+	        messages: [
+	          { role: 'system', content: system },
+	          { role: 'user', content }
+	        ]
+	      };
+
+	      const res = await fetch(endpoint, {
+	        method: 'POST',
+	        headers: {
+	          'Authorization': `Bearer ${apiKey}`,
+	          'Content-Type': 'application/json'
+	        },
+	        body: JSON.stringify(payload)
+	      });
+
+	      const data = await res.json().catch(() => ({}));
+	      if (!res.ok) {
+	        const msg = data && data.error && data.error.message ? data.error.message : (data && data.message ? data.message : `HTTP ${res.status}`);
+	        throw new Error(`AI error: ${msg}`);
+	      }
+
+	      const text = data && data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : '';
+	      if (!text) throw new Error('AI: risposta vuota.');
+	      return String(text);
+	    }
+
+	    async function runAiAutofill() {
+	      if (!lastUploadedImages.length) {
+	        throw new Error('Carica prima almeno 1 foto (Step 1).');
+	      }
+
+	      // Persist AI key in case mobile doesn't fire "change".
+	      try {
+	        const keyInput = document.getElementById('ai-key');
+	        const remember = document.getElementById('ai-remember');
+	        if (keyInput) saveOpenAIKey(keyInput.value.trim(), !!remember?.checked);
+	      } catch {}
+
+	      const apiKey = loadOpenAIKey();
+	      if (!apiKey) {
+	        throw new Error('Inserisci la chiave AI (OpenAI API Key) in alto oppure usa "Condividi prompt".');
+	      }
+
+	      const cfg = loadOpenAIConfig();
+	      const today = new Date().toISOString().slice(0, 10);
+	      const { image, gallery } = getEffectiveImageAndGallery();
+
+	      const baseDraft = {
+	        name: document.getElementById('name')?.value?.trim() || '',
+	        section: document.getElementById('section')?.value || 'usato',
+	        category: document.getElementById('category')?.value || '',
+	        location: document.getElementById('location')?.value?.trim() || '',
+	        condition: '',
+	        postedAt: today,
+	        description: '',
+	        price: 0,
+	        year: '',
+	        dimensions: '',
+	        status: 'available',
+	        featured: false,
+	        image: image || (lastUploadedImages[0]?.rawUrl || lastUploadedImages[0]?.path || ''),
+	        gallery: gallery.length ? gallery : [image].filter(Boolean),
+	        stripeLinkBuy: '',
+	        paypalBuy: '',
+	        whatsappText: ''
+	      };
+
+	      const imageUrls = lastUploadedImages
+	        .map((u) => u.rawUrl || u.pagesUrl)
+	        .filter(Boolean)
+	        .slice(0, 10);
+
+	      const rawText = await openaiCreateDraftFromImages({
+	        apiKey,
+	        model: cfg.model,
+	        endpoint: cfg.endpoint,
+	        baseDraft,
+	        imageUrls
+	      });
+
+	      const jsonText = stripJsonFromText(rawText);
+	      const parsed = JSON.parse(jsonText);
+	      if (!parsed || typeof parsed !== 'object') throw new Error('AI: JSON non valido.');
+
+	      // Sanitize/normalize and enforce image/gallery fields from our upload.
+	      const clean = {
+	        ...baseDraft,
+	        ...parsed
+	      };
+	      clean.category = normalizeCategory(clean.category) || baseDraft.category || 'altro';
+	      clean.section = normalizeSection(clean.section, clean.category);
+	      clean.status = 'available';
+	      clean.postedAt = today;
+	      clean.price = coercePrice(clean.price);
+	      clean.image = baseDraft.image;
+	      clean.gallery = baseDraft.gallery;
+	      if (!clean.name) clean.name = baseDraft.name || 'Annuncio';
+	      if (!clean.description) clean.description = baseDraft.description || '';
+
+	      const draftEl = document.getElementById('draft-json');
+	      if (draftEl) draftEl.value = JSON.stringify(clean, null, 2);
+	      applyDraftToForm(clean);
+	      return clean;
+	    }
+
 	    document.getElementById('btn-copy-chatgpt-prompt')?.addEventListener('click', async () => {
 	      try {
 	        const prompt = buildChatgptPrompt();
@@ -1229,7 +1617,13 @@
 	      try {
 	        const prompt = buildChatgptPrompt();
 	        if (navigator.share) {
-	          await navigator.share({ title: 'ENS Vintage - Prompt annuncio', text: prompt });
+	          const files = Array.from(document.getElementById('gh-images-input')?.files || []);
+	          const shareData = { title: 'ENS Vintage - Prompt annuncio', text: prompt };
+	          // On supported mobile browsers you can share both text + photos to the ChatGPT app.
+	          if (files.length && navigator.canShare && navigator.canShare({ files })) {
+	            shareData.files = files;
+	          }
+	          await navigator.share(shareData);
 	          showAlert('Prompt condiviso.');
 	          return;
 	        }

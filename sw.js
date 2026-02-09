@@ -1,5 +1,5 @@
 // Service Worker - sw.js
-const CACHE_NAME = 'antiquariato-shop-v3';
+const CACHE_NAME = 'ens-vintage-v4';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
