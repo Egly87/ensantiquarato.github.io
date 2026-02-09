@@ -16,29 +16,38 @@ const app = {
 
   loadProducts() {
     const storageKey = 'antiquariato_products';
-    const stored = localStorage.getItem(storageKey);
+    const params = new URLSearchParams(window.location.search);
+    const previewLocal = params.get('preview') === '1' || params.get('local') === '1';
 
-    if (stored) {
+    const loadFromLocalStorage = () => {
+      const stored = localStorage.getItem(storageKey);
+      if (!stored) return false;
       try {
         const data = JSON.parse(stored);
+        if (!Array.isArray(data)) return false;
         this.products = data;
         this.filteredProducts = data;
         this.detectPage();
-        return;
+        return true;
       } catch (e) {
-        console.warn('Errore parsing localStorage, riprovo con JSON');
+        console.warn('Errore parsing localStorage:', e);
+        return false;
       }
-    }
+    };
 
-    fetch('data/products.json')
+    // Default: use published data. Use localStorage only for explicit preview or offline fallback.
+    if (previewLocal && loadFromLocalStorage()) return;
+
+    fetch('data/products.json', { cache: 'no-store' })
       .then(r => r.json())
       .then(data => {
-        this.products = data;
-        this.filteredProducts = data;
+        this.products = Array.isArray(data) ? data : [];
+        this.filteredProducts = this.products;
         this.detectPage();
       })
       .catch(e => {
         console.error('Errore caricamento prodotti:', e);
+        if (loadFromLocalStorage()) return;
         this.showError('Impossibile caricare gli annunci. Riprova piu tardi.');
       });
   },
@@ -198,9 +207,17 @@ const app = {
       </button>
     `;
 
-    const imgSrc = String(product.image || 'assets/brand/og-1200x630.jpg').replace(/^\//, '');
-    const isWebp = imgSrc.toLowerCase().endsWith('.webp');
-    const pictureSource = isWebp ? `<source type="image/webp" srcset="${imgSrc}">` : '';
+    const gallery = this.getProductGallery(product, { limit: 10 });
+    const slides = gallery.map((img, idx) => {
+      const imgSrc = this.normalizeAssetPath(img) || 'assets/brand/og-1200x630.jpg';
+      const alt = `${product.name} - Foto ${idx + 1}`;
+      return `
+        <div class="product-slide">
+          <img src="${imgSrc}" alt="${alt}" loading="lazy" width="400" height="300" decoding="async" onerror="app.handleImageError(this)">
+        </div>
+      `;
+    }).join('');
+    const carouselHint = gallery.length > 1 ? `<div class="product-carousel-hint">${gallery.length} foto</div>` : '';
 
     const desc = String(product.description || '');
     const shortDesc = desc.length > 110
@@ -210,10 +227,10 @@ const app = {
     return `
       <div class="product-card" onclick="app.goToProduct(${product.id})">
         <div class="product-image">
-          <picture>
-            ${pictureSource}
-            <img src="${imgSrc}" alt="${product.name}" loading="lazy" width="400" height="300" decoding="async" onerror="this.onerror=null;this.src='assets/brand/og-1200x630.jpg'">
-          </picture>
+          <div class="product-carousel" aria-label="Foto annuncio">
+            ${slides}
+          </div>
+          ${carouselHint}
           <div class="product-badge ${statusClass}">${statusText}</div>
           ${featured}
           ${favBtn}
@@ -275,7 +292,7 @@ const app = {
         <div class="thumbnail${idx === 0 ? ' active' : ''}" onclick="app.changeMainImage(this, '${imgSrc}')">
           <picture>
             ${thumbSource}
-            <img src="${imgSrc}" alt="${product.name} - ${idx + 1}" loading="lazy" width="80" height="80" decoding="async" onerror="this.onerror=null;this.src='assets/brand/og-1200x630.jpg'">
+            <img src="${imgSrc}" alt="${product.name} - ${idx + 1}" loading="lazy" width="80" height="80" decoding="async" onerror="app.handleImageError(this)">
           </picture>
         </div>
       `;
@@ -297,7 +314,7 @@ const app = {
         <div class="product-main-image">
           <picture>
             ${mainSource}
-            <img src="${mainImg}" alt="${product.name}" loading="lazy" width="800" height="450" decoding="async" onerror="this.onerror=null;this.src='assets/brand/og-1200x630.jpg'">
+            <img src="${mainImg}" alt="${product.name}" loading="lazy" width="800" height="450" decoding="async" onerror="app.handleImageError(this)">
           </picture>
         </div>
         <div class="product-gallery-thumbnails">
@@ -328,6 +345,10 @@ const app = {
           <div class="spec-row">
             <span class="spec-label">Dimensioni</span>
             <span class="spec-value">${product.dimensions || '—'}</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Pubblicato</span>
+            <span class="spec-value">${this.formatPostedAt(product.postedAt)}</span>
           </div>
           <div class="spec-row">
             <span class="spec-label">Zona</span>
@@ -467,6 +488,62 @@ const app = {
     }
     const antiqueCategories = new Set(['mobili', 'arte', 'ceramica', 'orologeria', 'gioielli', 'oggetti']);
     return antiqueCategories.has(product.category) ? 'antiquariato' : 'usato';
+  },
+
+  normalizeAssetPath(path) {
+    return String(path || '').trim().replace(/^\//, '');
+  },
+
+  getProductGallery(product, { limit = 0 } = {}) {
+    const primary = this.normalizeAssetPath(product && product.image ? product.image : '');
+    const list = Array.isArray(product && product.gallery ? product.gallery : null) ? product.gallery : [];
+    const normalized = list.map((img) => this.normalizeAssetPath(img)).filter(Boolean);
+
+    const out = [];
+    if (primary) out.push(primary);
+    for (const img of normalized) {
+      if (img && !out.includes(img)) out.push(img);
+    }
+    const safe = out.length ? out : ['assets/brand/og-1200x630.jpg'];
+    if (limit && safe.length > limit) return safe.slice(0, limit);
+    return safe;
+  },
+
+  formatPostedAt(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '—';
+    const datePart = raw.includes('T') ? raw.slice(0, 10) : raw;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+      const [y, m, d] = datePart.split('-');
+      return `${d}/${m}/${y}`;
+    }
+    return raw;
+  },
+
+  handleImageError(imgEl) {
+    if (!imgEl) return;
+    const tried = imgEl.dataset && imgEl.dataset.fallbackTried === '1';
+    const current = String(imgEl.getAttribute('src') || imgEl.src || '');
+    if (!tried) {
+      const fallback = this.getFallbackImageUrl(current);
+      if (fallback && fallback !== current) {
+        imgEl.dataset.fallbackTried = '1';
+        imgEl.src = fallback;
+        return;
+      }
+    }
+    imgEl.onerror = null;
+    imgEl.src = 'assets/brand/og-1200x630.jpg';
+  },
+
+  getFallbackImageUrl(src) {
+    const s = String(src || '');
+    if (!s) return '';
+    const qIndex = s.indexOf('?');
+    const base = qIndex === -1 ? s : s.slice(0, qIndex);
+    const query = qIndex === -1 ? '' : s.slice(qIndex);
+    if (/\.webp$/i.test(base)) return base.replace(/\.webp$/i, '.jpg') + query;
+    return '';
   },
 
   formatSection(section) {

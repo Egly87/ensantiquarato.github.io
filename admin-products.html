@@ -311,8 +311,8 @@
 	        <h2>Aggiungi o Modifica Annuncio</h2>
 	        <form id="product-form">
 	          <details open style="margin: 0 0 12px;">
-	            <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Step 1 — Carica foto su GitHub (convertite in WebP)</summary>
-	            <p class="helper-note">Seleziona le foto dal telefono/PC: verranno caricate in <code>assets/products/</code> sul repo GitHub (serve Token GitHub in alto). Le convertiamo in <strong>WebP</strong> per essere sicuri che si vedano su tutti i dispositivi.</p>
+	            <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Step 1 — Carica foto su GitHub (JPG ottimizzate)</summary>
+	            <p class="helper-note">Seleziona le foto dal telefono/PC: verranno caricate in <code>assets/products/</code> sul repo GitHub (serve Token GitHub in alto). Le convertiamo in <strong>JPG</strong> (piu compatibile sui telefoni).</p>
 	            <div class="form-row">
 	              <div class="form-group">
 	                <label for="gh-image-prefix">Nome file base (opzionale)</label>
@@ -326,6 +326,7 @@
 	            <div class="publish-actions">
 	              <button type="button" id="btn-gh-upload-images" class="btn-secondary">Carica foto su GitHub</button>
 	              <button type="button" id="btn-copy-chatgpt-prompt" class="btn-secondary">Copia prompt ChatGPT</button>
+	              <button type="button" id="btn-share-chatgpt-prompt" class="btn-secondary">Condividi prompt</button>
 	            </div>
 	            <div id="gh-upload-preview" class="upload-preview"></div>
 	            <p id="gh-upload-status" class="status-note">Nessuna foto caricata.</p>
@@ -334,7 +335,7 @@
 
 	          <details style="margin: 0 0 12px;">
 	            <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Step 2 — Compila automaticamente con ChatGPT (bozza JSON)</summary>
-	            <p class="helper-note">Carica le foto qui in chat, ti preparo una bozza JSON. Incollala qui e clicca <strong>Applica bozza</strong> per riempire il form.</p>
+	            <p class="helper-note">Premi <strong>Copia/Condividi prompt</strong>, incollalo in ChatGPT e allega le foto se richiesto. ChatGPT deve rispondere con un JSON: incollalo qui e clicca <strong>Applica bozza</strong>.</p>
 	            <textarea id="draft-json" class="draft-box" placeholder="{\n  &quot;name&quot;: &quot;...&quot;,\n  &quot;section&quot;: &quot;usato&quot;,\n  &quot;category&quot;: &quot;moda&quot;,\n  &quot;location&quot;: &quot;Roma&quot;,\n  &quot;condition&quot;: &quot;Ottimo&quot;,\n  &quot;postedAt&quot;: &quot;2026-02-08&quot;,\n  &quot;description&quot;: &quot;...&quot;,\n  &quot;price&quot;: 0,\n  &quot;year&quot;: &quot;...&quot;,\n  &quot;dimensions&quot;: &quot;...&quot;,\n  &quot;status&quot;: &quot;available&quot;,\n  &quot;featured&quot;: false,\n  &quot;image&quot;: &quot;assets/products/...&quot;,\n  &quot;gallery&quot;: [&quot;assets/products/...&quot;],\n  &quot;stripeLinkBuy&quot;: &quot;&quot;,\n  &quot;paypalBuy&quot;: &quot;&quot;,\n  &quot;whatsappText&quot;: &quot;...&quot;\n}"></textarea>
 	            <div class="publish-actions" style="margin-top:10px;">
 	              <button type="button" id="btn-apply-draft" class="btn-secondary">Applica bozza</button>
@@ -612,11 +613,7 @@
 	      });
 	    }
 
-	    async function convertImageToWebp(file, { maxSize = 1600, quality = 0.82 } = {}) {
-	      const isWebp = String(file?.type || '').toLowerCase() === 'image/webp'
-	        || String(file?.name || '').toLowerCase().endsWith('.webp');
-	      if (isWebp) return file;
-
+	    async function convertImageToJpeg(file, { maxSize = 1600, quality = 0.86 } = {}) {
 	      // Try createImageBitmap first (handles EXIF orientation on supporting browsers).
 	      let bitmap = null;
 	      if (typeof createImageBitmap === 'function') {
@@ -656,10 +653,13 @@
 	        canvas.height = target.height;
 	        const ctx = canvas.getContext('2d', { alpha: false });
 	        if (!ctx) throw new Error('Impossibile creare canvas');
+	        // Ensure a clean background (important if source has transparency).
+	        ctx.fillStyle = '#ffffff';
+	        ctx.fillRect(0, 0, target.width, target.height);
 	        ctx.drawImage(bitmap, 0, 0, target.width, target.height);
 
-	        const blob = await canvasToBlob(canvas, 'image/webp', quality);
-	        if (!blob) throw new Error('Conversione WebP fallita');
+	        const blob = await canvasToBlob(canvas, 'image/jpeg', quality);
+	        if (!blob) throw new Error('Conversione JPG fallita');
 	        return blob;
 	      } finally {
 	        try { if (bitmap && typeof bitmap.close === 'function') bitmap.close(); } catch {}
@@ -741,7 +741,7 @@
 
 	      for (let i = 0; i < files.length; i++) {
 	        const file = files[i];
-	        const filename = `${base}-${i + 1}.webp`;
+	        const filename = `${base}-${i + 1}.jpg`;
 		        const path = `${cfg.imagesDir.replace(/\/$/, '')}/${filename}`.replace(/^\/+/, '');
 	        const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}`;
 
@@ -755,8 +755,8 @@
 	          if (!String(err.message || '').includes('404')) throw err;
 	        }
 
-	        const webpBlob = await convertImageToWebp(file, { maxSize: 1600, quality: 0.82 });
-	        const base64 = await fileToBase64(webpBlob);
+	        const jpgBlob = await convertImageToJpeg(file, { maxSize: 1600, quality: 0.86 });
+	        const base64 = await fileToBase64(jpgBlob);
 	        const payload = {
 	          message: `Carica foto annuncio: ${filename}`,
 	          content: base64,
@@ -1172,10 +1172,9 @@
 	      }
 	    });
 
-	    document.getElementById('btn-copy-chatgpt-prompt')?.addEventListener('click', async () => {
+	    function buildChatgptPrompt() {
 	      if (!lastUploadedImages.length) {
-	        showAlert('Carica prima almeno 1 foto (Step 1).', 'error');
-	        return;
+	        throw new Error('Carica prima almeno 1 foto (Step 1).');
 	      }
 	      const today = new Date().toISOString().slice(0, 10);
 	      const imageUrls = lastUploadedImages.map((u) => u.pagesUrl).filter(Boolean);
@@ -1199,7 +1198,7 @@
 	        paypalBuy: '',
 	        whatsappText: ''
 	      };
-	      const prompt = [
+	      return [
 	        'Analizza le foto e compila TUTTI i campi per un annuncio su ENS Vintage.',
 	        'Rispondi SOLO con JSON valido (nessun testo fuori dal JSON).',
 	        'Se non riesci a vedere le URL, chiedimi di allegare le immagini direttamente in chat.',
@@ -1213,12 +1212,32 @@
 	        'Foto (Raw URL - alternative):',
 	        ...rawUrls
 	      ].join('\n');
+	    }
+
+	    document.getElementById('btn-copy-chatgpt-prompt')?.addEventListener('click', async () => {
 	      try {
+	        const prompt = buildChatgptPrompt();
 	        await copyTextToClipboard(prompt);
-	        showAlert('Prompt ChatGPT copiato. Incollalo in chat e allega le foto se richiesto.');
+	        showAlert('Prompt ChatGPT copiato. Incollalo in ChatGPT e allega le foto se richiesto.');
 	      } catch (err) {
 	        console.error(err);
-	        showAlert('Impossibile copiare il prompt.', 'error');
+	        showAlert(err.message || 'Impossibile copiare il prompt.', 'error');
+	      }
+	    });
+
+	    document.getElementById('btn-share-chatgpt-prompt')?.addEventListener('click', async () => {
+	      try {
+	        const prompt = buildChatgptPrompt();
+	        if (navigator.share) {
+	          await navigator.share({ title: 'ENS Vintage - Prompt annuncio', text: prompt });
+	          showAlert('Prompt condiviso.');
+	          return;
+	        }
+	        await copyTextToClipboard(prompt);
+	        showAlert('Condivisione non supportata: prompt copiato.');
+	      } catch (err) {
+	        console.error(err);
+	        showAlert(err.message || 'Impossibile condividere il prompt.', 'error');
 	      }
 	    });
 

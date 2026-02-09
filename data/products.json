@@ -13,10 +13,10 @@
     "dimensions": "L 120cm × H 90cm × P 50cm",
     "status": "available",
     "featured": true,
-    "image": "assets/products/1_1.webp",
+    "image": "assets/products/1_1.jpg",
     "gallery": [
-      "assets/products/1_1.webp",
-      "assets/products/1_2.webp"
+      "assets/products/1_1.jpg",
+      "assets/products/1_2.jpg"
     ],
     "stripeLinkBuy": "https://buy.stripe.com/placeholder-como",
     "paypalBuy": "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&item_name=Como+Luigi+XVI&amount=2400.00",
@@ -36,9 +36,9 @@
     "dimensions": "L 80cm × H 60cm",
     "status": "available",
     "featured": true,
-    "image": "assets/products/2_1.webp",
+    "image": "assets/products/2_1.jpg",
     "gallery": [
-      "assets/products/2_1.webp"
+      "assets/products/2_1.jpg"
     ],
     "stripeLinkBuy": "https://buy.stripe.com/placeholder-dipinto",
     "paypalBuy": "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&item_name=Dipinto+Olio&amount=1800.00",
@@ -58,10 +58,10 @@
     "dimensions": "Varie (teiera H 15cm)",
     "status": "reserved",
     "featured": false,
-    "image": "assets/products/3_1.webp",
+    "image": "assets/products/3_1.jpg",
     "gallery": [
-      "assets/products/3_1.webp",
-      "assets/products/3_2.webp"
+      "assets/products/3_1.jpg",
+      "assets/products/3_2.jpg"
     ],
     "stripeLinkBuy": "",
     "paypalBuy": "",
@@ -81,9 +81,9 @@
     "dimensions": "L 25cm × H 35cm",
     "status": "available",
     "featured": false,
-    "image": "assets/products/4_1.webp",
+    "image": "assets/products/4_1.jpg",
     "gallery": [
-      "assets/products/4_1.webp"
+      "assets/products/4_1.jpg"
     ],
     "stripeLinkBuy": "https://buy.stripe.com/placeholder-orologio",
     "paypalBuy": "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&item_name=Orologio+Art+Deco&amount=680.00",
@@ -103,9 +103,9 @@
     "dimensions": "L 35cm × H 25cm",
     "status": "sold",
     "featured": false,
-    "image": "assets/products/5_1.webp",
+    "image": "assets/products/5_1.jpg",
     "gallery": [
-      "assets/products/5_1.webp"
+      "assets/products/5_1.jpg"
     ],
     "stripeLinkBuy": "",
     "paypalBuy": "",
@@ -125,10 +125,10 @@
     "dimensions": "Lunghezza 45cm",
     "status": "available",
     "featured": false,
-    "image": "assets/products/6_1.webp",
+    "image": "assets/products/6_1.jpg",
     "gallery": [
-      "assets/products/6_1.webp",
-      "assets/products/6_2.webp"
+      "assets/products/6_1.jpg",
+      "assets/products/6_2.jpg"
     ],
     "stripeLinkBuy": "https://buy.stripe.com/placeholder-collana",
     "paypalBuy": "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&item_name=Collana+Granati&amount=1200.00",
@@ -148,9 +148,9 @@
     "dimensions": "",
     "status": "available",
     "featured": true,
-    "image": "assets/brand/og-1200x630.webp",
+    "image": "assets/brand/og-1200x630.jpg",
     "gallery": [
-      "assets/brand/og-1200x630.webp"
+      "assets/brand/og-1200x630.jpg"
     ],
     "stripeLinkBuy": "",
     "paypalBuy": "",
@@ -170,9 +170,9 @@
     "dimensions": "",
     "status": "available",
     "featured": true,
-    "image": "assets/brand/og-1200x630.webp",
+    "image": "assets/brand/og-1200x630.jpg",
     "gallery": [
-      "assets/brand/og-1200x630.webp"
+      "assets/brand/og-1200x630.jpg"
     ],
     "stripeLinkBuy": "",
     "paypalBuy": "",
@@ -192,9 +192,9 @@
     "dimensions": "",
     "status": "available",
     "featured": false,
-    "image": "assets/brand/og-1200x630.webp",
+    "image": "assets/brand/og-1200x630.jpg",
     "gallery": [
-      "assets/brand/og-1200x630.webp"
+      "assets/brand/og-1200x630.jpg"
     ],
     "stripeLinkBuy": "",
     "paypalBuy": "",
@@ -214,13 +214,12 @@
     "dimensions": "",
     "status": "available",
     "featured": false,
-    "image": "assets/brand/og-1200x630.webp",
+    "image": "assets/brand/og-1200x630.jpg",
     "gallery": [
-      "assets/brand/og-1200x630.webp"
+      "assets/brand/og-1200x630.jpg"
     ],
     "stripeLinkBuy": "",
     "paypalBuy": "",
     "whatsappText": "Mi interessa la Bici pieghevole da citta..."
   }
 ]
-
