@@ -275,23 +275,10 @@
 	            Ricorda in questo browser
 	          </label>
 	        </div>
-	        <div class="file-inline">
-	          <label for="ai-key">AI (OpenAI API Key):</label>
-	          <input type="password" id="ai-key" class="token-input" placeholder="sk-..." autocomplete="off" spellcheck="false" inputmode="text">
-	          <label style="display:inline-flex;align-items:center;gap:8px;color:#bbb;">
-	            <input type="checkbox" id="ai-remember">
-	            Ricorda in questo browser
-	          </label>
-	        </div>
 	        <details style="margin-top:10px;">
-	          <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Impostazioni AI (modello)</summary>
-	          <div class="config-grid">
-	            <div class="form-group">
-	              <label for="ai-model">Model</label>
-	              <input type="text" id="ai-model" placeholder="gpt-4o-mini">
-	            </div>
-	          </div>
-	          <p class="helper-note">Nota: l'AI automatica richiede una chiave API OpenAI (ha un costo a consumo). Senza chiave, usa <strong>Condividi prompt</strong> e incolla il JSON.</p>
+	          <summary style="cursor:pointer;color:#d4af37;font-weight:700;">AI automatica (1 click, senza chiavi sul telefono)</summary>
+	          <p class="helper-note">Per usare <strong>Auto-compila (AI)</strong> basta impostare su GitHub un secret Actions: <code>OPENAI_API_KEY</code> (opzionale: <code>OPENAI_MODEL</code>). La chiave non viene mai salvata nel sito.</p>
+	          <p class="helper-note">Se l'AI non e' configurata, usa <strong>Condividi prompt</strong> e incolla il JSON.</p>
 	        </details>
 	        <details style="margin-top:10px;">
 	          <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Impostazioni GitHub (repo/dominio)</summary>
@@ -516,8 +503,6 @@
 	    const LIVE_DATA_PATH = 'data/products.json';
 	    const GITHUB_TOKEN_STORAGE_KEY = 'ens_admin_github_token';
 	    const GITHUB_CONFIG_STORAGE_KEY = 'ens_admin_github_config';
-	    const OPENAI_KEY_STORAGE_KEY = 'ens_admin_openai_key';
-	    const OPENAI_CFG_STORAGE_KEY = 'ens_admin_openai_cfg';
 	    const AUTO_PUBLISH_STORAGE_KEY = 'ens_admin_auto_publish';
 	    const PUBLIC_SITE_BASE = new URL('./', window.location.href).toString();
 
@@ -528,11 +513,6 @@
 	      productsPath: 'data/products.json',
 	      imagesDir: 'assets/products',
 	      useRawUrls: true
-	    };
-
-	    const DEFAULT_OPENAI_CONFIG = {
-	      model: 'gpt-4o-mini',
-	      endpoint: 'https://api.openai.com/v1/chat/completions'
 	    };
 
     function loadProducts() {
@@ -619,40 +599,6 @@
       if (remember) localStorage.setItem(GITHUB_TOKEN_STORAGE_KEY, token);
       else sessionStorage.setItem(GITHUB_TOKEN_STORAGE_KEY, token);
     }
-
-	    function loadOpenAIKey() {
-	      return sessionStorage.getItem(OPENAI_KEY_STORAGE_KEY)
-	        || localStorage.getItem(OPENAI_KEY_STORAGE_KEY)
-	        || '';
-	    }
-
-	    function saveOpenAIKey(key, remember) {
-	      sessionStorage.removeItem(OPENAI_KEY_STORAGE_KEY);
-	      localStorage.removeItem(OPENAI_KEY_STORAGE_KEY);
-	      if (!key) return;
-	      if (remember) localStorage.setItem(OPENAI_KEY_STORAGE_KEY, key);
-	      else sessionStorage.setItem(OPENAI_KEY_STORAGE_KEY, key);
-	    }
-
-	    function loadOpenAIConfig() {
-	      try {
-	        const raw = localStorage.getItem(OPENAI_CFG_STORAGE_KEY);
-	        if (!raw) return { ...DEFAULT_OPENAI_CONFIG };
-	        const parsed = JSON.parse(raw);
-	        return { ...DEFAULT_OPENAI_CONFIG, ...(parsed || {}) };
-	      } catch {
-	        return { ...DEFAULT_OPENAI_CONFIG };
-	      }
-	    }
-
-	    function saveOpenAIConfig(cfg) {
-	      const safe = {
-	        model: String(cfg.model || '').trim() || DEFAULT_OPENAI_CONFIG.model,
-	        endpoint: String(cfg.endpoint || '').trim() || DEFAULT_OPENAI_CONFIG.endpoint
-	      };
-	      localStorage.setItem(OPENAI_CFG_STORAGE_KEY, JSON.stringify(safe));
-	      return safe;
-	    }
 
 	    function loadAutoPublish() {
 	      const raw = localStorage.getItem(AUTO_PUBLISH_STORAGE_KEY);
@@ -1085,9 +1031,6 @@
 	    (function initGithubTokenUi() {
 	      const tokenInput = document.getElementById('gh-token');
 	      const rememberCheckbox = document.getElementById('gh-remember');
-	      const aiKeyInput = document.getElementById('ai-key');
-	      const aiRememberCheckbox = document.getElementById('ai-remember');
-	      const aiModelInput = document.getElementById('ai-model');
 	      const autoPublishCheckbox = document.getElementById('auto-publish');
 	      const ownerInput = document.getElementById('gh-owner');
 	      const repoInput = document.getElementById('gh-repo');
@@ -1099,10 +1042,6 @@
 	      if (stored) tokenInput.value = stored;
 	      // Default ON: users want fewer steps on mobile.
 	      rememberCheckbox.checked = !!localStorage.getItem(GITHUB_TOKEN_STORAGE_KEY) || !sessionStorage.getItem(GITHUB_TOKEN_STORAGE_KEY);
-
-	      const storedAi = loadOpenAIKey();
-	      if (storedAi) aiKeyInput.value = storedAi;
-	      aiRememberCheckbox.checked = !!localStorage.getItem(OPENAI_KEY_STORAGE_KEY) || !sessionStorage.getItem(OPENAI_KEY_STORAGE_KEY);
 
 	      if (autoPublishCheckbox) {
 	        autoPublishCheckbox.checked = loadAutoPublish();
@@ -1116,9 +1055,6 @@
 	      if (productsPathInput) productsPathInput.value = cfg.productsPath;
 	      if (useRawCheckbox) useRawCheckbox.checked = cfg.useRawUrls !== false;
 
-	      const aiCfg = loadOpenAIConfig();
-	      if (aiModelInput) aiModelInput.value = aiCfg.model;
-
 	      function persistToken() {
 	        const token = tokenInput.value.trim();
 	        saveGithubToken(token, rememberCheckbox.checked);
@@ -1128,25 +1064,6 @@
 	      rememberCheckbox.addEventListener('change', () => {
 	        persistToken();
 	      });
-
-	      function persistAiKey() {
-	        const key = aiKeyInput.value.trim();
-	        saveOpenAIKey(key, aiRememberCheckbox.checked);
-	      }
-	      aiKeyInput.addEventListener('input', persistAiKey);
-	      aiKeyInput.addEventListener('change', persistAiKey);
-	      aiRememberCheckbox.addEventListener('change', persistAiKey);
-
-	      function persistAiCfg() {
-	        saveOpenAIConfig({
-	          model: aiModelInput ? aiModelInput.value : '',
-	          endpoint: DEFAULT_OPENAI_CONFIG.endpoint
-	        });
-	      }
-	      if (aiModelInput) {
-	        aiModelInput.addEventListener('input', persistAiCfg);
-	        aiModelInput.addEventListener('change', persistAiCfg);
-	      }
 
 	      function persistCfg() {
 	        saveGithubConfig({
@@ -1322,14 +1239,12 @@
 	        if (imagesStatus) imagesStatus.textContent = `Upload completato: ${paths.length} file. Campi immagine/galleria aggiornati.`;
 	        showAlert("Foto caricate su GitHub e collegate all'annuncio.");
 
-	        // One-tap flow: if AI key is present, auto-fill right after upload.
+	        // One-tap flow: auto-fill via GitHub Action (requires OPENAI_API_KEY secret in repo).
 	        try {
-	          const hasAiKey = !!loadOpenAIKey() || !!document.getElementById('ai-key')?.value?.trim();
-	          if (hasAiKey) {
-	            if (imagesStatus) imagesStatus.textContent = `Upload completato: ${paths.length} file. Avvio compilazione AI...`;
-	            await runAiAutofill();
-	            showAlert('Campi compilati automaticamente con AI. Controlla e salva.');
-	          }
+	          if (imagesStatus) imagesStatus.textContent = `Upload completato: ${paths.length} file. Avvio compilazione AI...`;
+	          await runServerAiAutofill();
+	          if (imagesStatus) imagesStatus.textContent = `Upload completato: ${paths.length} file. Compilazione AI completata.`;
+	          showAlert('Campi compilati automaticamente con AI. Controlla e salva.');
 	        } catch (err) {
 	          showAlert(err.message || 'AI: compilazione fallita.', 'error');
 	        }
@@ -1342,7 +1257,7 @@
 	    document.getElementById('btn-ai-autofill')?.addEventListener('click', async () => {
 	      try {
 	        if (imagesStatus) imagesStatus.textContent = 'Compilazione AI in corso...';
-	        await runAiAutofill();
+	        await runServerAiAutofill();
 	        if (imagesStatus) imagesStatus.textContent = 'Compilazione AI completata.';
 	        showAlert('Campi compilati automaticamente con AI. Controlla e salva.');
 	      } catch (err) {
@@ -1458,89 +1373,112 @@
 	      return Number.isFinite(n) ? n : 0;
 	    }
 
-	    async function openaiCreateDraftFromImages({ apiKey, model, endpoint, baseDraft, imageUrls }) {
-	      const system = [
-	        'Sei un assistente esperto di annunci per un marketplace italiano (usato, vintage, antiquariato).',
-	        'Devi rispondere SOLO con JSON valido, senza testo extra e senza markdown.',
-	        'Non inventare dettagli non visibili: se sei incerto, usa \"da verificare\" e metti price=0.',
-	        'Mantieni i campi \"image\" e \"gallery\" esattamente come nella bozza JSON fornita.'
-	      ].join(' ');
-
-	      const allowedCategories = [
-	        'mobili', 'arte', 'ceramica', 'orologeria', 'oggetti', 'gioielli',
-	        'moda', 'elettronica', 'casa', 'sport', 'auto', 'bimbi',
-	        'collezionismo', 'libri', 'altro'
-	      ];
-
-	      const userText = [
-	        'Compila TUTTI i campi dell\'annuncio in base alle foto.',
-	        'Regole:',
-	        `- category deve essere UNA di: ${allowedCategories.join(', ')}`,
-	        '- section: \"antiquariato\" oppure \"usato\".',
-	        '- condition: breve (es: \"Nuovo\", \"Ottimo\", \"Buono\", \"Da sistemare\").',
-	        '- description: dettagliata, onesta, in italiano.',
-	        '- price: numero in EUR (se non sicuro, 0).',
-	        '- year: periodo/anni (se stimati, scrivi \"da verificare\").',
-	        '- dimensions: dimensioni (se non visibili, \"\").',
-	        '- status: \"available\".',
-	        '',
-	        'Bozza JSON (da completare):',
-	        JSON.stringify(baseDraft, null, 2)
-	      ].join('\n');
-
-	      const content = [
-	        { type: 'text', text: userText },
-	        ...imageUrls.map((url) => ({ type: 'image_url', image_url: { url } }))
-	      ];
-
-	      const payload = {
-	        model,
-	        temperature: 0.2,
-	        max_tokens: 900,
-	        messages: [
-	          { role: 'system', content: system },
-	          { role: 'user', content }
-	        ]
-	      };
-
-	      const res = await fetch(endpoint, {
-	        method: 'POST',
-	        headers: {
-	          'Authorization': `Bearer ${apiKey}`,
-	          'Content-Type': 'application/json'
-	        },
-	        body: JSON.stringify(payload)
-	      });
-
-	      const data = await res.json().catch(() => ({}));
-	      if (!res.ok) {
-	        const msg = data && data.error && data.error.message ? data.error.message : (data && data.message ? data.message : `HTTP ${res.status}`);
-	        throw new Error(`AI error: ${msg}`);
+	    function base64DecodeUnicode(str) {
+	      const cleaned = String(str || '').replace(/\n/g, '');
+	      try {
+	        return decodeURIComponent(escape(atob(cleaned)));
+	      } catch {
+	        return atob(cleaned);
 	      }
-
-	      const text = data && data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : '';
-	      if (!text) throw new Error('AI: risposta vuota.');
-	      return String(text);
 	    }
 
-	    async function runAiAutofill() {
+	    function sleep(ms) {
+	      return new Promise((resolve) => setTimeout(resolve, ms));
+	    }
+
+	    function makeRequestId() {
+	      const rand = Math.random().toString(16).slice(2, 8);
+	      return `ai-${Date.now()}-${rand}`;
+	    }
+
+	    function buildRawUrl({ owner, repo, branch, path }) {
+	      const safePath = String(path || '').replace(/^\/+/, '');
+	      return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${safePath}`;
+	    }
+
+	    async function putJsonFileToGithub({ path, data, message }) {
+	      const cfg = loadGithubConfig();
+	      const token = loadGithubToken();
+	      if (!token) throw new Error('Inserisci il Token GitHub.');
+	      const safePath = String(path || '').replace(/^\/+/, '');
+	      const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${safePath}`;
+	      const payload = {
+	        message: message || `Aggiorna ${safePath}`,
+	        content: base64EncodeUnicode(JSON.stringify(data, null, 2) + '\n'),
+	        branch: cfg.branch
+	      };
+	      return await githubRequest(url, { method: 'PUT', token, body: payload });
+	    }
+
+	    async function getJsonFileFromGithub(path) {
+	      const cfg = loadGithubConfig();
+	      const token = loadGithubToken();
+	      if (!token) throw new Error('Inserisci il Token GitHub.');
+	      const safePath = String(path || '').replace(/^\/+/, '');
+	      const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${safePath}?ref=${encodeURIComponent(cfg.branch)}`;
+	      try {
+	        const res = await githubRequest(url, { token });
+	        if (!res || !res.content) return null;
+	        const text = base64DecodeUnicode(res.content);
+	        return JSON.parse(text);
+	      } catch (err) {
+	        if (String(err.message || '').includes('404')) return null;
+	        throw err;
+	      }
+	    }
+
+	    async function requestAiDraftOnGithub({ baseDraft, images }) {
+	      const cfg = loadGithubConfig();
+	      const requestId = makeRequestId();
+	      const requestPath = `data/ai-requests/${requestId}.json`;
+	      const outputPath = `data/ai-results/${requestId}.json`;
+
+	      const normalizedImages = (Array.isArray(images) ? images : []).slice(0, 10).map((img) => {
+	        const path = String(img.path || '').replace(/^\/+/, '');
+	        const rawUrl = img.rawUrl || (path ? buildRawUrl({ owner: cfg.owner, repo: cfg.repo, branch: cfg.branch, path }) : '');
+	        const pagesUrl = img.pagesUrl || (path ? new URL(path, PUBLIC_SITE_BASE).toString() : '');
+	        return { path, rawUrl, pagesUrl };
+	      }).filter((img) => img.rawUrl || img.pagesUrl || img.path);
+
+	      const payload = {
+	        requestId,
+	        createdAt: new Date().toISOString(),
+	        outputPath,
+	        baseDraft,
+	        images: normalizedImages
+	      };
+
+	      await putJsonFileToGithub({
+	        path: requestPath,
+	        data: payload,
+	        message: `AI request: ${requestId}`
+	      });
+
+	      return { requestId, requestPath, outputPath };
+	    }
+
+	    async function waitForAiResult(outputPath, { timeoutMs = 120000, intervalMs = 3000 } = {}) {
+	      const started = Date.now();
+	      while (Date.now() - started < timeoutMs) {
+	        const res = await getJsonFileFromGithub(outputPath);
+	        if (res) return res;
+	        await sleep(intervalMs);
+	      }
+	      throw new Error('AI: tempo scaduto. Riprova tra 1 minuto.');
+	    }
+
+	    async function runServerAiAutofill() {
 	      if (!lastUploadedImages.length) {
 	        throw new Error('Carica prima almeno 1 foto (Step 1).');
 	      }
 
-	      // Persist AI key in case mobile doesn't fire "change".
+	      // Persist token/config even if mobile doesn't fire "change" reliably.
 	      try {
-	        const keyInput = document.getElementById('ai-key');
-	        const remember = document.getElementById('ai-remember');
-	        if (keyInput) saveOpenAIKey(keyInput.value.trim(), !!remember?.checked);
+	        const tokenInput = document.getElementById('gh-token');
+	        const remember = document.getElementById('gh-remember');
+	        if (tokenInput) saveGithubToken(tokenInput.value.trim(), !!remember?.checked);
 	      } catch {}
 
-	      const apiKey = loadOpenAIKey();
-	      if (!apiKey) {
-	        throw new Error('Inserisci la chiave AI (OpenAI API Key) in alto oppure usa "Condividi prompt".');
-	      }
-
-	      const cfg = loadOpenAIConfig();
 	      const today = new Date().toISOString().slice(0, 10);
 	      const { image, gallery } = getEffectiveImageAndGallery();
 
@@ -1564,42 +1502,33 @@
 	        whatsappText: ''
 	      };
 
-	      const imageUrls = lastUploadedImages
-	        .map((u) => u.rawUrl || u.pagesUrl)
-	        .filter(Boolean)
-	        .slice(0, 10);
-
-	      const rawText = await openaiCreateDraftFromImages({
-	        apiKey,
-	        model: cfg.model,
-	        endpoint: cfg.endpoint,
+	      const { requestId, outputPath } = await requestAiDraftOnGithub({
 	        baseDraft,
-	        imageUrls
+	        images: lastUploadedImages
 	      });
 
-	      const jsonText = stripJsonFromText(rawText);
-	      const parsed = JSON.parse(jsonText);
-	      if (!parsed || typeof parsed !== 'object') throw new Error('AI: JSON non valido.');
+	      const res = await waitForAiResult(outputPath);
+	      if (res && res.ok === false) {
+	        const msg = res.error || 'Errore AI.';
+	        throw new Error(msg);
+	      }
 
-	      // Sanitize/normalize and enforce image/gallery fields from our upload.
-	      const clean = {
-	        ...baseDraft,
-	        ...parsed
-	      };
-	      clean.category = normalizeCategory(clean.category) || baseDraft.category || 'altro';
-	      clean.section = normalizeSection(clean.section, clean.category);
-	      clean.status = 'available';
-	      clean.postedAt = today;
-	      clean.price = coercePrice(clean.price);
-	      clean.image = baseDraft.image;
-	      clean.gallery = baseDraft.gallery;
-	      if (!clean.name) clean.name = baseDraft.name || 'Annuncio';
-	      if (!clean.description) clean.description = baseDraft.description || '';
+	      const draft = (res && res.draft && typeof res.draft === 'object') ? res.draft : res;
+	      if (!draft || typeof draft !== 'object') throw new Error('AI: risposta non valida.');
+
+	      // Normalize again on client (defensive).
+	      draft.category = normalizeCategory(draft.category) || baseDraft.category || 'altro';
+	      draft.section = normalizeSection(draft.section, draft.category);
+	      draft.status = 'available';
+	      draft.postedAt = today;
+	      draft.price = coercePrice(draft.price);
+	      draft.image = baseDraft.image;
+	      draft.gallery = baseDraft.gallery;
 
 	      const draftEl = document.getElementById('draft-json');
-	      if (draftEl) draftEl.value = JSON.stringify(clean, null, 2);
-	      applyDraftToForm(clean);
-	      return clean;
+	      if (draftEl) draftEl.value = JSON.stringify(draft, null, 2);
+	      applyDraftToForm(draft);
+	      return { requestId, outputPath, draft };
 	    }
 
 	    document.getElementById('btn-copy-chatgpt-prompt')?.addEventListener('click', async () => {

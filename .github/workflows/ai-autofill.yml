@@ -1,0 +1,62 @@
+name: AI Autofill (Annunci)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'data/ai-requests/**.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  autofill:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Detect request files
+        id: req
+        run: |
+          set -e
+          files="$(git diff --name-only '${{ github.event.before }}' '${{ github.sha }}' | grep '^data/ai-requests/.*\.json$' || true)"
+          if [ -z "$files" ]; then
+            echo "files=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Collapse to single space separated list for the Node script.
+          files="$(echo "$files" | tr '\n' ' ')"
+          echo "files=$files" >> "$GITHUB_OUTPUT"
+
+      - name: Generate drafts (OpenAI)
+        if: steps.req.outputs.files != ''
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          OPENAI_ENDPOINT: ${{ secrets.OPENAI_ENDPOINT }}
+        run: |
+          node scripts/ai_autofill_request.js ${{ steps.req.outputs.files }}
+
+      - name: Commit results
+        if: steps.req.outputs.files != ''
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/ai-results || true
+          if ! git diff --cached --quiet; then
+            git commit -m "AI: bozza annuncio" || true
+            git push origin HEAD:${{ github.ref_name }} || true
+          else
+            echo "No AI results to commit"
+          fi
+
