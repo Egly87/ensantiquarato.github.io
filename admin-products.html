@@ -477,12 +477,12 @@
 	            <input type="text" id="gallery-urls" name="gallery" placeholder="assets/products/1.jpg, assets/products/2.jpg">
 	          </div>
 
-	          <div style="display: flex; gap: 10px;">
-	            <button type="submit" class="btn-primary" id="btn-save-product">💾 Salva annuncio</button>
-	            <button type="button" class="btn-primary" style="background: #666;" id="btn-clear">🗑️ Pulisci Form</button>
-	          </div>
-        </form>
-      </div>
+		          <div style="display: flex; gap: 10px;">
+		            <button type="submit" class="btn-secondary" id="btn-save-product">Salva bozza (solo locale)</button>
+		            <button type="button" class="btn-secondary" id="btn-clear">Pulisci</button>
+		          </div>
+	        </form>
+	      </div>
 
       <!-- Lista Prodotti -->
       <div class="admin-section">
@@ -939,17 +939,17 @@
 	      form.reset();
 	      const postedAtEl = document.getElementById('postedAt');
 	      if (postedAtEl) postedAtEl.value = new Date().toISOString().slice(0, 10);
-      document.getElementById('product-form').querySelector('input[name="id"]')?.remove();
-      document.getElementById('btn-save-product').textContent = '💾 Salva annuncio';
-    });
+	      document.getElementById('product-form').querySelector('input[name="id"]')?.remove();
+	      document.getElementById('btn-save-product').textContent = 'Salva bozza (solo locale)';
+	    });
 
-    document.getElementById('btn-clear').addEventListener('click', () => {
-      document.getElementById('product-form').reset();
-      const postedAtEl = document.getElementById('postedAt');
-      if (postedAtEl) postedAtEl.value = new Date().toISOString().slice(0, 10);
-      document.getElementById('product-form').querySelector('input[name="id"]')?.remove();
-      document.getElementById('btn-save-product').textContent = '💾 Salva annuncio';
-    });
+	    document.getElementById('btn-clear').addEventListener('click', () => {
+	      document.getElementById('product-form').reset();
+	      const postedAtEl = document.getElementById('postedAt');
+	      if (postedAtEl) postedAtEl.value = new Date().toISOString().slice(0, 10);
+	      document.getElementById('product-form').querySelector('input[name="id"]')?.remove();
+	      document.getElementById('btn-save-product').textContent = 'Salva bozza (solo locale)';
+	    });
 
     document.getElementById('btn-export-json').addEventListener('click', () => {
       downloadProductsJson();
@@ -1095,8 +1095,8 @@
 	      if (draft.image) document.getElementById('image-url').value = String(draft.image);
 	      if (Array.isArray(draft.gallery)) document.getElementById('gallery-urls').value = draft.gallery.join(', ');
 
-	      document.getElementById('btn-save-product').textContent = draft.id ? '💾 Aggiorna annuncio' : '💾 Salva annuncio';
-	    }
+		      document.getElementById('btn-save-product').textContent = draft.id ? 'Aggiorna bozza (solo locale)' : 'Salva bozza (solo locale)';
+		    }
 
 	    document.getElementById('btn-apply-draft')?.addEventListener('click', () => {
 	      const txt = document.getElementById('draft-json')?.value.trim();
@@ -1271,14 +1271,14 @@
 		      };
 		    }
 
-		    function resetProductForm() {
-		      const form = document.getElementById('product-form');
-		      form.reset();
-		      const postedAtEl = document.getElementById('postedAt');
-		      if (postedAtEl) postedAtEl.value = new Date().toISOString().slice(0, 10);
-		      document.querySelector('input[name=\"id\"]')?.remove();
-		      document.getElementById('btn-save-product').textContent = '💾 Salva annuncio';
-		    }
+			    function resetProductForm() {
+			      const form = document.getElementById('product-form');
+			      form.reset();
+			      const postedAtEl = document.getElementById('postedAt');
+			      if (postedAtEl) postedAtEl.value = new Date().toISOString().slice(0, 10);
+			      document.querySelector('input[name=\"id\"]')?.remove();
+			      document.getElementById('btn-save-product').textContent = 'Salva bozza (solo locale)';
+			    }
 
 		    function clearSelectedImages() {
 		      const input = document.getElementById('gh-images-input');
@@ -1698,9 +1698,9 @@
       }
       idInput.value = id;
 
-      document.getElementById('btn-save-product').textContent = '💾 Aggiorna annuncio';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+	      document.getElementById('btn-save-product').textContent = 'Aggiorna bozza (solo locale)';
+	      window.scrollTo({ top: 0, behavior: 'smooth' });
+	    }
 
     function deleteProduct(id) {
       if (!confirm("Sei sicuro di voler eliminare questo annuncio?")) return;
