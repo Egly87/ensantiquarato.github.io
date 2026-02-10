@@ -1,5 +1,5 @@
 // Service Worker - sw.js
-const CACHE_NAME = 'ens-vintage-v6';
+const CACHE_NAME = 'ens-vintage-v7';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -17,7 +17,6 @@ self.addEventListener('install', (event) => {
         'termini.html',
         'css/styles.css',
         'js/app.js',
-        'data/products.json',
         'manifest.webmanifest'
       ].map((path) => new URL(path, base).toString());
       return cache.addAll(assets);
@@ -45,7 +44,13 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        if (response && response.status === 200 && response.type === 'basic') {
+        const url = new URL(event.request.url);
+        const isSameOrigin = url.origin === self.location.origin;
+        const isDynamicData = url.pathname.endsWith('/data/products.json') || url.pathname.endsWith('/data/products.json/');
+        const hasQuery = url.search && url.search.length > 0;
+
+        // Cache only stable same-origin assets without query params.
+        if (response && response.status === 200 && response.type === 'basic' && isSameOrigin && !hasQuery && !isDynamicData) {
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
