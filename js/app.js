@@ -14,6 +14,35 @@ const app = {
     this.detectPage();
   },
 
+  guessGithubPagesRepo() {
+    try {
+      const host = String(window.location.hostname || '').toLowerCase();
+      if (!host.endsWith('.github.io')) return null;
+      const owner = host.split('.')[0];
+      const parts = String(window.location.pathname || '').split('/').filter(Boolean);
+      // User/Org Pages: https://{owner}.github.io/
+      // Project Pages:  https://{owner}.github.io/{repo}/
+      const repo = parts.length ? parts[0] : `${owner}.github.io`;
+      return { owner, repo, branch: 'main' };
+    } catch {
+      return null;
+    }
+  },
+
+  async fetchFirstJson(urls) {
+    for (const url of urls) {
+      if (!url) continue;
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) continue;
+        return await res.json();
+      } catch {
+        // try next
+      }
+    }
+    throw new Error('Impossibile caricare il catalogo.');
+  },
+
   loadProducts() {
     const storageKey = 'antiquariato_products';
     const params = new URLSearchParams(window.location.search);
@@ -38,14 +67,22 @@ const app = {
     // Default: use published data. Use localStorage only for explicit preview or offline fallback.
     if (previewLocal && loadFromLocalStorage()) return;
 
-    fetch('data/products.json', { cache: 'no-store' })
-      .then(r => r.json())
-      .then(data => {
+    const gh = this.guessGithubPagesRepo();
+    const urls = [];
+    // "Subito": raw.githubusercontent.com updates immediately after a commit, without waiting for Pages deploy.
+    if (gh) {
+      urls.push(`https://raw.githubusercontent.com/${gh.owner}/${gh.repo}/${gh.branch}/data/products.json?v=${Date.now()}`);
+    }
+    // Fallback: same-origin (works on custom domains / local dev).
+    urls.push(`data/products.json?v=${Date.now()}`);
+
+    this.fetchFirstJson(urls)
+      .then((data) => {
         this.products = Array.isArray(data) ? data : [];
         this.filteredProducts = this.products;
         this.detectPage();
       })
-      .catch(e => {
+      .catch((e) => {
         console.error('Errore caricamento prodotti:', e);
         if (loadFromLocalStorage()) return;
         this.showError('Impossibile caricare gli annunci. Riprova piu tardi.');
