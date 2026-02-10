@@ -187,7 +187,8 @@
       margin-top: 8px;
     }
     .token-input {
-      min-width: 320px;
+      width: 100%;
+      min-width: 0;
     }
     .config-grid {
       display: grid;
@@ -257,10 +258,11 @@
 
       <div class="admin-section publish-panel">
         <h2>Pubblica Annunci Online</h2>
-        <p>Questa pagina modifica il catalogo locale del browser. Per pubblicare davvero gli annunci sul sito online:</p>
+        <p>Questa pagina modifica il catalogo locale del browser. Per rendere gli annunci visibili sul sito online devi pubblicare su GitHub.</p>
+        <p><strong>Flusso consigliato (1 annuncio):</strong> carica foto → <strong>Riempi tutti i campi (AI)</strong> → <strong>Pubblica annuncio</strong>.</p>
         <ul>
           <li>modifica gli annunci qui;</li>
-          <li>inserisci il Token GitHub e clicca <strong>Pubblica online adesso</strong>;</li>
+          <li>inserisci il Token GitHub e clicca <strong>Pubblica online adesso</strong> (pubblica tutto il catalogo);</li>
           <li>in alternativa: scarica <code>products.json</code> e fai commit/push manuale.</li>
         </ul>
         <div class="file-inline">
@@ -314,12 +316,6 @@
 	          <button type="button" id="btn-copy-git" class="btn-secondary">Copia comandi Git</button>
 	          <button type="button" id="btn-gh-publish" class="btn-secondary">Pubblica online adesso</button>
 	        </div>
-	        <div class="file-inline" style="margin-top:10px;">
-	          <label style="display:inline-flex;align-items:center;gap:10px;color:#bbb;">
-	            <input type="checkbox" id="auto-publish">
-	            Auto-pubblica quando salvo un annuncio
-	          </label>
-	        </div>
         <p id="publish-status" class="status-note">Annunci locali: 0.</p>
       </div>
 
@@ -328,8 +324,9 @@
 	        <h2>Aggiungi o Modifica Annuncio</h2>
 	        <form id="product-form">
 	          <details open style="margin: 0 0 12px;">
-	            <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Step 1 — Carica foto su GitHub (JPG ottimizzate)</summary>
-	            <p class="helper-note">Seleziona le foto dal telefono/PC: verranno caricate in <code>assets/products/</code> sul repo GitHub (serve Token GitHub in alto). Le convertiamo in <strong>JPG</strong> (piu compatibile sui telefoni).</p>
+		          <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Step 1 — Carica foto su GitHub (JPG ottimizzate)</summary>
+		            <p class="helper-note">Seleziona le foto dal telefono/PC: verranno caricate in <code>assets/products/</code> sul repo GitHub (serve Token GitHub in alto). Le convertiamo in <strong>JPG</strong> (piu compatibile sui telefoni).</p>
+		            <p class="helper-note"><strong>1 click:</strong> seleziona foto → <strong>Riempi tutti i campi (AI)</strong> (fa anche l'upload) → <strong>Pubblica annuncio</strong>.</p>
 	            <div class="form-row">
 	              <div class="form-group">
 	                <label for="gh-image-prefix">Nome file base (opzionale)</label>
@@ -340,20 +337,22 @@
 	                <input type="file" id="gh-images-input" accept="image/*" multiple>
 	              </div>
 	            </div>
-	            <div class="publish-actions">
-	              <button type="button" id="btn-gh-upload-images" class="btn-secondary">Carica foto su GitHub</button>
-	              <button type="button" id="btn-ai-autofill" class="btn-secondary">Auto-compila (AI)</button>
-	              <button type="button" id="btn-copy-chatgpt-prompt" class="btn-secondary">Copia prompt ChatGPT</button>
-	              <button type="button" id="btn-share-chatgpt-prompt" class="btn-secondary">Condividi prompt</button>
-	            </div>
+		            <div class="publish-actions">
+		              <button type="button" id="btn-ai-autofill" class="btn-secondary">Riempi tutti i campi (AI)</button>
+		              <button type="button" id="btn-publish-ad" class="btn-secondary">Pubblica annuncio</button>
+		            </div>
 	            <div id="gh-upload-preview" class="upload-preview"></div>
 	            <p id="gh-upload-status" class="status-note">Nessuna foto caricata.</p>
 	            <div id="gh-upload-links" class="helper-note"></div>
 	          </details>
 
 	          <details style="margin: 0 0 12px;">
-	            <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Step 2 — Compila automaticamente con ChatGPT (bozza JSON)</summary>
-	            <p class="helper-note">Premi <strong>Copia/Condividi prompt</strong>, incollalo in ChatGPT e allega le foto se richiesto. ChatGPT deve rispondere con un JSON: incollalo qui e clicca <strong>Applica bozza</strong>.</p>
+	            <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Step 2 (Avanzato) — Prompt manuale ChatGPT</summary>
+	            <p class="helper-note">Se l'AI automatica non e' configurata su GitHub, usa questo fallback: copia/condividi un prompt e incolla il JSON qui.</p>
+	            <div class="publish-actions" style="margin: 10px 0 0;">
+	              <button type="button" id="btn-copy-chatgpt-prompt" class="btn-secondary">Copia prompt ChatGPT</button>
+	              <button type="button" id="btn-share-chatgpt-prompt" class="btn-secondary">Condividi prompt</button>
+	            </div>
 	            <textarea id="draft-json" class="draft-box" placeholder="{\n  &quot;name&quot;: &quot;...&quot;,\n  &quot;section&quot;: &quot;usato&quot;,\n  &quot;category&quot;: &quot;moda&quot;,\n  &quot;location&quot;: &quot;Roma&quot;,\n  &quot;condition&quot;: &quot;Ottimo&quot;,\n  &quot;postedAt&quot;: &quot;2026-02-08&quot;,\n  &quot;description&quot;: &quot;...&quot;,\n  &quot;price&quot;: 0,\n  &quot;year&quot;: &quot;...&quot;,\n  &quot;dimensions&quot;: &quot;...&quot;,\n  &quot;status&quot;: &quot;available&quot;,\n  &quot;featured&quot;: false,\n  &quot;image&quot;: &quot;assets/products/...&quot;,\n  &quot;gallery&quot;: [&quot;assets/products/...&quot;],\n  &quot;stripeLinkBuy&quot;: &quot;&quot;,\n  &quot;paypalBuy&quot;: &quot;&quot;,\n  &quot;whatsappText&quot;: &quot;...&quot;\n}"></textarea>
 	            <div class="publish-actions" style="margin-top:10px;">
 	              <button type="button" id="btn-apply-draft" class="btn-secondary">Applica bozza</button>
@@ -498,12 +497,11 @@
   </div>
 
   <script>
-	    // Gestione LocalStorage per prodotti
-	    const STORAGE_KEY = 'antiquariato_products';
-	    const LIVE_DATA_PATH = 'data/products.json';
-	    const GITHUB_TOKEN_STORAGE_KEY = 'ens_admin_github_token';
-	    const GITHUB_CONFIG_STORAGE_KEY = 'ens_admin_github_config';
-	    const AUTO_PUBLISH_STORAGE_KEY = 'ens_admin_auto_publish';
+		    // Gestione LocalStorage per prodotti
+		    const STORAGE_KEY = 'antiquariato_products';
+		    const LIVE_DATA_PATH = 'data/products.json';
+		    const GITHUB_TOKEN_STORAGE_KEY = 'ens_admin_github_token';
+		    const GITHUB_CONFIG_STORAGE_KEY = 'ens_admin_github_config';
 	    const PUBLIC_SITE_BASE = new URL('./', window.location.href).toString();
 
 	    const DEFAULT_GITHUB_CONFIG = {
@@ -599,16 +597,6 @@
       if (remember) localStorage.setItem(GITHUB_TOKEN_STORAGE_KEY, token);
       else sessionStorage.setItem(GITHUB_TOKEN_STORAGE_KEY, token);
     }
-
-	    function loadAutoPublish() {
-	      const raw = localStorage.getItem(AUTO_PUBLISH_STORAGE_KEY);
-	      if (raw === null || raw === undefined || raw === '') return true;
-	      return raw === '1' || raw === 'true' || raw === 'yes';
-	    }
-
-	    function saveAutoPublish(enabled) {
-	      localStorage.setItem(AUTO_PUBLISH_STORAGE_KEY, enabled ? '1' : '0');
-	    }
 
 	    function base64EncodeUnicode(str) {
 	      return btoa(unescape(encodeURIComponent(str)));
@@ -894,13 +882,13 @@
       }
     }
 
-    // Form submission
-	    document.getElementById('product-form').addEventListener('submit', async (e) => {
-	      e.preventDefault();
-	      const form = e.target;
-	      const formData = new FormData(form);
-	      const parsedPrice = parseFloat(formData.get('price'));
-	      const postedAtRaw = String(formData.get('postedAt') || '').trim();
+	    // Form submission
+		    document.getElementById('product-form').addEventListener('submit', async (e) => {
+		      e.preventDefault();
+		      const form = e.target;
+		      const formData = new FormData(form);
+		      const parsedPrice = parseFloat(formData.get('price'));
+		      const postedAtRaw = String(formData.get('postedAt') || '').trim();
 	      
 	      const product = {
 	        id: parseInt(formData.get('id')) || generateId(),
@@ -945,29 +933,12 @@
         saveLabel = '✅ Annuncio aggiunto';
       }
 
-      saveProducts(products);
+	      saveProducts(products);
+	      showAlert(`${saveLabel}. Ora premi "Pubblica annuncio" per renderlo visibile sul sito.`);
 
-      const autoPublish = !!document.getElementById('auto-publish')?.checked;
-      if (autoPublish) {
-        try {
-          // Persist token even if mobile doesn't fire "change" reliably.
-          const tokenInput = document.getElementById('gh-token');
-          const remember = document.getElementById('gh-remember');
-          if (tokenInput) saveGithubToken(tokenInput.value.trim(), !!remember?.checked);
-
-          const result = await publishProductsToGithub(products);
-          const commitUrl = result && result.commit && result.commit.html_url ? result.commit.html_url : '';
-          showAlert(commitUrl ? `${saveLabel} e pubblicato online! Commit: ${commitUrl}` : `${saveLabel} e pubblicato online!`);
-        } catch (err) {
-          showAlert(`${saveLabel}. Pubblicazione fallita: ${err.message || 'Errore'}`, 'error');
-        }
-      } else {
-        showAlert(`${saveLabel}!`);
-      }
-
-      form.reset();
-      const postedAtEl = document.getElementById('postedAt');
-      if (postedAtEl) postedAtEl.value = new Date().toISOString().slice(0, 10);
+	      form.reset();
+	      const postedAtEl = document.getElementById('postedAt');
+	      if (postedAtEl) postedAtEl.value = new Date().toISOString().slice(0, 10);
       document.getElementById('product-form').querySelector('input[name="id"]')?.remove();
       document.getElementById('btn-save-product').textContent = '💾 Salva annuncio';
     });
@@ -1027,30 +998,24 @@
       }
     });
 
-	    // GitHub token field (client-side "login")
-	    (function initGithubTokenUi() {
-	      const tokenInput = document.getElementById('gh-token');
-	      const rememberCheckbox = document.getElementById('gh-remember');
-	      const autoPublishCheckbox = document.getElementById('auto-publish');
-	      const ownerInput = document.getElementById('gh-owner');
-	      const repoInput = document.getElementById('gh-repo');
-	      const branchInput = document.getElementById('gh-branch');
-	      const productsPathInput = document.getElementById('gh-products-path');
-	      const useRawCheckbox = document.getElementById('gh-use-raw');
+		    // GitHub token field (client-side "login")
+		    (function initGithubTokenUi() {
+		      const tokenInput = document.getElementById('gh-token');
+		      const rememberCheckbox = document.getElementById('gh-remember');
+		      const ownerInput = document.getElementById('gh-owner');
+		      const repoInput = document.getElementById('gh-repo');
+		      const branchInput = document.getElementById('gh-branch');
+		      const productsPathInput = document.getElementById('gh-products-path');
+		      const useRawCheckbox = document.getElementById('gh-use-raw');
 
-	      const stored = loadGithubToken();
-	      if (stored) tokenInput.value = stored;
-	      // Default ON: users want fewer steps on mobile.
-	      rememberCheckbox.checked = !!localStorage.getItem(GITHUB_TOKEN_STORAGE_KEY) || !sessionStorage.getItem(GITHUB_TOKEN_STORAGE_KEY);
+		      const stored = loadGithubToken();
+		      if (stored) tokenInput.value = stored;
+		      // Default ON: users want fewer steps on mobile.
+		      rememberCheckbox.checked = !!localStorage.getItem(GITHUB_TOKEN_STORAGE_KEY) || !sessionStorage.getItem(GITHUB_TOKEN_STORAGE_KEY);
 
-	      if (autoPublishCheckbox) {
-	        autoPublishCheckbox.checked = loadAutoPublish();
-	        autoPublishCheckbox.addEventListener('change', () => saveAutoPublish(!!autoPublishCheckbox.checked));
-	      }
-
-	      const cfg = loadGithubConfig();
-	      if (ownerInput) ownerInput.value = cfg.owner;
-	      if (repoInput) repoInput.value = cfg.repo;
+		      const cfg = loadGithubConfig();
+		      if (ownerInput) ownerInput.value = cfg.owner;
+		      if (repoInput) repoInput.value = cfg.repo;
 	      if (branchInput) branchInput.value = cfg.branch;
 	      if (productsPathInput) productsPathInput.value = cfg.productsPath;
 	      if (useRawCheckbox) useRawCheckbox.checked = cfg.useRawUrls !== false;
@@ -1152,119 +1117,221 @@
 	      showAlert('Bozza pulita.');
 	    });
 
-	    // GitHub image upload -> fills image + gallery
-	    const imagesInput = document.getElementById('gh-images-input');
-	    const imagesPreview = document.getElementById('gh-upload-preview');
-	    const imagesStatus = document.getElementById('gh-upload-status');
-	    const imagesLinks = document.getElementById('gh-upload-links');
-	    let lastUploadedImages = [];
-	    if (imagesInput) {
-	      imagesInput.addEventListener('change', () => {
-	        const files = Array.from(imagesInput.files || []);
-	        lastUploadedImages = [];
-	        if (imagesLinks) imagesLinks.innerHTML = '';
-	        if (imagesPreview) {
-	          imagesPreview.innerHTML = files.map((f) => {
-	            const url = URL.createObjectURL(f);
+		    // GitHub image upload -> fills image + gallery
+		    const imagesInput = document.getElementById('gh-images-input');
+		    const imagesPreview = document.getElementById('gh-upload-preview');
+		    const imagesStatus = document.getElementById('gh-upload-status');
+		    const imagesLinks = document.getElementById('gh-upload-links');
+		    let lastUploadedImages = [];
+		    let lastUploadBase = '';
+		    if (imagesInput) {
+		      imagesInput.addEventListener('change', () => {
+		        const prefixEl = document.getElementById('gh-image-prefix');
+		        const files = Array.from(imagesInput.files || []);
+		        lastUploadedImages = [];
+		        if (!lastUploadBase) lastUploadBase = `ad-${Date.now()}`;
+		        if (prefixEl && !prefixEl.value.trim()) prefixEl.value = lastUploadBase;
+		        if (imagesLinks) imagesLinks.innerHTML = '';
+		        if (imagesPreview) {
+		          imagesPreview.innerHTML = files.map((f) => {
+		            const url = URL.createObjectURL(f);
 	            return `<img src="${url}" alt="${f.name}">`;
 	          }).join('');
 	        }
 	        if (imagesStatus) {
 	          imagesStatus.textContent = files.length ? `${files.length} foto selezionate (pronte per upload).` : 'Nessuna foto caricata.';
 	        }
-	      });
-	    }
+		      });
+		    }
 
-	    document.getElementById('btn-gh-upload-images')?.addEventListener('click', async () => {
-	      const files = Array.from(document.getElementById('gh-images-input')?.files || []);
-	      const prefixEl = document.getElementById('gh-image-prefix');
-	      const prefix = (prefixEl && prefixEl.value.trim())
-	        || slugify(document.getElementById('name')?.value)
-	        || `p${Date.now()}`;
+		    function setButtonsDisabled(disabled) {
+		      ['btn-gh-upload-images', 'btn-ai-autofill', 'btn-publish-ad'].forEach((id) => {
+		        const el = document.getElementById(id);
+		        if (el) el.disabled = !!disabled;
+		      });
+		    }
 
-	      try {
-	        if (imagesStatus) imagesStatus.textContent = 'Upload in corso...';
-	        // Persist token/config even if mobile doesn't fire "change" reliably.
-	        try {
-	          const tokenInput = document.getElementById('gh-token');
-	          const remember = document.getElementById('gh-remember');
-	          if (tokenInput) saveGithubToken(tokenInput.value.trim(), !!remember?.checked);
-	        } catch {}
-	        const uploaded = await uploadImagesToGithub(files, prefix);
-	        const cfg = loadGithubConfig();
-	        const useRaw = cfg.useRawUrls !== false;
-	        const paths = uploaded.map((u) => u.path);
-	        const values = uploaded.map((u) => (useRaw && u.downloadUrl) ? u.downloadUrl : u.path);
-	        if (values.length) {
-	          document.getElementById('image-url').value = values[0];
-	          document.getElementById('gallery-urls').value = values.join(', ');
-	        }
-	        lastUploadedImages = uploaded.map((u) => ({
-	          path: u.path,
-	          pagesUrl: new URL(u.path, PUBLIC_SITE_BASE).toString(),
-	          rawUrl: u.downloadUrl || ''
-	        }));
-	        if (imagesLinks) {
-	          const list = lastUploadedImages.map((u, idx) => {
-	            const raw = u.rawUrl ? `<a href="${u.rawUrl}" target="_blank" rel="noopener">Raw</a>` : 'Raw';
-	            return `<div><strong>${idx + 1}.</strong> <a href="${u.pagesUrl}" target="_blank" rel="noopener">Pages</a> · ${raw}</div>`;
-	          }).join('');
-	          imagesLinks.innerHTML = `<div style="margin-top:8px;"><strong>Link foto:</strong> (Pages puo' richiedere 1-3 min)</div>${list}`;
-	        }
-	        // If the draft box is empty, prefill it with a skeleton including image/gallery.
-	        const draftEl = document.getElementById('draft-json');
-	        if (draftEl && !draftEl.value.trim() && values.length) {
-	          const today = new Date().toISOString().slice(0, 10);
-	          const skeleton = {
-	            name: document.getElementById('name')?.value?.trim() || '',
-	            section: document.getElementById('section')?.value || 'usato',
-	            category: document.getElementById('category')?.value || '',
-	            location: document.getElementById('location')?.value?.trim() || '',
-	            condition: '',
-	            postedAt: today,
-	            description: '',
-	            price: 0,
-	            year: '',
-	            dimensions: '',
-	            status: 'available',
-	            featured: false,
-	            image: values[0],
-	            gallery: values,
-	            stripeLinkBuy: '',
-	            paypalBuy: '',
-	            whatsappText: ''
-	          };
-	          draftEl.value = JSON.stringify(skeleton, null, 2);
-	        }
-	        if (imagesStatus) imagesStatus.textContent = `Upload completato: ${paths.length} file. Campi immagine/galleria aggiornati.`;
-	        showAlert("Foto caricate su GitHub e collegate all'annuncio.");
+		    async function ensureImagesUploaded() {
+		      if (lastUploadedImages.length) return lastUploadedImages;
 
-	        // One-tap flow: auto-fill via GitHub Action (requires OPENAI_API_KEY secret in repo).
-	        try {
-	          if (imagesStatus) imagesStatus.textContent = `Upload completato: ${paths.length} file. Avvio compilazione AI...`;
-	          await runServerAiAutofill();
-	          if (imagesStatus) imagesStatus.textContent = `Upload completato: ${paths.length} file. Compilazione AI completata.`;
-	          showAlert('Campi compilati automaticamente con AI. Controlla e salva.');
-	        } catch (err) {
-	          showAlert(err.message || 'AI: compilazione fallita.', 'error');
-	        }
-	      } catch (err) {
-	        if (imagesStatus) imagesStatus.textContent = 'Upload fallito.';
-	        showAlert(err.message || 'Errore upload immagini.', 'error');
-	      }
-	    });
+		      const files = Array.from(document.getElementById('gh-images-input')?.files || []);
+		      const prefixEl = document.getElementById('gh-image-prefix');
+		      const prefix = (prefixEl && prefixEl.value.trim())
+		        || slugify(document.getElementById('name')?.value)
+		        || lastUploadBase
+		        || `ad-${Date.now()}`;
 
-	    document.getElementById('btn-ai-autofill')?.addEventListener('click', async () => {
-	      try {
-	        if (imagesStatus) imagesStatus.textContent = 'Compilazione AI in corso...';
-	        await runServerAiAutofill();
-	        if (imagesStatus) imagesStatus.textContent = 'Compilazione AI completata.';
-	        showAlert('Campi compilati automaticamente con AI. Controlla e salva.');
-	      } catch (err) {
-	        if (imagesStatus) imagesStatus.textContent = 'Compilazione AI fallita.';
-	        showAlert(err.message || 'AI: compilazione fallita.', 'error');
-	      }
-	    });
+		      if (!files.length) throw new Error('Seleziona almeno 1 foto.');
+
+		      if (imagesStatus) imagesStatus.textContent = 'Upload foto in corso...';
+		      setButtonsDisabled(true);
+
+		      // Persist token even if mobile doesn't fire "change" reliably.
+		      try {
+		        const tokenInput = document.getElementById('gh-token');
+		        const remember = document.getElementById('gh-remember');
+		        if (tokenInput) saveGithubToken(tokenInput.value.trim(), !!remember?.checked);
+		      } catch {}
+
+		      const uploaded = await uploadImagesToGithub(files, prefix);
+		      const cfg = loadGithubConfig();
+		      const useRaw = cfg.useRawUrls !== false;
+
+		      const paths = uploaded.map((u) => u.path);
+		      const values = uploaded.map((u) => (useRaw && u.downloadUrl) ? u.downloadUrl : u.path);
+
+		      if (values.length) {
+		        document.getElementById('image-url').value = values[0];
+		        document.getElementById('gallery-urls').value = values.join(', ');
+		      }
+
+		      lastUploadedImages = uploaded.map((u) => ({
+		        path: u.path,
+		        pagesUrl: new URL(u.path, PUBLIC_SITE_BASE).toString(),
+		        rawUrl: u.downloadUrl || ''
+		      }));
+
+		      if (imagesLinks) {
+		        const list = lastUploadedImages.map((u, idx) => {
+		          const raw = u.rawUrl ? `<a href="${u.rawUrl}" target="_blank" rel="noopener">Raw</a>` : 'Raw';
+		          return `<div><strong>${idx + 1}.</strong> <a href="${u.pagesUrl}" target="_blank" rel="noopener">Pages</a> · ${raw}</div>`;
+		        }).join('');
+		        imagesLinks.innerHTML = `<div style="margin-top:8px;"><strong>Link foto:</strong> (Pages puo' richiedere 1-3 min)</div>${list}`;
+		      }
+
+		      if (imagesStatus) imagesStatus.textContent = `Upload completato: ${paths.length} foto.`;
+		      setButtonsDisabled(false);
+		      return lastUploadedImages;
+		    }
+
+		    document.getElementById('btn-gh-upload-images')?.addEventListener('click', async () => {
+		      try {
+		        await ensureImagesUploaded();
+		        showAlert('Foto caricate e collegate all\'annuncio.');
+		      } catch (err) {
+		        if (imagesStatus) imagesStatus.textContent = 'Upload fallito.';
+		        setButtonsDisabled(false);
+		        showAlert(err.message || 'Errore upload immagini.', 'error');
+		      }
+		    });
+
+		    document.getElementById('btn-ai-autofill')?.addEventListener('click', async () => {
+		      try {
+		        await ensureImagesUploaded();
+		        if (imagesStatus) imagesStatus.textContent = 'Compilazione AI in corso...';
+		        setButtonsDisabled(true);
+		        await runServerAiAutofill();
+		        if (imagesStatus) imagesStatus.textContent = 'Compilazione AI completata.';
+		        showAlert('Campi compilati automaticamente. Controlla e poi premi "Pubblica annuncio".');
+		      } catch (err) {
+		        if (imagesStatus) imagesStatus.textContent = 'Compilazione AI fallita.';
+		        showAlert(err.message || 'AI: compilazione fallita.', 'error');
+		      } finally {
+		        setButtonsDisabled(false);
+		      }
+		    });
+
+		    function getFirstMissingFieldId(product) {
+		      if (!String(product.name || '').trim()) return 'name';
+		      if (!String(product.category || '').trim()) return 'category';
+		      if (!String(product.section || '').trim()) return 'section';
+		      if (!String(product.description || '').trim()) return 'description';
+		      if (!String(product.image || '').trim()) return 'image-url';
+		      if (!Array.isArray(product.gallery) || product.gallery.length === 0) return 'gallery-urls';
+		      return '';
+		    }
+
+		    function readProductFromForm() {
+		      const form = document.getElementById('product-form');
+		      const formData = new FormData(form);
+		      const parsedPrice = parseFloat(formData.get('price'));
+		      const postedAtRaw = String(formData.get('postedAt') || '').trim();
+		      return {
+		        id: parseInt(formData.get('id')) || generateId(),
+		        name: String(formData.get('name') || ''),
+		        section: String(formData.get('section') || '').trim() || 'antiquariato',
+		        category: String(formData.get('category') || ''),
+		        location: String(formData.get('location') || '').trim(),
+		        condition: String(formData.get('condition') || '').trim(),
+		        postedAt: postedAtRaw || new Date().toISOString().slice(0, 10),
+		        description: String(formData.get('description') || ''),
+		        price: Number.isFinite(parsedPrice) ? parsedPrice : 0,
+		        year: String(formData.get('year') || ''),
+		        dimensions: String(formData.get('dimensions') || ''),
+		        status: String(formData.get('status') || 'available'),
+		        featured: formData.get('featured') ? true : false,
+		        image: String(formData.get('image') || ''),
+		        gallery: String(formData.get('gallery') || '')
+		          .split(',')
+		          .map(url => String(url || '').trim())
+		          .filter(url => url),
+		        stripeLinkBuy: String(formData.get('stripeLinkBuy') || ''),
+		        paypalBuy: String(formData.get('paypalBuy') || ''),
+		        whatsappText: String(formData.get('whatsappText') || '')
+		      };
+		    }
+
+		    function resetProductForm() {
+		      const form = document.getElementById('product-form');
+		      form.reset();
+		      const postedAtEl = document.getElementById('postedAt');
+		      if (postedAtEl) postedAtEl.value = new Date().toISOString().slice(0, 10);
+		      document.querySelector('input[name=\"id\"]')?.remove();
+		      document.getElementById('btn-save-product').textContent = '💾 Salva annuncio';
+		    }
+
+		    function clearSelectedImages() {
+		      const input = document.getElementById('gh-images-input');
+		      if (input) input.value = '';
+		      lastUploadedImages = [];
+		      lastUploadBase = `ad-${Date.now()}`;
+		      const prefixEl = document.getElementById('gh-image-prefix');
+		      if (prefixEl) prefixEl.value = lastUploadBase;
+		      if (imagesPreview) imagesPreview.innerHTML = '';
+		      if (imagesLinks) imagesLinks.innerHTML = '';
+		      if (imagesStatus) imagesStatus.textContent = 'Nessuna foto caricata.';
+		    }
+
+		    document.getElementById('btn-publish-ad')?.addEventListener('click', async () => {
+		      try {
+		        // Persist token even if mobile doesn't fire "change" reliably.
+		        try {
+		          const tokenInput = document.getElementById('gh-token');
+		          const remember = document.getElementById('gh-remember');
+		          if (tokenInput) saveGithubToken(tokenInput.value.trim(), !!remember?.checked);
+		        } catch {}
+
+		        const product = readProductFromForm();
+		        const missing = getFirstMissingFieldId(product);
+		        if (missing) {
+		          document.getElementById(missing)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		          throw new Error('Completa i campi obbligatori (usa "Riempi tutti i campi (AI)" dopo aver caricato le foto).');
+		        }
+
+		        if (imagesStatus) imagesStatus.textContent = 'Pubblicazione in corso...';
+		        setButtonsDisabled(true);
+
+		        let products = loadProducts();
+		        const index = products.findIndex(p => p.id === product.id);
+		        const saveLabel = index >= 0 ? '✅ Annuncio aggiornato' : '✅ Annuncio aggiunto';
+		        if (index >= 0) products[index] = product;
+		        else products.push(product);
+		        saveProducts(products);
+
+			        const result = await publishProductsToGithub(products);
+			        const commitUrl = result && result.commit && result.commit.html_url ? result.commit.html_url : '';
+			        showAlert(commitUrl ? `${saveLabel} e pubblicato online! Commit: ${commitUrl}` : `${saveLabel} e pubblicato online!`);
+			        if (imagesStatus) imagesStatus.textContent = 'Pubblicazione completata.';
+
+			        resetProductForm();
+			        clearSelectedImages();
+			      } catch (err) {
+			        if (imagesStatus) imagesStatus.textContent = 'Pubblicazione fallita.';
+			        showAlert(err.message || 'Errore pubblicazione.', 'error');
+			      } finally {
+			        setButtonsDisabled(false);
+			      }
+			    });
 
 	    function buildChatgptPrompt() {
 	      if (!lastUploadedImages.length) {
