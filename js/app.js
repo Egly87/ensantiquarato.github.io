@@ -227,7 +227,7 @@ const app = {
     return `
       <div class="product-card" onclick="app.goToProduct(${product.id})">
         <div class="product-image">
-          <div class="product-carousel" aria-label="Foto annuncio">
+          <div class="product-carousel" aria-label="Foto annuncio" onclick="event.stopPropagation();" onmousedown="event.stopPropagation();" ontouchstart="event.stopPropagation();">
             ${slides}
           </div>
           ${carouselHint}
