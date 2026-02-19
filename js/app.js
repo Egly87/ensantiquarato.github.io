@@ -121,6 +121,19 @@ const app = {
         .slice(0, 12);
       recentContainer.innerHTML = recent.map(p => this.renderProductCard(p)).join('');
     }
+
+    const marqueeContainer = document.getElementById('home-marquee');
+    if (marqueeContainer) {
+      const ordered = [...this.products].sort((a, b) => this.getPostedTimestamp(b) - this.getPostedTimestamp(a));
+      if (!ordered.length) {
+        marqueeContainer.innerHTML = '<p class="text-center">Nessun annuncio disponibile.</p>';
+      } else {
+        const cards = ordered.map((p) => `<div class="marquee-item">${this.renderProductCard(p)}</div>`).join('');
+        marqueeContainer.innerHTML = `<div class="marquee-track">${cards}${cards}</div>`;
+        const durationSeconds = Math.max(30, Math.min(220, ordered.length * 5));
+        marqueeContainer.style.setProperty('--marquee-duration', `${durationSeconds}s`);
+      }
+    }
   },
 
   // ========================

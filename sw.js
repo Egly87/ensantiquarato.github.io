@@ -1,5 +1,5 @@
 // Service Worker - sw.js
-const CACHE_NAME = 'ens-vintage-v7';
+const CACHE_NAME = 'ens-vintage-v8';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

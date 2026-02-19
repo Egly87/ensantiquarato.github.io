@@ -437,6 +437,63 @@ a:hover {
   gap: 2rem;
 }
 
+.annunci-marquee {
+  --marquee-duration: 60s;
+  position: relative;
+  overflow: hidden;
+  padding: 0.25rem 0;
+}
+
+.annunci-marquee::before,
+.annunci-marquee::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 56px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.annunci-marquee::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--paper) 0%, rgba(246, 241, 231, 0) 100%);
+}
+
+.annunci-marquee::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--paper) 0%, rgba(246, 241, 231, 0) 100%);
+}
+
+.marquee-track {
+  display: flex;
+  gap: 1.2rem;
+  width: max-content;
+  animation: home-marquee-ltr var(--marquee-duration) linear infinite;
+  will-change: transform;
+}
+
+.annunci-marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+.marquee-item {
+  flex: 0 0 clamp(240px, 24vw, 320px);
+}
+
+.marquee-item .product-card {
+  height: 100%;
+}
+
+@keyframes home-marquee-ltr {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
 .product-card {
   background: #fff;
   border: 1px solid var(--line);
@@ -1605,6 +1662,15 @@ a:hover {
     animation: none !important;
     transition: none !important;
   }
+
+  .annunci-marquee {
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .marquee-track {
+    width: max-content;
+  }
 }
 
 /* ========================
@@ -1668,6 +1734,14 @@ a:hover {
 
   .hero {
     padding: 3.5rem 0 2.5rem;
+  }
+
+  .marquee-track {
+    gap: 0.9rem;
+  }
+
+  .marquee-item {
+    flex-basis: clamp(220px, 78vw, 280px);
   }
 
   .product-image {
