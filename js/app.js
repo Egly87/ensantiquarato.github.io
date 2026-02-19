@@ -130,7 +130,7 @@ const app = {
       } else {
         const cards = ordered.map((p) => `<div class="marquee-item">${this.renderProductCard(p)}</div>`).join('');
         marqueeContainer.innerHTML = `<div class="marquee-track">${cards}${cards}</div>`;
-        const durationSeconds = Math.max(30, Math.min(220, ordered.length * 5));
+        const durationSeconds = Math.max(38, Math.min(280, ordered.length * 6.5));
         marqueeContainer.style.setProperty('--marquee-duration', `${durationSeconds}s`);
       }
     }
