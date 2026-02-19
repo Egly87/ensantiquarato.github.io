@@ -11,7 +11,6 @@ const app = {
     this.loadFavorites();
     this.loadProducts();
     this.setupEventListeners();
-    this.detectPage();
   },
 
   guessGithubPagesRepo() {
@@ -68,25 +67,52 @@ const app = {
     if (previewLocal && loadFromLocalStorage()) return;
 
     const gh = this.guessGithubPagesRepo();
-    const urls = [];
-    // "Subito": raw.githubusercontent.com updates immediately after a commit, without waiting for Pages deploy.
-    if (gh) {
-      urls.push(`https://raw.githubusercontent.com/${gh.owner}/${gh.repo}/${gh.branch}/data/products.json?v=${Date.now()}`);
-    }
-    // Fallback: same-origin (works on custom domains / local dev).
-    urls.push(`data/products.json?v=${Date.now()}`);
+    const stamp = Date.now();
+    const localUrl = `data/products.json?v=${stamp}`;
+    const rawUrl = gh
+      ? `https://raw.githubusercontent.com/${gh.owner}/${gh.repo}/${gh.branch}/data/products.json?v=${stamp}`
+      : '';
 
-    this.fetchFirstJson(urls)
+    const applyProducts = (data) => {
+      this.products = Array.isArray(data) ? data : [];
+      this.filteredProducts = this.products;
+      this.detectPage();
+    };
+
+    // Load local catalog first for immediate render (no blank feed),
+    // then refresh with raw GitHub data when available.
+    const localPromise = this.fetchFirstJson([localUrl]).then((data) => {
+      if (!Array.isArray(data)) throw new Error('Catalogo locale non valido.');
+      return data;
+    });
+
+    const rawPromise = rawUrl
+      ? this.fetchFirstJson([rawUrl]).then((data) => {
+          if (!Array.isArray(data)) throw new Error('Catalogo raw non valido.');
+          return data;
+        })
+      : Promise.reject(new Error('Raw non disponibile.'));
+
+    Promise.any(rawUrl ? [localPromise, rawPromise] : [localPromise])
       .then((data) => {
-        this.products = Array.isArray(data) ? data : [];
-        this.filteredProducts = this.products;
-        this.detectPage();
+        applyProducts(data);
       })
       .catch((e) => {
         console.error('Errore caricamento prodotti:', e);
         if (loadFromLocalStorage()) return;
         this.showError('Impossibile caricare gli annunci. Riprova piu tardi.');
       });
+
+    // Upgrade to freshest raw data when it arrives (instant publish path).
+    if (rawUrl) {
+      rawPromise
+        .then((data) => {
+          applyProducts(data);
+        })
+        .catch(() => {
+          // Keep local data already shown.
+        });
+    }
   },
 
   detectPage() {
