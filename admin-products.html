@@ -233,6 +233,26 @@
       color: #a9a9a9;
       margin-top: 8px;
     }
+    .simple-flow {
+      border: 1px solid #5b4a1d;
+      background: #15120a;
+      border-radius: 8px;
+      padding: 14px;
+      margin: 12px 0 0;
+    }
+    .simple-flow h3 {
+      margin: 0 0 8px;
+      color: #f3d37c;
+      font-size: 1rem;
+    }
+    .simple-flow ol {
+      margin: 0;
+      padding-left: 18px;
+      color: #d9d9d9;
+    }
+    .simple-flow li {
+      margin: 6px 0;
+    }
   </style>
 </head>
 <body>
@@ -252,11 +272,11 @@
     </header>
 
     <main class="admin-container">
-      <h1 style="color: #d4af37; margin-bottom: 30px;">📣 Gestione Annunci</h1>
+      <h1 id="page-title" style="color: #d4af37; margin-bottom: 30px;">Gestione Annunci</h1>
 
       <div id="alert-container"></div>
 
-      <div class="admin-section publish-panel">
+      <div class="admin-section publish-panel" id="publish-panel">
         <h2>Pubblica Annunci Online</h2>
         <p>Questa pagina modifica il catalogo locale del browser. Per rendere gli annunci visibili sul sito online devi pubblicare su GitHub.</p>
         <p><strong>Flusso consigliato (1 annuncio):</strong> carica foto → <strong>Riempi tutti i campi (AI)</strong> → <strong>Pubblica annuncio</strong>.</p>
@@ -265,10 +285,10 @@
           <li>inserisci il Token GitHub e clicca <strong>Pubblica online adesso</strong> (pubblica tutto il catalogo);</li>
           <li>in alternativa: scarica <code>products.json</code> e fai commit/push manuale.</li>
         </ul>
-        <div class="file-inline">
-          <label for="products-file-input">Importa products.json:</label>
-          <input type="file" id="products-file-input" accept="application/json">
-        </div>
+	        <div class="file-inline" id="import-json-inline">
+	          <label for="products-file-input">Importa products.json:</label>
+	          <input type="file" id="products-file-input" accept="application/json">
+	        </div>
 	        <div class="file-inline">
 	          <label for="gh-token">Accesso Admin (Token GitHub):</label>
 	          <input type="password" id="gh-token" class="token-input" placeholder="github_pat_..." autocomplete="off" spellcheck="false" inputmode="text">
@@ -310,21 +330,30 @@
 	          </div>
 	          <p class="helper-note">Consiglio: usa token fine-grained, solo su questo repo, permesso <code>Contents: Read and write</code>, scadenza breve.</p>
 	        </details>
-	        <div class="publish-actions">
-	          <button type="button" id="btn-export-json" class="btn-secondary">Scarica products.json</button>
-	          <button type="button" id="btn-sync-live" class="btn-secondary">Ricarica da dati pubblicati</button>
-	          <button type="button" id="btn-copy-git" class="btn-secondary">Copia comandi Git</button>
-	          <button type="button" id="btn-gh-publish" class="btn-secondary">Pubblica online adesso</button>
-	        </div>
+		        <div class="publish-actions" id="bulk-actions">
+		          <button type="button" id="btn-export-json" class="btn-secondary">Scarica products.json</button>
+		          <button type="button" id="btn-sync-live" class="btn-secondary">Ricarica da dati pubblicati</button>
+		          <button type="button" id="btn-copy-git" class="btn-secondary">Copia comandi Git</button>
+		          <button type="button" id="btn-gh-publish" class="btn-secondary">Pubblica online adesso</button>
+		        </div>
         <p id="publish-status" class="status-note">Annunci locali: 0.</p>
       </div>
 
 	      <!-- Form Aggiunta/Modifica Prodotto -->
-	      <div class="admin-section">
-	        <h2>Aggiungi o Modifica Annuncio</h2>
-	        <form id="product-form">
-	          <details open style="margin: 0 0 12px;">
-		          <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Step 1 — Carica foto su GitHub (JPG ottimizzate)</summary>
+		      <div class="admin-section" id="insert-section">
+		        <h2>Aggiungi o Modifica Annuncio</h2>
+		        <div class="simple-flow" id="simple-flow">
+		          <h3>Inserimento rapido</h3>
+		          <ol>
+		            <li>Incolla il token GitHub.</li>
+		            <li>Seleziona le foto.</li>
+		            <li>Premi <strong>Riempi tutti i campi (AI)</strong>.</li>
+		            <li>Controlla i dati e premi <strong>Pubblica annuncio</strong>.</li>
+		          </ol>
+		        </div>
+		        <form id="product-form">
+		          <details open style="margin: 0 0 12px;">
+		            <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Step 1 — Carica foto su GitHub (JPG ottimizzate)</summary>
 		            <p class="helper-note">Seleziona le foto dal telefono/PC: verranno caricate in <code>assets/products/</code> sul repo GitHub (serve Token GitHub in alto). Le convertiamo in <strong>JPG</strong> (piu compatibile sui telefoni).</p>
 		            <p class="helper-note"><strong>1 click:</strong> seleziona foto → <strong>Riempi tutti i campi (AI)</strong> (fa anche l'upload) → <strong>Pubblica annuncio</strong>.</p>
 	            <div class="form-row">
@@ -346,9 +375,9 @@
 	            <div id="gh-upload-links" class="helper-note"></div>
 	          </details>
 
-	          <details style="margin: 0 0 12px;">
-	            <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Step 2 (Avanzato) — Prompt manuale ChatGPT</summary>
-	            <p class="helper-note">Se l'AI automatica non e' configurata su GitHub, usa questo fallback: copia/condividi un prompt e incolla il JSON qui.</p>
+		          <details style="margin: 0 0 12px;" id="manual-ai-step">
+		            <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Step 2 (Avanzato) — Prompt manuale ChatGPT</summary>
+		            <p class="helper-note">Se l'AI automatica non e' configurata su GitHub, usa questo fallback: copia/condividi un prompt e incolla il JSON qui.</p>
 	            <div class="publish-actions" style="margin: 10px 0 0;">
 	              <button type="button" id="btn-copy-chatgpt-prompt" class="btn-secondary">Copia prompt ChatGPT</button>
 	              <button type="button" id="btn-share-chatgpt-prompt" class="btn-secondary">Condividi prompt</button>
@@ -477,18 +506,18 @@
 	            <input type="text" id="gallery-urls" name="gallery" placeholder="assets/products/1.jpg, assets/products/2.jpg">
 	          </div>
 
-		          <div style="display: flex; gap: 10px;">
+		          <div style="display: flex; gap: 10px;" id="draft-actions">
 		            <button type="submit" class="btn-secondary" id="btn-save-product">Salva bozza (solo locale)</button>
 		            <button type="button" class="btn-secondary" id="btn-clear">Pulisci</button>
 		          </div>
 	        </form>
 	      </div>
 
-      <!-- Lista Prodotti -->
-      <div class="admin-section">
-        <h2>Annunci Attuali (<span id="product-count">0</span>)</h2>
-        <div id="products-list" class="products-grid"></div>
-      </div>
+	      <!-- Lista Prodotti -->
+	      <div class="admin-section" id="products-section">
+	        <h2>Annunci Attuali (<span id="product-count">0</span>)</h2>
+	        <div id="products-list" class="products-grid"></div>
+	      </div>
     </main>
 
     <footer style="text-align: center; padding: 20px; color: #666; margin-top: 40px;">
@@ -503,15 +532,35 @@
 		    const GITHUB_TOKEN_STORAGE_KEY = 'ens_admin_github_token';
 		    const GITHUB_CONFIG_STORAGE_KEY = 'ens_admin_github_config';
 	    const PUBLIC_SITE_BASE = new URL('./', window.location.href).toString();
+	    const INSERT_ONLY_MODE = new URLSearchParams(window.location.search).get('insert') === '1';
 
-	    const DEFAULT_GITHUB_CONFIG = {
-	      owner: 'Egly87',
-	      repo: 'ensantiquarato.github.io',
-	      branch: 'main',
-	      productsPath: 'data/products.json',
-	      imagesDir: 'assets/products',
-	      useRawUrls: true
-	    };
+		    const DEFAULT_GITHUB_CONFIG = {
+		      owner: 'Egly87',
+		      repo: 'ensantiquarato.github.io',
+		      branch: 'main',
+		      productsPath: 'data/products.json',
+		      imagesDir: 'assets/products',
+		      useRawUrls: true
+		    };
+
+	    function applyInsertOnlyMode() {
+	      if (!INSERT_ONLY_MODE) return;
+	      document.title = 'Inserisci Annuncio - ENS Vintage';
+	      const pageTitle = document.getElementById('page-title');
+	      if (pageTitle) pageTitle.textContent = 'Inserisci Annuncio';
+
+	      const hideIds = [
+	        'import-json-inline',
+	        'bulk-actions',
+	        'products-section',
+	        'manual-ai-step',
+	        'draft-actions'
+	      ];
+	      hideIds.forEach((id) => {
+	        const el = document.getElementById(id);
+	        if (el) el.style.display = 'none';
+	      });
+	    }
 
     function loadProducts() {
       try {
@@ -1711,14 +1760,15 @@
       showAlert('✅ Annuncio eliminato!');
     }
 
-    // Load products on page load
-    (function initFormDefaults() {
-      const postedAtEl = document.getElementById('postedAt');
-      if (postedAtEl && !postedAtEl.value) postedAtEl.value = new Date().toISOString().slice(0, 10);
-    })();
+	    // Load products on page load
+	    (function initFormDefaults() {
+	      const postedAtEl = document.getElementById('postedAt');
+	      if (postedAtEl && !postedAtEl.value) postedAtEl.value = new Date().toISOString().slice(0, 10);
+	    })();
+	    applyInsertOnlyMode();
 
-    initializeProductsIfEmpty();
-    renderProducts();
+	    initializeProductsIfEmpty();
+	    renderProducts();
   </script>
 </body>
 </html>

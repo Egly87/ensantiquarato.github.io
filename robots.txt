@@ -3,6 +3,7 @@ Allow: /
 Disallow: /admin/
 Disallow: /admin.html
 Disallow: /admin-products.html
+Disallow: /inserisci-annuncio.html
 Disallow: /private/
 
 Sitemap: https://egly87.github.io/ensantiquarato.github.io/sitemap.xml
