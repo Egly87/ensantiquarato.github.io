@@ -240,8 +240,8 @@ a:hover {
 }
 
 .cart-icon-svg {
-  width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 18px;
   stroke: currentColor;
   stroke-width: 1.8;
   fill: none;
@@ -427,9 +427,7 @@ a:hover {
 }
 
 .hero-highlights {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
+  display: none;
 }
 
 .hero-highlight {
