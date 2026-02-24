@@ -840,11 +840,9 @@ const app = {
         e.preventDefault();
         const q = document.getElementById('home-q')?.value.trim() || '';
         const section = document.getElementById('home-section')?.value || '';
-        const location = document.getElementById('home-location')?.value.trim() || '';
         const params = new URLSearchParams();
         if (q) params.set('q', q);
         if (section) params.set('section', section);
-        if (location) params.set('location', location);
         const hash = params.toString();
         window.location.href = `catalogo.html${hash ? `#${hash}` : ''}`;
       });
