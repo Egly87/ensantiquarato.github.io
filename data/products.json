@@ -1,1 +1,33 @@
-[]
+[
+  {
+    "id": 1,
+    "name": "Quadro olio su tela firmato Venezia",
+    "section": "antiquariato",
+    "category": "arte",
+    "location": "24052, Azzano San Paolo",
+    "condition": "Buone",
+    "postedAt": "2026-02-24",
+    "description": "Quadro",
+    "price": 249,
+    "year": "",
+    "dimensions": "40x30cm",
+    "status": "available",
+    "featured": true,
+    "image": "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-1.jpg",
+    "gallery": [
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-1.jpg",
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-2.jpg",
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-3.jpg",
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-4.jpg",
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-5.jpg",
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-6.jpg",
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-7.jpg",
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-8.jpg",
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-9.jpg",
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-10.jpg"
+    ],
+    "stripeLinkBuy": "",
+    "paypalBuy": "",
+    "whatsappText": ""
+  }
+]
