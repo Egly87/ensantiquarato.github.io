@@ -232,6 +232,65 @@ a:hover {
   color: var(--accent-2);
 }
 
+.nav-link-cart {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+}
+
+.cart-icon-svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: 0 0 auto;
+}
+
+.cart-count-badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+.cart-fab {
+  position: fixed;
+  right: 14px;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  z-index: 2500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--ink);
+  box-shadow: var(--shadow-soft);
+  padding: 0.55rem 0.8rem;
+  text-decoration: none;
+}
+
+.cart-fab .cart-fab-text {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.cart-fab:hover {
+  border-color: var(--accent);
+  color: var(--accent-2);
+}
+
 /* ========================
    BUTTONS
    ======================== */
@@ -1914,6 +1973,10 @@ body.gallery-open {
 
   .navbar-menu::-webkit-scrollbar {
     display: none;
+  }
+
+  .nav-link-cart .cart-count-badge {
+    margin-left: 0.1rem;
   }
 
   .nav-link {

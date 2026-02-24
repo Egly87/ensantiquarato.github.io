@@ -14,6 +14,7 @@ const app = {
 
   init() {
     this.loadFavorites();
+    this.updateCartUi();
     this.loadProducts();
     this.setupEventListeners();
   },
@@ -825,6 +826,10 @@ const app = {
   },
 
   setupEventListeners() {
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'antiquariato_cart') this.updateCartUi();
+    });
+
     const homeSearchForm = document.getElementById('home-search-form');
     if (homeSearchForm) {
       homeSearchForm.addEventListener('submit', (e) => {
@@ -891,6 +896,50 @@ const app = {
     }
   },
 
+  getCartCount() {
+    try {
+      const raw = localStorage.getItem('antiquariato_cart');
+      const cart = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(cart)) return 0;
+      return cart.reduce((sum, item) => sum + Math.max(0, Number(item && item.quantity ? item.quantity : 0)), 0);
+    } catch {
+      return 0;
+    }
+  },
+
+  ensureCartFab() {
+    if (window.location.pathname.includes('carrello')) return;
+    let fab = document.getElementById('cart-fab');
+    if (!fab) {
+      fab = document.createElement('a');
+      fab.id = 'cart-fab';
+      fab.className = 'cart-fab';
+      fab.href = 'carrello.html';
+      fab.setAttribute('aria-label', 'Apri carrello');
+      fab.innerHTML = `
+        <svg class="cart-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h2l2 10h10l2-7H7"/><circle cx="10" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg>
+        <span class="cart-fab-text">Carrello</span>
+        <span class="cart-count-badge hidden" data-cart-count>0</span>
+      `;
+      document.body.appendChild(fab);
+    }
+  },
+
+  updateCartUi() {
+    const count = this.getCartCount();
+    this.ensureCartFab();
+
+    document.querySelectorAll('[data-cart-count]').forEach((el) => {
+      if (count > 0) {
+        el.textContent = String(count);
+        el.classList.remove('hidden');
+      } else {
+        el.textContent = '0';
+        el.classList.add('hidden');
+      }
+    });
+  },
+
   // ========================
   // CART
   // ========================
@@ -910,10 +959,11 @@ const app = {
     }
 
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
-    this.showNotification(`${product.name} aggiunto al carrello.`);
+    this.updateCartUi();
+    this.showNotification(`${product.name} aggiunto al carrello.`, { showCartLink: true });
   },
 
-  showNotification(message) {
+  showNotification(message, { showCartLink = false } = {}) {
     const notif = document.createElement('div');
     notif.style.cssText = `
       position: fixed;
@@ -927,8 +977,22 @@ const app = {
       font-weight: 600;
       z-index: 9999;
       box-shadow: var(--shadow-soft);
+      display: flex;
+      align-items: center;
+      gap: 10px;
     `;
-    notif.textContent = message;
+    const text = document.createElement('span');
+    text.textContent = message;
+    notif.appendChild(text);
+
+    if (showCartLink) {
+      const link = document.createElement('a');
+      link.href = 'carrello.html';
+      link.textContent = 'Apri carrello';
+      link.style.cssText = 'font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.08em;';
+      notif.appendChild(link);
+    }
+
     document.body.appendChild(notif);
     setTimeout(() => notif.remove(), 3000);
   }

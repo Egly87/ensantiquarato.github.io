@@ -30,7 +30,7 @@
           <a href="catalogo.html#preferiti=1" class="nav-link">Preferiti</a>
           <a href="chi-siamo.html" class="nav-link">Chi siamo</a>
           <a href="contatti.html" class="nav-link">Contatti</a>
-          <a href="carrello.html" class="nav-link active">Carrello</a>
+          <a href="carrello.html" class="nav-link nav-link-cart active"><svg class="cart-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h2l2 10h10l2-7H7"/><circle cx="10" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg><span>Carrello</span><span class="cart-count-badge hidden" data-cart-count>0</span></a>
         </nav>
       </div>
     </header>
@@ -120,15 +120,48 @@
     }
 
     async function loadProducts() {
+      const liveRes = await fetch(`data/products.json?v=${Date.now()}`, { cache: 'no-store' });
+      if (liveRes.ok) {
+        const data = await liveRes.json();
+        if (Array.isArray(data)) return data;
+      }
+
       const stored = getProducts();
-      if (stored) return stored;
-      const res = await fetch('data/products.json');
-      if (!res.ok) throw new Error('Errore caricamento prodotti');
-      return res.json();
+      if (stored && Array.isArray(stored)) return stored;
+      throw new Error('Errore caricamento prodotti');
+    }
+
+    function getCartCount() {
+      return getCart().reduce((sum, item) => sum + Math.max(0, Number(item && item.quantity ? item.quantity : 0)), 0);
+    }
+
+    function updateCartBadge() {
+      const count = getCartCount();
+      document.querySelectorAll('[data-cart-count]').forEach((el) => {
+        if (count > 0) {
+          el.textContent = String(count);
+          el.classList.remove('hidden');
+        } else {
+          el.textContent = '0';
+          el.classList.add('hidden');
+        }
+      });
+    }
+
+    function getProductImage(product) {
+      if (!product || typeof product !== 'object') return 'assets/brand/og-1200x630.jpg';
+      const main = String(product.image || '').trim();
+      if (main) return main;
+      if (Array.isArray(product.gallery) && product.gallery.length) {
+        const first = String(product.gallery[0] || '').trim();
+        if (first) return first;
+      }
+      return 'assets/brand/og-1200x630.jpg';
     }
 
     function saveCart(cart) {
       localStorage.setItem(CART_KEY, JSON.stringify(cart));
+      updateCartBadge();
       renderCart();
     }
 
@@ -182,6 +215,7 @@
 
     async function renderCart() {
       const cart = getCart();
+      updateCartBadge();
       let products = [];
       try {
         products = await loadProducts();
@@ -207,9 +241,10 @@
       container.innerHTML = cart.map(item => {
         const product = products.find(p => p.id === item.productId);
         if (!product) return '';
+        const imageSrc = getProductImage(product);
         return `
           <div class="cart-item">
-            <img src="${product.image}" alt="${product.name}" onerror="this.src='assets/brand/og-1200x630.jpg'">
+            <img src="${imageSrc}" alt="${product.name}" onerror="this.src='assets/brand/og-1200x630.jpg'">
             <div>
               <h4>${product.name}</h4>
               <div class="cart-item-meta">
@@ -271,6 +306,14 @@
       emailBtn.href = `mailto:egli87@yahoo.com?subject=Richiesta%20preventivo&body=${emailBody}`;
     }
 
+    window.addEventListener('storage', (e) => {
+      if (e.key === CART_KEY) {
+        updateCartBadge();
+        renderCart();
+      }
+    });
+
+    updateCartBadge();
     renderCart();
   </script>
 </body>
