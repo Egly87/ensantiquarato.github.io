@@ -6,6 +6,11 @@ const app = {
   products: [],
   filteredProducts: [],
   favorites: new Set(),
+  currentDetailGallery: [],
+  currentDetailIndex: 0,
+  galleryTouchStartX: null,
+  galleryTouchStartY: null,
+  galleryKeyHandler: null,
 
   init() {
     this.loadFavorites();
@@ -164,7 +169,7 @@ const app = {
 
         const baseCards = baseItems.map((p) => `<div class="marquee-item">${this.renderProductCard(p)}</div>`).join('');
         marqueeContainer.innerHTML = `<div class="marquee-track">${baseCards}${baseCards}</div>`;
-        const durationSeconds = Math.max(52, Math.min(360, baseItems.length * 8));
+        const durationSeconds = Math.max(78, Math.min(520, baseItems.length * 11));
         marqueeContainer.style.setProperty('--marquee-duration', `${durationSeconds}s`);
       }
     }
@@ -361,19 +366,19 @@ const app = {
     const statusText = this.getStatusText(product.status);
     const priceDisplay = product.status === 'sold' ? '—' : `€ ${product.price.toFixed(2)}`;
 
-    const mainImg = String(product.image || (product.gallery && product.gallery[0]) || 'assets/brand/og-1200x630.jpg').replace(/^\//, '');
+    const galleryList = this.getProductGallery(product, { limit: 30 });
+    const mainImg = String(galleryList[0] || 'assets/brand/og-1200x630.jpg').replace(/^\//, '');
     const mainSource = mainImg.toLowerCase().endsWith('.webp')
       ? `<source type="image/webp" srcset="${mainImg}">`
       : '';
 
-    const galleryList = Array.isArray(product.gallery) && product.gallery.length ? product.gallery : [mainImg];
     const thumbnails = galleryList.map((img, idx) => {
       const imgSrc = String(img || 'assets/brand/og-1200x630.jpg').replace(/^\//, '');
       const thumbSource = imgSrc.toLowerCase().endsWith('.webp')
         ? `<source type="image/webp" srcset="${imgSrc}">`
         : '';
       return `
-        <div class="thumbnail${idx === 0 ? ' active' : ''}" onclick="app.changeMainImage(this, '${imgSrc}')">
+        <div class="thumbnail${idx === 0 ? ' active' : ''}" onclick="app.changeMainImage(this, '${imgSrc}', ${idx})">
           <picture>
             ${thumbSource}
             <img src="${imgSrc}" alt="${product.name} - ${idx + 1}" loading="lazy" width="80" height="80" decoding="async" onerror="app.handleImageError(this)">
@@ -395,11 +400,12 @@ const app = {
 
     const html = `
       <div class="product-gallery">
-        <div class="product-main-image">
+        <div class="product-main-image" role="button" tabindex="0" aria-label="Apri foto a schermo intero" data-gallery-index="0" onclick="app.openGalleryFromMain(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();app.openGalleryFromMain(this);}">
           <picture>
             ${mainSource}
             <img src="${mainImg}" alt="${product.name}" loading="lazy" width="800" height="450" decoding="async" onerror="app.handleImageError(this)">
           </picture>
+          <button type="button" class="gallery-zoom-btn" onclick="event.stopPropagation(); app.openGalleryFromMain(this.closest('.product-main-image'));">Apri foto</button>
         </div>
         <div class="product-gallery-thumbnails">
           ${thumbnails}
@@ -461,6 +467,9 @@ const app = {
     `;
 
     container.innerHTML = html;
+    this.currentDetailGallery = galleryList.map((img) => this.normalizeAssetPath(img)).filter(Boolean);
+    this.currentDetailIndex = 0;
+    this.ensureGalleryLightbox();
   },
 
   renderRelatedProducts(product) {
@@ -474,10 +483,11 @@ const app = {
     container.innerHTML = list.map(p => this.renderProductCard(p)).join('');
   },
 
-  changeMainImage(el, src) {
+  changeMainImage(el, src, index = 0) {
     document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
 
+    const wrap = document.querySelector('.product-main-image');
     const main = document.querySelector('.product-main-image img');
     const source = document.querySelector('.product-main-image source');
     const safe = String(src || '').replace(/^\//, '');
@@ -486,6 +496,133 @@ const app = {
       if (safe.toLowerCase().endsWith('.webp')) source.srcset = safe;
       else source.removeAttribute('srcset');
     }
+    if (wrap) wrap.dataset.galleryIndex = String(index);
+    this.currentDetailIndex = Number.isFinite(index) ? index : 0;
+  },
+
+  ensureGalleryLightbox() {
+    if (document.getElementById('gallery-lightbox')) return;
+
+    const lightbox = document.createElement('div');
+    lightbox.id = 'gallery-lightbox';
+    lightbox.className = 'gallery-lightbox hidden';
+    lightbox.setAttribute('aria-hidden', 'true');
+    lightbox.innerHTML = `
+      <div class="gallery-lightbox-inner" role="dialog" aria-modal="true" aria-label="Galleria immagini annuncio">
+        <button type="button" class="gallery-lightbox-close" data-gallery-close aria-label="Chiudi galleria">×</button>
+        <button type="button" class="gallery-lightbox-nav prev" data-gallery-prev aria-label="Foto precedente">‹</button>
+        <figure class="gallery-lightbox-stage" data-gallery-stage>
+          <img class="gallery-lightbox-image" alt="Foto annuncio ingrandita">
+        </figure>
+        <button type="button" class="gallery-lightbox-nav next" data-gallery-next aria-label="Foto successiva">›</button>
+        <div class="gallery-lightbox-counter" data-gallery-counter>1 / 1</div>
+      </div>
+    `;
+
+    lightbox.addEventListener('click', (event) => {
+      if (event.target === lightbox || event.target.hasAttribute('data-gallery-close')) {
+        this.closeGallery();
+      }
+      if (event.target.hasAttribute('data-gallery-prev')) this.prevGallery();
+      if (event.target.hasAttribute('data-gallery-next')) this.nextGallery();
+    });
+
+    const stage = lightbox.querySelector('[data-gallery-stage]');
+    if (stage) {
+      stage.addEventListener('touchstart', (event) => {
+        const touch = event.changedTouches && event.changedTouches[0];
+        if (!touch) return;
+        this.galleryTouchStartX = touch.clientX;
+        this.galleryTouchStartY = touch.clientY;
+      }, { passive: true });
+
+      stage.addEventListener('touchend', (event) => {
+        const touch = event.changedTouches && event.changedTouches[0];
+        if (!touch || this.galleryTouchStartX == null || this.galleryTouchStartY == null) return;
+
+        const dx = touch.clientX - this.galleryTouchStartX;
+        const dy = touch.clientY - this.galleryTouchStartY;
+        this.galleryTouchStartX = null;
+        this.galleryTouchStartY = null;
+
+        if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+        if (dx > 0) this.prevGallery();
+        else this.nextGallery();
+      }, { passive: true });
+    }
+
+    document.body.appendChild(lightbox);
+  },
+
+  updateGalleryLightbox() {
+    const lightbox = document.getElementById('gallery-lightbox');
+    if (!lightbox || !this.currentDetailGallery.length) return;
+
+    const total = this.currentDetailGallery.length;
+    const safeIndex = ((this.currentDetailIndex % total) + total) % total;
+    this.currentDetailIndex = safeIndex;
+
+    const src = this.normalizeAssetPath(this.currentDetailGallery[safeIndex]) || 'assets/brand/og-1200x630.jpg';
+    const img = lightbox.querySelector('.gallery-lightbox-image');
+    const counter = lightbox.querySelector('[data-gallery-counter]');
+    if (img) {
+      img.src = src;
+      img.alt = `Foto ${safeIndex + 1} di ${total}`;
+      img.onerror = () => this.handleImageError(img);
+    }
+    if (counter) counter.textContent = `${safeIndex + 1} / ${total}`;
+  },
+
+  openGalleryFromMain(mainEl) {
+    const idx = Number.parseInt(mainEl?.dataset?.galleryIndex || '0', 10);
+    const startIndex = Number.isFinite(idx) ? idx : 0;
+    this.openGallery(startIndex);
+  },
+
+  openGallery(startIndex = 0) {
+    if (!this.currentDetailGallery.length) return;
+    this.ensureGalleryLightbox();
+    this.currentDetailIndex = Number.isFinite(startIndex) ? startIndex : 0;
+    this.updateGalleryLightbox();
+
+    const lightbox = document.getElementById('gallery-lightbox');
+    if (!lightbox) return;
+    lightbox.classList.remove('hidden');
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('gallery-open');
+
+    if (!this.galleryKeyHandler) {
+      this.galleryKeyHandler = (event) => {
+        if (event.key === 'Escape') this.closeGallery();
+        if (event.key === 'ArrowLeft') this.prevGallery();
+        if (event.key === 'ArrowRight') this.nextGallery();
+      };
+    }
+    document.addEventListener('keydown', this.galleryKeyHandler);
+  },
+
+  closeGallery() {
+    const lightbox = document.getElementById('gallery-lightbox');
+    if (lightbox) {
+      lightbox.classList.add('hidden');
+      lightbox.setAttribute('aria-hidden', 'true');
+    }
+    document.body.classList.remove('gallery-open');
+    if (this.galleryKeyHandler) {
+      document.removeEventListener('keydown', this.galleryKeyHandler);
+    }
+  },
+
+  nextGallery() {
+    if (!this.currentDetailGallery.length) return;
+    this.currentDetailIndex += 1;
+    this.updateGalleryLightbox();
+  },
+
+  prevGallery() {
+    if (!this.currentDetailGallery.length) return;
+    this.currentDetailIndex -= 1;
+    this.updateGalleryLightbox();
   },
 
   setProductSchema(product) {
