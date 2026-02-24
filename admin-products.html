@@ -1234,19 +1234,22 @@
 	    });
 
 	    // Draft apply (ChatGPT -> form)
-	    function applyDraftToForm(draft) {
-	      if (!draft || typeof draft !== 'object') throw new Error('Bozza non valida.');
-
-	      if (draft.id != null) {
-	        let idInput = document.querySelector('input[name="id"]');
-	        if (!idInput) {
-	          idInput = document.createElement('input');
-	          idInput.type = 'hidden';
-	          idInput.name = 'id';
-	          document.getElementById('product-form').appendChild(idInput);
-	        }
-	        idInput.value = String(draft.id);
-	      }
+		    function applyDraftToForm(draft) {
+		      if (!draft || typeof draft !== 'object') throw new Error('Bozza non valida.');
+		      const draftIdRaw = parseInt(draft.id, 10);
+		      const canApplyId = !INSERT_ONLY_MODE && Number.isFinite(draftIdRaw) && draftIdRaw > 0;
+		      let idInput = document.querySelector('input[name="id"]');
+		      if (canApplyId) {
+		        if (!idInput) {
+		          idInput = document.createElement('input');
+		          idInput.type = 'hidden';
+		          idInput.name = 'id';
+		          document.getElementById('product-form').appendChild(idInput);
+		        }
+		        idInput.value = String(draftIdRaw);
+		      } else if (idInput) {
+		        idInput.remove();
+		      }
 
 	      if (draft.name) document.getElementById('name').value = String(draft.name);
 	      if (draft.section != null) document.getElementById('section').value = String(draft.section || 'antiquariato');
@@ -1271,8 +1274,8 @@
 	      if (draft.image) document.getElementById('image-url').value = String(draft.image);
 	      if (Array.isArray(draft.gallery)) document.getElementById('gallery-urls').value = draft.gallery.join(', ');
 
-		      document.getElementById('btn-save-product').textContent = draft.id ? 'Aggiorna bozza (solo locale)' : 'Salva bozza (solo locale)';
-		    }
+			      document.getElementById('btn-save-product').textContent = canApplyId ? 'Aggiorna bozza (solo locale)' : 'Salva bozza (solo locale)';
+			    }
 
 	    document.getElementById('btn-apply-draft')?.addEventListener('click', () => {
 	      const txt = document.getElementById('draft-json')?.value.trim();
@@ -1300,18 +1303,27 @@
 	    const imagesLinks = document.getElementById('gh-upload-links');
 	    let lastUploadedImages = [];
 	    let lastUploadBase = '';
+	    let previewObjectUrls = [];
+	    function clearPreviewObjectUrls() {
+	      previewObjectUrls.forEach((url) => {
+	        try { URL.revokeObjectURL(url); } catch {}
+	      });
+	      previewObjectUrls = [];
+	    }
 	    if (imagesInput) {
 	      imagesInput.addEventListener('change', () => {
 	        const prefixEl = document.getElementById('gh-image-prefix');
 	        const selectedCount = Array.from(imagesInput.files || []).length;
 	        const files = getSelectedImages(10);
 	        lastUploadedImages = [];
+	        clearPreviewObjectUrls();
 	        if (!lastUploadBase) lastUploadBase = `ad-${Date.now()}`;
 	        if (prefixEl && !prefixEl.value.trim()) prefixEl.value = lastUploadBase;
 	        if (imagesLinks) imagesLinks.innerHTML = '';
 	        if (imagesPreview) {
 		          imagesPreview.innerHTML = files.map((f) => {
 		            const url = URL.createObjectURL(f);
+		            previewObjectUrls.push(url);
 	            return `<img src="${url}" alt="${f.name}">`;
 	          }).join('');
 	        }
@@ -1392,7 +1404,7 @@
 		        await ensureImagesUploaded();
 		        showAlert('Foto caricate e collegate all\'annuncio.');
 		      } catch (err) {
-		        if (imagesStatus) imagesStatus.textContent = 'Upload fallito.';
+		        if (imagesStatus) imagesStatus.textContent = `Upload fallito: ${err && err.message ? err.message : 'errore sconosciuto'}`;
 		        setButtonsDisabled(false);
 		        showAlert(err.message || 'Errore upload immagini.', 'error');
 		      }
@@ -1407,7 +1419,7 @@
 		        if (imagesStatus) imagesStatus.textContent = 'Compilazione AI completata.';
 		        showAlert('Campi compilati automaticamente. Controlla e poi premi "Pubblica annuncio".');
 		      } catch (err) {
-		        if (imagesStatus) imagesStatus.textContent = 'Compilazione AI fallita.';
+		        if (imagesStatus) imagesStatus.textContent = `Compilazione AI fallita: ${err && err.message ? err.message : 'errore sconosciuto'}`;
 		        showAlert(err.message || 'AI: compilazione fallita.', 'error');
 		      } finally {
 		        setButtonsDisabled(false);
@@ -1431,8 +1443,12 @@
 			      const parsedPrice = parseFloat(formData.get('price'));
 			      const parsedShipping = parseFloat(formData.get('shippingCost'));
 			      const postedAtRaw = String(formData.get('postedAt') || '').trim();
+			      const explicitId = parseInt(formData.get('id'), 10);
+			      const nextId = INSERT_ONLY_MODE
+			        ? generateId()
+			        : (Number.isFinite(explicitId) && explicitId > 0 ? explicitId : generateId());
 			      return {
-		        id: parseInt(formData.get('id')) || generateId(),
+		        id: nextId,
 		        name: String(formData.get('name') || ''),
 		        section: String(formData.get('section') || '').trim() || 'antiquariato',
 		        category: String(formData.get('category') || ''),
@@ -1468,14 +1484,15 @@
 			      document.getElementById('btn-save-product').textContent = 'Salva bozza (solo locale)';
 			    }
 
-		    function clearSelectedImages() {
-		      const input = document.getElementById('gh-images-input');
-		      if (input) input.value = '';
-		      lastUploadedImages = [];
-		      lastUploadBase = `ad-${Date.now()}`;
-		      const prefixEl = document.getElementById('gh-image-prefix');
-		      if (prefixEl) prefixEl.value = lastUploadBase;
-		      if (imagesPreview) imagesPreview.innerHTML = '';
+	    function clearSelectedImages() {
+	      const input = document.getElementById('gh-images-input');
+	      if (input) input.value = '';
+	      lastUploadedImages = [];
+	      lastUploadBase = `ad-${Date.now()}`;
+	      clearPreviewObjectUrls();
+	      const prefixEl = document.getElementById('gh-image-prefix');
+	      if (prefixEl) prefixEl.value = lastUploadBase;
+	      if (imagesPreview) imagesPreview.innerHTML = '';
 		      if (imagesLinks) imagesLinks.innerHTML = '';
 		      if (imagesStatus) imagesStatus.textContent = 'Nessuna foto caricata.';
 		    }
@@ -1514,7 +1531,7 @@
 			        resetProductForm();
 			        clearSelectedImages();
 			      } catch (err) {
-			        if (imagesStatus) imagesStatus.textContent = 'Pubblicazione fallita.';
+			        if (imagesStatus) imagesStatus.textContent = `Pubblicazione fallita: ${err && err.message ? err.message : 'errore sconosciuto'}`;
 			        showAlert(err.message || 'Errore pubblicazione.', 'error');
 			      } finally {
 			        setButtonsDisabled(false);
@@ -1558,10 +1575,11 @@
 	        paypalBuy: '',
 	        whatsappText: ''
 	      };
-	      return [
-	        'Analizza le foto e compila TUTTI i campi per un annuncio su ENS Vintage.',
-	        'Rispondi SOLO con JSON valido (nessun testo fuori dal JSON).',
-	        'Se non riesci a vedere le URL, chiedimi di allegare le immagini direttamente in chat.',
+		      return [
+		        'Analizza le foto e compila TUTTI i campi per un annuncio su ENS Vintage.',
+		        'Rispondi SOLO con JSON valido (nessun testo fuori dal JSON).',
+		        'NON includere il campo "id": viene assegnato automaticamente in pubblicazione.',
+		        'Se non riesci a vedere le URL, chiedimi di allegare le immagini direttamente in chat.',
 	        '',
 	        'Bozza JSON (da completare):',
 	        JSON.stringify(draft, null, 2),
@@ -1815,12 +1833,13 @@
 	      // Normalize again on client (defensive).
 	      draft.category = normalizeCategory(draft.category) || baseDraft.category || 'altro';
 	      draft.section = normalizeSection(draft.section, draft.category);
-	      draft.status = 'available';
-	      draft.postedAt = today;
-	      draft.price = coercePrice(draft.price);
-	      draft.shippingCost = coercePrice(draft.shippingCost != null ? draft.shippingCost : baseDraft.shippingCost);
-	      draft.image = baseDraft.image;
-	      draft.gallery = baseDraft.gallery;
+		      draft.status = 'available';
+		      draft.postedAt = today;
+		      draft.price = coercePrice(draft.price);
+		      draft.shippingCost = coercePrice(draft.shippingCost != null ? draft.shippingCost : baseDraft.shippingCost);
+		      if (draft && Object.prototype.hasOwnProperty.call(draft, 'id')) delete draft.id;
+		      draft.image = baseDraft.image;
+		      draft.gallery = baseDraft.gallery;
 
 	      const draftEl = document.getElementById('draft-json');
 	      if (draftEl) draftEl.value = JSON.stringify(draft, null, 2);

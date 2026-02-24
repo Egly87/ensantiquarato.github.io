@@ -71,6 +71,8 @@ function coercePrice(value) {
 
 function ensureDraftShape(draft, baseDraft) {
   const out = { ...(baseDraft || {}), ...(draft || {}) };
+  // IDs are assigned client-side at publish time to avoid accidental overwrites.
+  if (Object.prototype.hasOwnProperty.call(out, 'id')) delete out.id;
   out.category = normalizeCategory(out.category) || normalizeCategory(baseDraft && baseDraft.category) || 'altro';
   out.section = normalizeSection(out.section, out.category);
   out.status = 'available';
@@ -117,6 +119,7 @@ async function callOpenAI({ baseDraft, imageUrls }) {
     '- description: dettagliata, onesta, in italiano.',
     '- price: numero in EUR (se non sicuro, 0).',
     '- shippingCost: costo spedizione in EUR (se non noto, usa 0).',
+    '- NON includere il campo "id".',
     '- year: periodo/anni (se stimati, scrivi "da verificare").',
     '- dimensions: dimensioni (se non visibili, "").',
     '- status: "available".',
