@@ -154,9 +154,17 @@ const app = {
       if (!ordered.length) {
         marqueeContainer.innerHTML = '<p class="text-center">Nessun annuncio disponibile.</p>';
       } else {
-        const cards = ordered.map((p) => `<div class="marquee-item">${this.renderProductCard(p)}</div>`).join('');
-        marqueeContainer.innerHTML = `<div class="marquee-track">${cards}${cards}</div>`;
-        const durationSeconds = Math.max(38, Math.min(280, ordered.length * 6.5));
+        // Build a base strip large enough to avoid empty areas even with few ads.
+        const minVisibleCards = 8;
+        const repeatFactor = Math.max(1, Math.ceil(minVisibleCards / ordered.length));
+        const baseItems = [];
+        for (let i = 0; i < ordered.length * repeatFactor; i += 1) {
+          baseItems.push(ordered[i % ordered.length]);
+        }
+
+        const baseCards = baseItems.map((p) => `<div class="marquee-item">${this.renderProductCard(p)}</div>`).join('');
+        marqueeContainer.innerHTML = `<div class="marquee-track">${baseCards}${baseCards}</div>`;
+        const durationSeconds = Math.max(52, Math.min(360, baseItems.length * 8));
         marqueeContainer.style.setProperty('--marquee-duration', `${durationSeconds}s`);
       }
     }
