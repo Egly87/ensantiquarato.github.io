@@ -186,14 +186,26 @@
       flex-wrap: wrap;
       margin-top: 8px;
     }
-    .token-input {
-      width: 100%;
-      min-width: 0;
-    }
-    .config-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
+	    .token-input {
+	      width: 100%;
+	      min-width: 0;
+	    }
+	    .auth-status {
+	      width: 100%;
+	      justify-content: space-between;
+	      border: 1px solid #5b4a1d;
+	      background: #15120a;
+	      border-radius: 6px;
+	      padding: 10px;
+	    }
+	    .auth-status-label {
+	      color: #e3c678;
+	      font-weight: 600;
+	    }
+	    .config-grid {
+	      display: grid;
+	      grid-template-columns: 1fr;
+	      gap: 10px;
       margin-top: 10px;
     }
     @media (min-width: 900px) {
@@ -289,7 +301,14 @@
 	          <label for="products-file-input">Importa products.json:</label>
 	          <input type="file" id="products-file-input" accept="application/json">
 	        </div>
-	        <div class="file-inline">
+	        <div class="file-inline auth-status" id="gh-login-status" style="display:none;">
+	          <span id="gh-login-label" class="auth-status-label">Accesso admin attivo.</span>
+	          <div class="publish-actions" style="margin-top:0;">
+	            <button type="button" id="btn-gh-change-login" class="btn-secondary">Cambia accesso</button>
+	            <button type="button" id="btn-gh-clear-login" class="btn-secondary">Disconnetti</button>
+	          </div>
+	        </div>
+	        <div class="file-inline" id="gh-token-row">
 	          <label for="gh-token">Accesso Admin (Token GitHub):</label>
 	          <input type="password" id="gh-token" class="token-input" placeholder="github_pat_..." autocomplete="off" spellcheck="false" inputmode="text">
 	          <label style="display:inline-flex;align-items:center;gap:8px;color:#bbb;">
@@ -1051,11 +1070,34 @@
 		    (function initGithubTokenUi() {
 		      const tokenInput = document.getElementById('gh-token');
 		      const rememberCheckbox = document.getElementById('gh-remember');
+		      const tokenRow = document.getElementById('gh-token-row');
+		      const loginStatusRow = document.getElementById('gh-login-status');
+		      const loginStatusLabel = document.getElementById('gh-login-label');
+		      const changeLoginBtn = document.getElementById('btn-gh-change-login');
+		      const clearLoginBtn = document.getElementById('btn-gh-clear-login');
 		      const ownerInput = document.getElementById('gh-owner');
 		      const repoInput = document.getElementById('gh-repo');
 		      const branchInput = document.getElementById('gh-branch');
 		      const productsPathInput = document.getElementById('gh-products-path');
 		      const useRawCheckbox = document.getElementById('gh-use-raw');
+
+		      function maskToken(token) {
+		        const t = String(token || '').trim();
+		        if (!t) return '';
+		        if (t.length <= 10) return `${t.slice(0, 3)}...`;
+		        return `${t.slice(0, 6)}...${t.slice(-4)}`;
+		      }
+
+		      function refreshAuthUi() {
+		        const storedToken = loadGithubToken().trim();
+		        const hasToken = !!storedToken;
+		        if (!tokenInput.value.trim() && hasToken) tokenInput.value = storedToken;
+		        if (tokenRow) tokenRow.style.display = hasToken ? 'none' : 'flex';
+		        if (loginStatusRow) loginStatusRow.style.display = hasToken ? 'flex' : 'none';
+		        if (loginStatusLabel && hasToken) {
+		          loginStatusLabel.textContent = `Accesso admin attivo (${maskToken(storedToken)}).`;
+		        }
+		      }
 
 		      const stored = loadGithubToken();
 		      if (stored) tokenInput.value = stored;
@@ -1069,31 +1111,44 @@
 	      if (productsPathInput) productsPathInput.value = cfg.productsPath;
 	      if (useRawCheckbox) useRawCheckbox.checked = cfg.useRawUrls !== false;
 
-	      function persistToken() {
-	        const token = tokenInput.value.trim();
-	        saveGithubToken(token, rememberCheckbox.checked);
-	      }
-	      tokenInput.addEventListener('input', persistToken);
-	      tokenInput.addEventListener('change', persistToken);
-	      rememberCheckbox.addEventListener('change', () => {
-	        persistToken();
-	      });
+		      function persistToken() {
+		        const token = tokenInput.value.trim();
+		        saveGithubToken(token, rememberCheckbox.checked);
+		        refreshAuthUi();
+		      }
+		      tokenInput.addEventListener('input', persistToken);
+		      tokenInput.addEventListener('change', persistToken);
+		      rememberCheckbox.addEventListener('change', () => {
+		        persistToken();
+		      });
+		      changeLoginBtn?.addEventListener('click', () => {
+		        if (tokenRow) tokenRow.style.display = 'flex';
+		        if (loginStatusRow) loginStatusRow.style.display = 'none';
+		        tokenInput.focus();
+		      });
+		      clearLoginBtn?.addEventListener('click', () => {
+		        saveGithubToken('', true);
+		        tokenInput.value = '';
+		        refreshAuthUi();
+		        showAlert('Accesso admin rimosso da questo browser.');
+		      });
 
-	      function persistCfg() {
-	        saveGithubConfig({
-	          owner: ownerInput ? ownerInput.value : '',
+		      function persistCfg() {
+		        saveGithubConfig({
+		          owner: ownerInput ? ownerInput.value : '',
 	          repo: repoInput ? repoInput.value : '',
 	          branch: branchInput ? branchInput.value : '',
 	          productsPath: productsPathInput ? productsPathInput.value : '',
 	          useRawUrls: useRawCheckbox ? !!useRawCheckbox.checked : true
 	        });
 	      }
-	      [ownerInput, repoInput, branchInput, productsPathInput, useRawCheckbox].forEach((el) => {
-	        if (!el) return;
-	        el.addEventListener('input', persistCfg);
-	        el.addEventListener('change', persistCfg);
-	      });
-	    })();
+		      [ownerInput, repoInput, branchInput, productsPathInput, useRawCheckbox].forEach((el) => {
+		        if (!el) return;
+		        el.addEventListener('input', persistCfg);
+		        el.addEventListener('change', persistCfg);
+		      });
+		      refreshAuthUi();
+		    })();
 
 	    document.getElementById('btn-gh-publish').addEventListener('click', async () => {
 	      if (!confirm('Pubblicare online adesso? Questo aggiorna data/products.json su GitHub e rende gli annunci visibili sul sito.')) return;
