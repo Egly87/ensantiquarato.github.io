@@ -1692,14 +1692,35 @@
 	      return { requestId, requestPath, outputPath };
 	    }
 
-	    async function waitForAiResult(outputPath, { timeoutMs = 120000, intervalMs = 3000 } = {}) {
+	    async function triggerAiWorkflowDispatch(requestPath) {
+	      const cfg = loadGithubConfig();
+	      const token = loadGithubToken();
+	      if (!token) return false;
+	      const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/actions/workflows/ai-autofill.yml/dispatches`;
+	      try {
+	        await githubRequest(url, {
+	          method: 'POST',
+	          token,
+	          body: {
+	            ref: cfg.branch,
+	            inputs: { request_file: String(requestPath || '') }
+	          }
+	        });
+	        return true;
+	      } catch (err) {
+	        console.warn('AI workflow dispatch failed:', err && err.message ? err.message : err);
+	        return false;
+	      }
+	    }
+
+	    async function waitForAiResult(outputPath, { timeoutMs = 240000, intervalMs = 3500 } = {}) {
 	      const started = Date.now();
 	      while (Date.now() - started < timeoutMs) {
 	        const res = await getJsonFileFromGithub(outputPath);
 	        if (res) return res;
 	        await sleep(intervalMs);
 	      }
-	      throw new Error('AI: tempo scaduto. Riprova tra 1 minuto.');
+	      throw new Error('AI: nessun risultato entro 4 minuti. Controlla GitHub Actions > "AI Autofill (Annunci)" e verifica il secret OPENAI_API_KEY.');
 	    }
 
 	    async function runServerAiAutofill() {
@@ -1737,11 +1758,12 @@
 	        whatsappText: ''
 	      };
 
-	      const { requestId, outputPath } = await requestAiDraftOnGithub({
+	      const { requestId, requestPath, outputPath } = await requestAiDraftOnGithub({
 	        baseDraft,
 	        images: lastUploadedImages
 	      });
 
+	      await triggerAiWorkflowDispatch(requestPath);
 	      const res = await waitForAiResult(outputPath);
 	      if (res && res.ok === false) {
 	        const msg = res.error || 'Errore AI.';

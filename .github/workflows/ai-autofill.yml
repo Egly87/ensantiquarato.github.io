@@ -4,8 +4,14 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'data/ai-requests/**.json'
+      - 'data/ai-requests/*.json'
+      - 'data/ai-requests/**/*.json'
   workflow_dispatch:
+    inputs:
+      request_file:
+        description: "Path file request (opzionale)"
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -17,7 +23,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -27,14 +33,49 @@ jobs:
       - name: Detect request files
         id: req
         run: |
-          set -e
-          files="$(git diff --name-only '${{ github.event.before }}' '${{ github.sha }}' | grep '^data/ai-requests/.*\.json$' || true)"
+          set -euo pipefail
+
+          files=""
+          manual_file="${{ github.event.inputs.request_file || '' }}"
+          if [ -n "$manual_file" ] && [ -f "$manual_file" ]; then
+            files="$manual_file"
+          fi
+
+          if [ -z "$files" ] && [ "${{ github.event_name }}" = "push" ]; then
+            base="${{ github.event.before }}"
+            head="${{ github.sha }}"
+            if [ -n "$base" ] && [ "$base" != "0000000000000000000000000000000000000000" ] && git cat-file -e "$base^{commit}" 2>/dev/null; then
+              changed="$(git diff --name-only "$base" "$head" || true)"
+            else
+              changed="$(git show --name-only --pretty='' "$head" || true)"
+            fi
+            files="$(printf '%s\n' "$changed" | grep '^data/ai-requests/.*\.json$' || true)"
+          fi
+
+          if [ -z "$files" ]; then
+            for p in data/ai-requests/*.json; do
+              [ -e "$p" ] || continue
+              f="$(basename "$p")"
+              if [ ! -f "data/ai-results/$f" ]; then
+                files="$p"
+                break
+              fi
+            done
+          fi
+
+          if [ -z "$files" ]; then
+            files="$(ls -t data/ai-requests/*.json 2>/dev/null | head -n 1 || true)"
+          fi
+
           if [ -z "$files" ]; then
             echo "files=" >> "$GITHUB_OUTPUT"
+            echo "No AI request files found."
             exit 0
           fi
+
           # Collapse to single space separated list for the Node script.
           files="$(echo "$files" | tr '\n' ' ')"
+          echo "Detected request files: $files"
           echo "files=$files" >> "$GITHUB_OUTPUT"
 
       - name: Generate drafts (OpenAI)
@@ -59,4 +100,3 @@ jobs:
           else
             echo "No AI results to commit"
           fi
-
