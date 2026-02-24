@@ -1,0 +1,35 @@
+{
+  "requestId": "ai-1771955255229-1a4fe8",
+  "ok": false,
+  "error": "Missing OPENAI_API_KEY secret in GitHub Actions.",
+  "draft": {
+    "name": "Annuncio",
+    "section": "antiquariato",
+    "category": "arte",
+    "location": "24052, Azzano San Paolo",
+    "condition": "",
+    "postedAt": "2026-02-24",
+    "description": "",
+    "price": 0,
+    "year": "",
+    "dimensions": "",
+    "status": "available",
+    "featured": false,
+    "image": "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-1.jpg",
+    "gallery": [
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-1.jpg",
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-2.jpg",
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-3.jpg",
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-4.jpg",
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-5.jpg",
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-6.jpg",
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-7.jpg",
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-8.jpg",
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-9.jpg",
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771955017230-10.jpg"
+    ],
+    "stripeLinkBuy": "",
+    "paypalBuy": "",
+    "whatsappText": ""
+  }
+}
