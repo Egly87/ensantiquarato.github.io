@@ -29,5 +29,26 @@
     "stripeLinkBuy": "",
     "paypalBuy": "",
     "whatsappText": ""
+  },
+  {
+    "id": 2,
+    "name": "Macchina diorama in legno e vetro San You",
+    "section": "antiquariato",
+    "category": "collezionismo",
+    "location": "24052, Azzano San Paolo",
+    "condition": "Ottime",
+    "postedAt": "2026-02-24",
+    "description": "Splendido oggetto decorativo vintage in ottime condizioni, una macchina in legno massello che funge da vetrina per un piccolo diorama orientale. La struttura in legno presenta una finitura calda e lucida. La parte centrale è racchiusa in una teca di vetro che protegge una miniatura dettagliata raffigurante un paesaggio con una pagoda gialla, alberi (pini e palme) e figure di uccelli (gru o aironi) su un basamento in sughero e muschio sintetico. L'articolo è in ottime condizioni generali, come testimoniato dalle foto. L'oggetto misura circa 26 cm di lunghezza e 14 cm di altezza. Un dettaglio funzionale importante è che le ruote sono mobili e non fisse. Perfetto per collezionisti di miniature, amanti dell'arredamento orientale o come pezzo unico da esposizione. Presente adesivo del brand 'San You' sul fondo.",
+    "price": 49,
+    "shippingCost": 10,
+    "year": "1990",
+    "dimensions": "25x12x12cm",
+    "status": "available",
+    "featured": true,
+    "image": "",
+    "gallery": [],
+    "stripeLinkBuy": "",
+    "paypalBuy": "",
+    "whatsappText": ""
   }
 ]
