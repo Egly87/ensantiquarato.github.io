@@ -235,12 +235,13 @@ a:hover {
 .nav-link-cart {
   display: inline-flex;
   align-items: center;
-  gap: 0.42rem;
+  justify-content: center;
+  gap: 0.18rem;
 }
 
 .cart-icon-svg {
-  width: 15px;
-  height: 15px;
+  width: 13px;
+  height: 13px;
   stroke: currentColor;
   stroke-width: 1.8;
   fill: none;
@@ -250,15 +251,15 @@ a:hover {
 }
 
 .cart-count-badge {
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
   border-radius: 999px;
   background: var(--accent);
   color: #fff;
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 700;
-  line-height: 18px;
+  line-height: 16px;
   text-align: center;
 }
 
@@ -269,21 +270,16 @@ a:hover {
   z-index: 2500;
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  justify-content: center;
   border-radius: 999px;
   border: 1px solid var(--line-strong);
   background: rgba(255, 255, 255, 0.96);
   color: var(--ink);
   box-shadow: var(--shadow-soft);
-  padding: 0.55rem 0.8rem;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   text-decoration: none;
-}
-
-.cart-fab .cart-fab-text {
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
 }
 
 .cart-fab:hover {
@@ -1975,9 +1971,7 @@ body.gallery-open {
     display: none;
   }
 
-  .nav-link-cart .cart-count-badge {
-    margin-left: 0.1rem;
-  }
+  .nav-link-cart .cart-count-badge { margin-left: 0; }
 
   .nav-link {
     flex: 0 0 auto;

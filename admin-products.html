@@ -401,7 +401,7 @@
 	              <button type="button" id="btn-copy-chatgpt-prompt" class="btn-secondary">Copia prompt ChatGPT</button>
 	              <button type="button" id="btn-share-chatgpt-prompt" class="btn-secondary">Condividi prompt</button>
 	            </div>
-	            <textarea id="draft-json" class="draft-box" placeholder="{\n  &quot;name&quot;: &quot;...&quot;,\n  &quot;section&quot;: &quot;usato&quot;,\n  &quot;category&quot;: &quot;moda&quot;,\n  &quot;location&quot;: &quot;Roma&quot;,\n  &quot;condition&quot;: &quot;Ottimo&quot;,\n  &quot;postedAt&quot;: &quot;2026-02-08&quot;,\n  &quot;description&quot;: &quot;...&quot;,\n  &quot;price&quot;: 0,\n  &quot;year&quot;: &quot;...&quot;,\n  &quot;dimensions&quot;: &quot;...&quot;,\n  &quot;status&quot;: &quot;available&quot;,\n  &quot;featured&quot;: false,\n  &quot;image&quot;: &quot;assets/products/...&quot;,\n  &quot;gallery&quot;: [&quot;assets/products/...&quot;],\n  &quot;stripeLinkBuy&quot;: &quot;&quot;,\n  &quot;paypalBuy&quot;: &quot;&quot;,\n  &quot;whatsappText&quot;: &quot;...&quot;\n}"></textarea>
+	            <textarea id="draft-json" class="draft-box" placeholder="{\n  &quot;name&quot;: &quot;...&quot;,\n  &quot;section&quot;: &quot;usato&quot;,\n  &quot;category&quot;: &quot;moda&quot;,\n  &quot;location&quot;: &quot;Roma&quot;,\n  &quot;condition&quot;: &quot;Ottimo&quot;,\n  &quot;postedAt&quot;: &quot;2026-02-08&quot;,\n  &quot;description&quot;: &quot;...&quot;,\n  &quot;price&quot;: 0,\n  &quot;shippingCost&quot;: 0,\n  &quot;year&quot;: &quot;...&quot;,\n  &quot;dimensions&quot;: &quot;...&quot;,\n  &quot;status&quot;: &quot;available&quot;,\n  &quot;featured&quot;: false,\n  &quot;image&quot;: &quot;assets/products/...&quot;,\n  &quot;gallery&quot;: [&quot;assets/products/...&quot;],\n  &quot;stripeLinkBuy&quot;: &quot;&quot;,\n  &quot;paypalBuy&quot;: &quot;&quot;,\n  &quot;whatsappText&quot;: &quot;...&quot;\n}"></textarea>
 	            <div class="publish-actions" style="margin-top:10px;">
 	              <button type="button" id="btn-apply-draft" class="btn-secondary">Applica bozza</button>
 	              <button type="button" id="btn-clear-draft" class="btn-secondary">Pulisci bozza</button>
@@ -461,6 +461,13 @@
               <label for="price">Prezzo (€) *</label>
               <input type="number" id="price" name="price" step="0.01" min="0" required>
             </div>
+            <div class="form-group">
+              <label for="shipping-cost">Spese spedizione (€) *</label>
+              <input type="number" id="shipping-cost" name="shippingCost" step="0.01" min="0" required>
+            </div>
+          </div>
+
+          <div class="form-row">
             <div class="form-group">
               <label for="year">Periodo (es: 1880-1890)</label>
               <input type="text" id="year" name="year">
@@ -991,6 +998,7 @@
         `Categoria: ${product.category || 'N/D'}`,
         `Zona: ${product.location || 'N/D'}`,
         `Condizione: ${product.condition || 'N/D'}`,
+        `Spedizione: EUR ${Number(product.shippingCost || 0).toFixed(2)}`,
         `Periodo: ${product.year || 'N/D'}`,
         product.description || '',
         `Link: ${buildProductUrl(product.id)}`,
@@ -1013,6 +1021,7 @@
 		      const form = e.target;
 		      const formData = new FormData(form);
 		      const parsedPrice = parseFloat(formData.get('price'));
+		      const parsedShipping = parseFloat(formData.get('shippingCost'));
 		      const postedAtRaw = String(formData.get('postedAt') || '').trim();
 	      
 	      const product = {
@@ -1025,6 +1034,7 @@
 	        postedAt: postedAtRaw || new Date().toISOString().slice(0, 10),
 	        description: formData.get('description'),
 	        price: Number.isFinite(parsedPrice) ? parsedPrice : 0,
+	        shippingCost: Number.isFinite(parsedShipping) ? parsedShipping : 0,
 	        year: formData.get('year'),
 	        dimensions: formData.get('dimensions'),
 	        status: formData.get('status'),
@@ -1064,6 +1074,8 @@
 	      form.reset();
 	      const postedAtEl = document.getElementById('postedAt');
 	      if (postedAtEl) postedAtEl.value = new Date().toISOString().slice(0, 10);
+	      const shippingEl = document.getElementById('shipping-cost');
+	      if (shippingEl && !shippingEl.value) shippingEl.value = '0';
 	      document.getElementById('product-form').querySelector('input[name="id"]')?.remove();
 	      document.getElementById('btn-save-product').textContent = 'Salva bozza (solo locale)';
 	    });
@@ -1072,6 +1084,8 @@
 	      document.getElementById('product-form').reset();
 	      const postedAtEl = document.getElementById('postedAt');
 	      if (postedAtEl) postedAtEl.value = new Date().toISOString().slice(0, 10);
+	      const shippingEl = document.getElementById('shipping-cost');
+	      if (shippingEl && !shippingEl.value) shippingEl.value = '0';
 	      document.getElementById('product-form').querySelector('input[name="id"]')?.remove();
 	      document.getElementById('btn-save-product').textContent = 'Salva bozza (solo locale)';
 	    });
@@ -1246,6 +1260,7 @@
 	      }
 	      if (draft.description) document.getElementById('description').value = String(draft.description);
 	      if (draft.price != null) document.getElementById('price').value = String(draft.price);
+	      if (draft.shippingCost != null) document.getElementById('shipping-cost').value = String(draft.shippingCost);
 	      if (draft.year) document.getElementById('year').value = String(draft.year);
 	      if (draft.dimensions) document.getElementById('dimensions').value = String(draft.dimensions);
 	      if (draft.status) document.getElementById('status').value = String(draft.status);
@@ -1404,6 +1419,7 @@
 		      if (!String(product.category || '').trim()) return 'category';
 		      if (!String(product.section || '').trim()) return 'section';
 		      if (!String(product.description || '').trim()) return 'description';
+		      if (!String(document.getElementById('shipping-cost')?.value || '').trim()) return 'shipping-cost';
 		      if (!String(product.image || '').trim()) return 'image-url';
 		      if (!Array.isArray(product.gallery) || product.gallery.length === 0) return 'gallery-urls';
 		      return '';
@@ -1424,6 +1440,7 @@
 		        postedAt: postedAtRaw || new Date().toISOString().slice(0, 10),
 		        description: String(formData.get('description') || ''),
 		        price: Number.isFinite(parsedPrice) ? parsedPrice : 0,
+		        shippingCost: Number.isFinite(parsedShipping) ? parsedShipping : 0,
 		        year: String(formData.get('year') || ''),
 		        dimensions: String(formData.get('dimensions') || ''),
 		        status: String(formData.get('status') || 'available'),
@@ -1444,6 +1461,8 @@
 			      form.reset();
 			      const postedAtEl = document.getElementById('postedAt');
 			      if (postedAtEl) postedAtEl.value = new Date().toISOString().slice(0, 10);
+			      const shippingEl = document.getElementById('shipping-cost');
+			      if (shippingEl && !shippingEl.value) shippingEl.value = '0';
 			      document.querySelector('input[name=\"id\"]')?.remove();
 			      document.getElementById('btn-save-product').textContent = 'Salva bozza (solo locale)';
 			    }
@@ -1515,6 +1534,7 @@
 	      const effectiveGallery = currentGallery.length ? currentGallery : (currentImage ? [currentImage] : []);
 
 	      const today = new Date().toISOString().slice(0, 10);
+	      const shippingRaw = parseFloat(document.getElementById('shipping-cost')?.value || '0');
 	      const imageUrls = lastUploadedImages.map((u) => u.pagesUrl).filter(Boolean);
 	      const rawUrls = lastUploadedImages.map((u) => u.rawUrl).filter(Boolean);
 	      const draft = {
@@ -1526,6 +1546,7 @@
 	        postedAt: today,
 	        description: '',
 	        price: 0,
+	        shippingCost: Number.isFinite(shippingRaw) ? shippingRaw : 0,
 	        year: '',
 	        dimensions: '',
 	        status: 'available',
@@ -1752,6 +1773,7 @@
 	      } catch {}
 
 	      const today = new Date().toISOString().slice(0, 10);
+	      const shippingRaw = parseFloat(document.getElementById('shipping-cost')?.value || '0');
 	      const { image, gallery } = getEffectiveImageAndGallery();
 
 	      const baseDraft = {
@@ -1763,6 +1785,7 @@
 	        postedAt: today,
 	        description: '',
 	        price: 0,
+	        shippingCost: Number.isFinite(shippingRaw) ? shippingRaw : 0,
 	        year: '',
 	        dimensions: '',
 	        status: 'available',
@@ -1794,6 +1817,7 @@
 	      draft.status = 'available';
 	      draft.postedAt = today;
 	      draft.price = coercePrice(draft.price);
+	      draft.shippingCost = coercePrice(draft.shippingCost != null ? draft.shippingCost : baseDraft.shippingCost);
 	      draft.image = baseDraft.image;
 	      draft.gallery = baseDraft.gallery;
 
@@ -1850,6 +1874,7 @@
           <p><strong>Sezione:</strong> ${product.section || 'antiquariato'}</p>
           <p><strong>Categoria:</strong> ${product.category}</p>
           <p><strong>Prezzo:</strong> €${Number(product.price || 0).toFixed(2)}</p>
+          <p><strong>Spedizione:</strong> €${Number(product.shippingCost || 0).toFixed(2)}</p>
           <p><strong>Status:</strong> <span style="color: ${
             product.status === 'available' ? '#4caf50' : 
             product.status === 'reserved' ? '#ff9800' : '#dc3545'
@@ -1883,6 +1908,7 @@
         : (product.postedAt || '');
       document.getElementById('description').value = product.description;
       document.getElementById('price').value = product.price;
+      document.getElementById('shipping-cost').value = Number(product.shippingCost || 0);
       document.getElementById('year').value = product.year;
       document.getElementById('dimensions').value = product.dimensions;
       document.getElementById('status').value = product.status;
@@ -1920,6 +1946,8 @@
 	    (function initFormDefaults() {
 	      const postedAtEl = document.getElementById('postedAt');
 	      if (postedAtEl && !postedAtEl.value) postedAtEl.value = new Date().toISOString().slice(0, 10);
+	      const shippingEl = document.getElementById('shipping-cost');
+	      if (shippingEl && !shippingEl.value) shippingEl.value = '0';
 	    })();
 	    applyInsertOnlyMode();
 

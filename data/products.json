@@ -9,6 +9,7 @@
     "postedAt": "2026-02-24",
     "description": "Quadro",
     "price": 249,
+    "shippingCost": 15,
     "year": "",
     "dimensions": "40x30cm",
     "status": "available",

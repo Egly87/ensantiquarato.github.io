@@ -450,6 +450,10 @@ const app = {
             <span class="spec-value">${product.condition || '—'}</span>
           </div>
           <div class="spec-row">
+            <span class="spec-label">Spedizione</span>
+            <span class="spec-value">€ ${Number(product.shippingCost || 0).toFixed(2)}</span>
+          </div>
+          <div class="spec-row">
             <span class="spec-label">Stato</span>
             <span class="spec-value">${statusText}</span>
           </div>
@@ -918,7 +922,7 @@ const app = {
       fab.setAttribute('aria-label', 'Apri carrello');
       fab.innerHTML = `
         <svg class="cart-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h2l2 10h10l2-7H7"/><circle cx="10" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg>
-        <span class="cart-fab-text">Carrello</span>
+        <span class="sr-only">Carrello</span>
         <span class="cart-count-badge hidden" data-cart-count>0</span>
       `;
       document.body.appendChild(fab);

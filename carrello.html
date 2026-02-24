@@ -30,7 +30,7 @@
           <a href="catalogo.html#preferiti=1" class="nav-link">Preferiti</a>
           <a href="chi-siamo.html" class="nav-link">Chi siamo</a>
           <a href="contatti.html" class="nav-link">Contatti</a>
-          <a href="carrello.html" class="nav-link nav-link-cart active"><svg class="cart-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h2l2 10h10l2-7H7"/><circle cx="10" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg><span>Carrello</span><span class="cart-count-badge hidden" data-cart-count>0</span></a>
+          <a href="carrello.html" class="nav-link nav-link-cart active"><svg class="cart-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h2l2 10h10l2-7H7"/><circle cx="10" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg><span class="sr-only">Carrello</span><span class="cart-count-badge hidden" data-cart-count>0</span></a>
         </nav>
       </div>
     </header>
@@ -180,12 +180,14 @@
     function updateTotals(products) {
       const cart = getCart();
       let subtotal = 0;
+      let shipping = 0;
       cart.forEach(item => {
         const product = products.find(p => p.id === item.productId);
-        if (product) subtotal += product.price * item.quantity;
+        if (!product) return;
+        const qty = Number(item.quantity || 0);
+        subtotal += Number(product.price || 0) * qty;
+        shipping += Number(product.shippingCost || 0) * qty;
       });
-
-      const shipping = subtotal > 0 ? 10 : 0;
       const total = subtotal + shipping;
 
       document.getElementById('subtotal').textContent = `€${subtotal.toFixed(2)}`;
@@ -255,6 +257,7 @@
                 <span>${getStatusText(product.status)}</span>
               </div>
               <div class="product-price">€ ${product.price.toFixed(2)}</div>
+              <div class="small">Spedizione: € ${Number(product.shippingCost || 0).toFixed(2)} x ${item.quantity}</div>
               <div class="quantity-control">
                 <button class="quantity-btn" onclick="updateQuantity(${item.productId}, ${item.quantity - 1})">−</button>
                 <span style="min-width: 32px; text-align: center;">${item.quantity}</span>

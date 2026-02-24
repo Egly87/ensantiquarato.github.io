@@ -76,6 +76,9 @@ function ensureDraftShape(draft, baseDraft) {
   out.status = 'available';
   out.postedAt = (baseDraft && baseDraft.postedAt) ? baseDraft.postedAt : (out.postedAt || new Date().toISOString().slice(0, 10));
   out.price = coercePrice(out.price);
+  out.shippingCost = coercePrice(
+    out.shippingCost != null ? out.shippingCost : (baseDraft && baseDraft.shippingCost != null ? baseDraft.shippingCost : 0)
+  );
 
   // Enforce image/gallery from base draft (these are stable file/URL references).
   if (baseDraft && baseDraft.image) out.image = baseDraft.image;
@@ -113,6 +116,7 @@ async function callOpenAI({ baseDraft, imageUrls }) {
     '- condition: breve (es: "Nuovo", "Ottimo", "Buono", "Da sistemare").',
     '- description: dettagliata, onesta, in italiano.',
     '- price: numero in EUR (se non sicuro, 0).',
+    '- shippingCost: costo spedizione in EUR (se non noto, usa 0).',
     '- year: periodo/anni (se stimati, scrivi "da verificare").',
     '- dimensions: dimensioni (se non visibili, "").',
     '- status: "available".',
