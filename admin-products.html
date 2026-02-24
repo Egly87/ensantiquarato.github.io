@@ -1425,12 +1425,13 @@
 		      return '';
 		    }
 
-		    function readProductFromForm() {
-		      const form = document.getElementById('product-form');
-		      const formData = new FormData(form);
-		      const parsedPrice = parseFloat(formData.get('price'));
-		      const postedAtRaw = String(formData.get('postedAt') || '').trim();
-		      return {
+			    function readProductFromForm() {
+			      const form = document.getElementById('product-form');
+			      const formData = new FormData(form);
+			      const parsedPrice = parseFloat(formData.get('price'));
+			      const parsedShipping = parseFloat(formData.get('shippingCost'));
+			      const postedAtRaw = String(formData.get('postedAt') || '').trim();
+			      return {
 		        id: parseInt(formData.get('id')) || generateId(),
 		        name: String(formData.get('name') || ''),
 		        section: String(formData.get('section') || '').trim() || 'antiquariato',
