@@ -200,15 +200,17 @@
     }
 
     function renderItemActions(product) {
-      const links = [];
+      const links = [
+        `<a href="prodotto.html?id=${product.id}">Apri annuncio</a>`
+      ];
       if (product.stripeLinkBuy) {
         links.push(`<a href="${product.stripeLinkBuy}" target="_blank" rel="noopener">Paga con Stripe</a>`);
       }
       if (product.paypalBuy) {
         links.push(`<a href="${product.paypalBuy}" target="_blank" rel="noopener">Paga con PayPal</a>`);
       }
-      if (!links.length) {
-        return `<div class="small">Pagamento disponibile su richiesta.</div>`;
+      if (!product.stripeLinkBuy && !product.paypalBuy) {
+        links.push(`<a href="https://wa.me/393296627575?text=${encodeURIComponent(`Ciao, vorrei acquistare: ${product.name}`)}" target="_blank" rel="noopener">Acquista su WhatsApp</a>`);
       }
       return `<div class="payment-links">${links.join('')}</div>`;
     }
