@@ -1,0 +1,33 @@
+{
+  "requestId": "ai-debug-1771956840",
+  "createdAt": "2026-02-24T18:14:00Z",
+  "outputPath": "data/ai-results/ai-debug-1771956840.json",
+  "baseDraft": {
+    "name": "",
+    "section": "usato",
+    "category": "altro",
+    "location": "",
+    "condition": "",
+    "postedAt": "2026-02-24",
+    "description": "",
+    "price": 0,
+    "year": "",
+    "dimensions": "",
+    "status": "available",
+    "featured": false,
+    "image": "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771956662840-1.jpg",
+    "gallery": [
+      "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771956662840-1.jpg"
+    ],
+    "stripeLinkBuy": "",
+    "paypalBuy": "",
+    "whatsappText": ""
+  },
+  "images": [
+    {
+      "path": "assets/products/ad-1771956662840-1.jpg",
+      "rawUrl": "https://raw.githubusercontent.com/Egly87/ensantiquarato.github.io/main/assets/products/ad-1771956662840-1.jpg",
+      "pagesUrl": "https://egly87.github.io/ensantiquarato.github.io/assets/products/ad-1771956662840-1.jpg"
+    }
+  ]
+}
