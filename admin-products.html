@@ -375,16 +375,16 @@
 		            <summary style="cursor:pointer;color:#d4af37;font-weight:700;">Step 1 — Carica foto su GitHub (JPG ottimizzate)</summary>
 		            <p class="helper-note">Seleziona le foto dal telefono/PC: verranno caricate in <code>assets/products/</code> sul repo GitHub (serve Token GitHub in alto). Le convertiamo in <strong>JPG</strong> (piu compatibile sui telefoni).</p>
 		            <p class="helper-note"><strong>1 click:</strong> seleziona foto → <strong>Riempi tutti i campi (AI)</strong> (fa anche l'upload) → <strong>Pubblica annuncio</strong>.</p>
-	            <div class="form-row">
-	              <div class="form-group">
-	                <label for="gh-image-prefix">Nome file base (opzionale)</label>
-	                <input type="text" id="gh-image-prefix" placeholder="es: giacca-pelle-vintage">
-	              </div>
-	              <div class="form-group">
-	                <label for="gh-images-input">Foto (multiple)</label>
-	                <input type="file" id="gh-images-input" accept="image/*" multiple>
-	              </div>
-	            </div>
+		            <div class="form-row">
+		              <div class="form-group">
+		                <label for="gh-image-prefix">Nome file base (opzionale)</label>
+		                <input type="text" id="gh-image-prefix" placeholder="es: giacca-pelle-vintage">
+		              </div>
+		              <div class="form-group">
+		                <label for="gh-images-input">Foto (max 10, supporto HEIC/HEIF)</label>
+		                <input type="file" id="gh-images-input" accept="image/*,.heic,.HEIC,.heif,.HEIF" multiple>
+		              </div>
+		            </div>
 		            <div class="publish-actions">
 		              <button type="button" id="btn-ai-autofill" class="btn-secondary">Riempi tutti i campi (AI)</button>
 		              <button type="button" id="btn-publish-ad" class="btn-secondary">Pubblica annuncio</button>
@@ -657,18 +657,64 @@
         || '';
     }
 
-    function saveGithubToken(token, remember) {
-      // Never store on the server; this is client-only. Still: treat it as sensitive.
-      sessionStorage.removeItem(GITHUB_TOKEN_STORAGE_KEY);
-      localStorage.removeItem(GITHUB_TOKEN_STORAGE_KEY);
-      if (!token) return;
-      if (remember) localStorage.setItem(GITHUB_TOKEN_STORAGE_KEY, token);
-      else sessionStorage.setItem(GITHUB_TOKEN_STORAGE_KEY, token);
-    }
-
-	    function base64EncodeUnicode(str) {
-	      return btoa(unescape(encodeURIComponent(str)));
+	    function saveGithubToken(token, remember) {
+	      // Never store on the server; this is client-only. Still: treat it as sensitive.
+	      sessionStorage.removeItem(GITHUB_TOKEN_STORAGE_KEY);
+	      localStorage.removeItem(GITHUB_TOKEN_STORAGE_KEY);
+	      if (!token) return;
+	      if (remember) localStorage.setItem(GITHUB_TOKEN_STORAGE_KEY, token);
+	      else sessionStorage.setItem(GITHUB_TOKEN_STORAGE_KEY, token);
 	    }
+
+	    function isHeicOrHeifFile(file) {
+	      if (!file) return false;
+	      const type = String(file.type || '').toLowerCase();
+	      const name = String(file.name || '').toLowerCase();
+	      return type.includes('heic')
+	        || type.includes('heif')
+	        || name.endsWith('.heic')
+	        || name.endsWith('.heif');
+	    }
+
+	    let heic2anyLoaderPromise = null;
+	    async function loadHeic2Any() {
+	      if (typeof window.heic2any === 'function') return window.heic2any;
+	      if (heic2anyLoaderPromise) return heic2anyLoaderPromise;
+	      heic2anyLoaderPromise = new Promise((resolve, reject) => {
+	        const script = document.createElement('script');
+	        script.src = 'https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';
+	        script.async = true;
+	        script.onload = () => {
+	          if (typeof window.heic2any === 'function') resolve(window.heic2any);
+	          else reject(new Error('Libreria HEIC non disponibile.'));
+	        };
+	        script.onerror = () => reject(new Error('Impossibile caricare la libreria HEIC.'));
+	        document.head.appendChild(script);
+	      });
+	      return heic2anyLoaderPromise;
+	    }
+
+	    async function convertHeicToJpegBlob(file) {
+	      const heic2any = await loadHeic2Any();
+	      const out = await heic2any({
+	        blob: file,
+	        toType: 'image/jpeg',
+	        quality: 0.92
+	      });
+	      const first = Array.isArray(out) ? out[0] : out;
+	      if (!(first instanceof Blob)) throw new Error('Conversione HEIC fallita.');
+	      return first;
+	    }
+
+	    function getSelectedImages(max = 10) {
+	      const selected = Array.from(document.getElementById('gh-images-input')?.files || []);
+	      if (!selected.length) return [];
+	      return selected.slice(0, max);
+	    }
+
+		    function base64EncodeUnicode(str) {
+		      return btoa(unescape(encodeURIComponent(str)));
+		    }
 
 	    async function fileToBase64(file) {
 	      return new Promise((resolve, reject) => {
@@ -701,13 +747,23 @@
 	    }
 
 	    async function convertImageToJpeg(file, { maxSize = 1600, quality = 0.86 } = {}) {
+	      let sourceFile = file;
+	      if (isHeicOrHeifFile(file)) {
+	        try {
+	          sourceFile = await convertHeicToJpegBlob(file);
+	        } catch (err) {
+	          const msg = err && err.message ? err.message : 'Conversione HEIC fallita.';
+	          throw new Error(`HEIC/HEIF non convertibile (${String(file.name || 'file')}). ${msg}`);
+	        }
+	      }
+
 	      // Try createImageBitmap first (handles EXIF orientation on supporting browsers).
 	      let bitmap = null;
 	      if (typeof createImageBitmap === 'function') {
 	        try {
-	          bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+	          bitmap = await createImageBitmap(sourceFile, { imageOrientation: 'from-image' });
 	        } catch {
-	          try { bitmap = await createImageBitmap(file); } catch { bitmap = null; }
+	          try { bitmap = await createImageBitmap(sourceFile); } catch { bitmap = null; }
 	        }
 	      }
 
@@ -718,7 +774,7 @@
 	          srcW = bitmap.width;
 	          srcH = bitmap.height;
 	        } else {
-	          const url = URL.createObjectURL(file);
+	          const url = URL.createObjectURL(sourceFile);
 	          try {
 	            const img = await new Promise((resolve, reject) => {
 	              const el = new Image();
@@ -822,6 +878,7 @@
 	      const token = loadGithubToken();
 	      if (!token) throw new Error('Inserisci il Token GitHub per caricare le foto.');
 	      if (!files || !files.length) throw new Error('Seleziona almeno una foto.');
+	      if (files.length > 10) throw new Error('Massimo 10 foto per annuncio.');
 
 	      const base = slugify(baseName) || `p${Date.now()}`;
 	      const uploaded = [];
@@ -1222,31 +1279,38 @@
 	    });
 
 		    // GitHub image upload -> fills image + gallery
-		    const imagesInput = document.getElementById('gh-images-input');
-		    const imagesPreview = document.getElementById('gh-upload-preview');
-		    const imagesStatus = document.getElementById('gh-upload-status');
-		    const imagesLinks = document.getElementById('gh-upload-links');
-		    let lastUploadedImages = [];
-		    let lastUploadBase = '';
-		    if (imagesInput) {
-		      imagesInput.addEventListener('change', () => {
-		        const prefixEl = document.getElementById('gh-image-prefix');
-		        const files = Array.from(imagesInput.files || []);
-		        lastUploadedImages = [];
-		        if (!lastUploadBase) lastUploadBase = `ad-${Date.now()}`;
-		        if (prefixEl && !prefixEl.value.trim()) prefixEl.value = lastUploadBase;
-		        if (imagesLinks) imagesLinks.innerHTML = '';
-		        if (imagesPreview) {
+	    const imagesInput = document.getElementById('gh-images-input');
+	    const imagesPreview = document.getElementById('gh-upload-preview');
+	    const imagesStatus = document.getElementById('gh-upload-status');
+	    const imagesLinks = document.getElementById('gh-upload-links');
+	    let lastUploadedImages = [];
+	    let lastUploadBase = '';
+	    if (imagesInput) {
+	      imagesInput.addEventListener('change', () => {
+	        const prefixEl = document.getElementById('gh-image-prefix');
+	        const selectedCount = Array.from(imagesInput.files || []).length;
+	        const files = getSelectedImages(10);
+	        lastUploadedImages = [];
+	        if (!lastUploadBase) lastUploadBase = `ad-${Date.now()}`;
+	        if (prefixEl && !prefixEl.value.trim()) prefixEl.value = lastUploadBase;
+	        if (imagesLinks) imagesLinks.innerHTML = '';
+	        if (imagesPreview) {
 		          imagesPreview.innerHTML = files.map((f) => {
 		            const url = URL.createObjectURL(f);
 	            return `<img src="${url}" alt="${f.name}">`;
 	          }).join('');
 	        }
 	        if (imagesStatus) {
-	          imagesStatus.textContent = files.length ? `${files.length} foto selezionate (pronte per upload).` : 'Nessuna foto caricata.';
+	          if (!files.length) {
+	            imagesStatus.textContent = 'Nessuna foto caricata.';
+	          } else if (selectedCount > 10) {
+	            imagesStatus.textContent = `${selectedCount} foto selezionate: useremo solo le prime 10.`;
+	          } else {
+	            imagesStatus.textContent = `${files.length} foto selezionate (pronte per upload).`;
+	          }
 	        }
-		      });
-		    }
+	      });
+	    }
 
 		    function setButtonsDisabled(disabled) {
 		      ['btn-gh-upload-images', 'btn-ai-autofill', 'btn-publish-ad'].forEach((id) => {
@@ -1255,14 +1319,14 @@
 		      });
 		    }
 
-		    async function ensureImagesUploaded() {
-		      if (lastUploadedImages.length) return lastUploadedImages;
+	    async function ensureImagesUploaded() {
+	      if (lastUploadedImages.length) return lastUploadedImages;
 
-		      const files = Array.from(document.getElementById('gh-images-input')?.files || []);
-		      const prefixEl = document.getElementById('gh-image-prefix');
-		      const prefix = (prefixEl && prefixEl.value.trim())
-		        || slugify(document.getElementById('name')?.value)
-		        || lastUploadBase
+	      const files = getSelectedImages(10);
+	      const prefixEl = document.getElementById('gh-image-prefix');
+	      const prefix = (prefixEl && prefixEl.value.trim())
+	        || slugify(document.getElementById('name')?.value)
+	        || lastUploadBase
 		        || `ad-${Date.now()}`;
 
 		      if (!files.length) throw new Error('Seleziona almeno 1 foto.');
@@ -1717,7 +1781,7 @@
 	      try {
 	        const prompt = buildChatgptPrompt();
 	        if (navigator.share) {
-	          const files = Array.from(document.getElementById('gh-images-input')?.files || []);
+	          const files = getSelectedImages(10);
 	          const shareData = { title: 'ENS Vintage - Prompt annuncio', text: prompt };
 	          // On supported mobile browsers you can share both text + photos to the ChatGPT app.
 	          if (files.length && navigator.canShare && navigator.canShare({ files })) {
