@@ -318,7 +318,7 @@
 	        </div>
 	        <details style="margin-top:10px;">
 	          <summary style="cursor:pointer;color:#d4af37;font-weight:700;">AI automatica (1 click, senza chiavi sul telefono)</summary>
-	          <p class="helper-note">Per usare <strong>Auto-compila (AI)</strong> imposta su GitHub un secret Actions: <code>OPENAI_API_KEY</code> (accettati anche <code>OPENAI_KEY</code> o <code>CHATGPT_API_KEY</code>). Opzionale: <code>OPENAI_MODEL</code>. La chiave non viene mai salvata nel sito.</p>
+	          <p class="helper-note">Per usare <strong>Auto-compila (AI)</strong> imposta su GitHub un secret Actions: <code>OPENAI_API_KEY</code> (accettati anche <code>OPENAI_KEY</code> o <code>CHATGPT_API_KEY</code>). Opzionale: <code>OPENAI_MODEL</code>. Serve un account OpenAI API con billing/credito attivo. La chiave non viene mai salvata nel sito.</p>
 	          <p class="helper-note">Se l'AI non e' configurata, usa <strong>Condividi prompt</strong> e incolla il JSON.</p>
 	        </details>
 	        <details style="margin-top:10px;">
@@ -1608,6 +1608,22 @@
 	      return Number.isFinite(n) ? n : 0;
 	    }
 
+	    function formatAiErrorMessage(raw) {
+	      const msg = String(raw || '').trim();
+	      const low = msg.toLowerCase();
+	      if (!msg) return 'Errore AI.';
+	      if (low.includes('missing openai') || low.includes('openai_api_key')) {
+	        return 'AI non configurata: aggiungi il secret OPENAI_API_KEY (oppure OPENAI_KEY/CHATGPT_API_KEY) in GitHub Actions.';
+	      }
+	      if (low.includes('insufficient_quota') || low.includes('exceeded your current quota') || low.includes('billing')) {
+	        return 'AI non disponibile: quota OpenAI esaurita o billing non attivo. Apri platform.openai.com/billing e abilita credito API.';
+	      }
+	      if (low.includes('rate limit')) {
+	        return 'AI temporaneamente occupata (rate limit). Riprova tra 1-2 minuti.';
+	      }
+	      return msg;
+	    }
+
 	    function base64DecodeUnicode(str) {
 	      const cleaned = String(str || '').replace(/\n/g, '');
 	      try {
@@ -1766,8 +1782,7 @@
 	      await triggerAiWorkflowDispatch(requestPath);
 	      const res = await waitForAiResult(outputPath);
 	      if (res && res.ok === false) {
-	        const msg = res.error || 'Errore AI.';
-	        throw new Error(msg);
+	        throw new Error(formatAiErrorMessage(res.error || 'Errore AI.'));
 	      }
 
 	      const draft = (res && res.draft && typeof res.draft === 'object') ? res.draft : res;
