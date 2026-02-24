@@ -6,7 +6,8 @@
  * Reads request JSON, calls OpenAI Vision, writes a result JSON to `data/ai-results/`.
  *
  * Env:
- * - OPENAI_API_KEY (required in Actions secrets)
+ * - OPENAI_API_KEY (recommended in Actions secrets)
+ * - OPENAI_KEY or CHATGPT_API_KEY (fallback names supported)
  * - OPENAI_MODEL (optional, default: gpt-4o-mini)
  * - OPENAI_ENDPOINT (optional, default: https://api.openai.com/v1/chat/completions)
  */
@@ -14,7 +15,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY
+  || process.env.OPENAI_KEY
+  || process.env.CHATGPT_API_KEY
+  || '';
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 const OPENAI_ENDPOINT = process.env.OPENAI_ENDPOINT || 'https://api.openai.com/v1/chat/completions';
 
@@ -186,7 +190,7 @@ async function processRequestFile(reqPath) {
     const result = {
       requestId,
       ok: false,
-      error: 'Missing OPENAI_API_KEY secret in GitHub Actions.',
+      error: 'Missing OpenAI secret in GitHub Actions (OPENAI_API_KEY, OPENAI_KEY or CHATGPT_API_KEY).',
       draft: ensureDraftShape(baseDraft, baseDraft)
     };
     writeJson(absOut, result);
@@ -240,4 +244,3 @@ async function main() {
 }
 
 main();
-

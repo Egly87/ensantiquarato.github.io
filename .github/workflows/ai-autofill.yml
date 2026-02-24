@@ -82,6 +82,8 @@ jobs:
         if: steps.req.outputs.files != ''
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
+          CHATGPT_API_KEY: ${{ secrets.CHATGPT_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
           OPENAI_ENDPOINT: ${{ secrets.OPENAI_ENDPOINT }}
         run: |

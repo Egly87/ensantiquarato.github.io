@@ -318,7 +318,7 @@
 	        </div>
 	        <details style="margin-top:10px;">
 	          <summary style="cursor:pointer;color:#d4af37;font-weight:700;">AI automatica (1 click, senza chiavi sul telefono)</summary>
-	          <p class="helper-note">Per usare <strong>Auto-compila (AI)</strong> basta impostare su GitHub un secret Actions: <code>OPENAI_API_KEY</code> (opzionale: <code>OPENAI_MODEL</code>). La chiave non viene mai salvata nel sito.</p>
+	          <p class="helper-note">Per usare <strong>Auto-compila (AI)</strong> imposta su GitHub un secret Actions: <code>OPENAI_API_KEY</code> (accettati anche <code>OPENAI_KEY</code> o <code>CHATGPT_API_KEY</code>). Opzionale: <code>OPENAI_MODEL</code>. La chiave non viene mai salvata nel sito.</p>
 	          <p class="helper-note">Se l'AI non e' configurata, usa <strong>Condividi prompt</strong> e incolla il JSON.</p>
 	        </details>
 	        <details style="margin-top:10px;">
@@ -1720,7 +1720,7 @@
 	        if (res) return res;
 	        await sleep(intervalMs);
 	      }
-	      throw new Error('AI: nessun risultato entro 4 minuti. Controlla GitHub Actions > "AI Autofill (Annunci)" e verifica il secret OPENAI_API_KEY.');
+	      throw new Error('AI: nessun risultato entro 4 minuti. Controlla GitHub Actions > "AI Autofill (Annunci)" e verifica il secret OPENAI_API_KEY (oppure OPENAI_KEY/CHATGPT_API_KEY).');
 	    }
 
 	    async function runServerAiAutofill() {
