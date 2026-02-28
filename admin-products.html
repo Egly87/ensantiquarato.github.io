@@ -97,6 +97,7 @@
     }
     .product-actions {
       display: flex;
+      flex-wrap: wrap;
       gap: 10px;
       margin-top: 10px;
     }
@@ -119,6 +120,17 @@
     }
     .btn-ad {
       background: #1f7a3d;
+      color: #fff;
+      flex: 1;
+      padding: 8px;
+      text-align: center;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85em;
+    }
+    .btn-online {
+      background: #b8860b;
       color: #fff;
       flex: 1;
       padding: 8px;
@@ -401,13 +413,14 @@
 	              <button type="button" id="btn-copy-chatgpt-prompt" class="btn-secondary">Copia prompt ChatGPT</button>
 	              <button type="button" id="btn-share-chatgpt-prompt" class="btn-secondary">Condividi prompt</button>
 	            </div>
-	            <textarea id="draft-json" class="draft-box" placeholder="{\n  &quot;name&quot;: &quot;...&quot;,\n  &quot;section&quot;: &quot;usato&quot;,\n  &quot;category&quot;: &quot;moda&quot;,\n  &quot;location&quot;: &quot;Roma&quot;,\n  &quot;condition&quot;: &quot;Ottimo&quot;,\n  &quot;postedAt&quot;: &quot;2026-02-08&quot;,\n  &quot;description&quot;: &quot;...&quot;,\n  &quot;price&quot;: 0,\n  &quot;shippingCost&quot;: 0,\n  &quot;year&quot;: &quot;...&quot;,\n  &quot;dimensions&quot;: &quot;...&quot;,\n  &quot;status&quot;: &quot;available&quot;,\n  &quot;featured&quot;: false,\n  &quot;image&quot;: &quot;assets/products/...&quot;,\n  &quot;gallery&quot;: [&quot;assets/products/...&quot;],\n  &quot;stripeLinkBuy&quot;: &quot;&quot;,\n  &quot;paypalBuy&quot;: &quot;&quot;,\n  &quot;whatsappText&quot;: &quot;...&quot;\n}"></textarea>
-	            <div class="publish-actions" style="margin-top:10px;">
-	              <button type="button" id="btn-apply-draft" class="btn-secondary">Applica bozza</button>
-	              <button type="button" id="btn-clear-draft" class="btn-secondary">Pulisci bozza</button>
-	            </div>
-	            <p class="helper-note">Dopo l'approvazione, salva l'annuncio e poi clicca <strong>Pubblica online adesso</strong> in alto.</p>
-	          </details>
+		            <textarea id="draft-json" class="draft-box" placeholder="{\n  &quot;name&quot;: &quot;...&quot;,\n  &quot;section&quot;: &quot;usato&quot;,\n  &quot;category&quot;: &quot;moda&quot;,\n  &quot;location&quot;: &quot;Roma&quot;,\n  &quot;condition&quot;: &quot;Ottimo&quot;,\n  &quot;postedAt&quot;: &quot;2026-02-08&quot;,\n  &quot;description&quot;: &quot;...&quot;,\n  &quot;price&quot;: 0,\n  &quot;shippingCost&quot;: 0,\n  &quot;year&quot;: &quot;...&quot;,\n  &quot;dimensions&quot;: &quot;...&quot;,\n  &quot;status&quot;: &quot;available&quot;,\n  &quot;featured&quot;: false,\n  &quot;image&quot;: &quot;assets/products/...&quot;,\n  &quot;gallery&quot;: [&quot;assets/products/...&quot;],\n  &quot;stripeLinkBuy&quot;: &quot;&quot;,\n  &quot;paypalBuy&quot;: &quot;&quot;,\n  &quot;whatsappText&quot;: &quot;...&quot;\n}"></textarea>
+		            <div class="publish-actions" style="margin-top:10px;">
+		              <button type="button" id="btn-apply-draft" class="btn-secondary">Inserisci dalla bozza</button>
+		              <button type="button" id="btn-insert-from-draft" class="btn-secondary">Inserisci dalla bozza + vai al form</button>
+		              <button type="button" id="btn-clear-draft" class="btn-secondary">Pulisci bozza</button>
+		            </div>
+		            <p class="helper-note">Dopo l'approvazione puoi usare <strong>Inserisci online</strong> in basso, oppure pubblicare una bozza specifica dalla lista annunci.</p>
+		          </details>
 
           <div class="form-row">
             <div class="form-group">
@@ -532,10 +545,11 @@
 	            <input type="text" id="gallery-urls" name="gallery" placeholder="assets/products/1.jpg, assets/products/2.jpg">
 	          </div>
 
-		          <div style="display: flex; gap: 10px;" id="draft-actions">
-		            <button type="submit" class="btn-secondary" id="btn-save-product">Salva bozza (solo locale)</button>
-		            <button type="button" class="btn-secondary" id="btn-clear">Pulisci</button>
-		          </div>
+			          <div style="display: flex; gap: 10px; flex-wrap: wrap;" id="draft-actions">
+			            <button type="submit" class="btn-secondary" id="btn-save-product">Salva bozza (solo locale)</button>
+			            <button type="button" class="btn-secondary" id="btn-publish-ad-inline">Inserisci online</button>
+			            <button type="button" class="btn-secondary" id="btn-clear">Pulisci</button>
+			          </div>
 	        </form>
 	      </div>
 
@@ -1277,14 +1291,30 @@
 			      document.getElementById('btn-save-product').textContent = canApplyId ? 'Aggiorna bozza (solo locale)' : 'Salva bozza (solo locale)';
 			    }
 
-	    document.getElementById('btn-apply-draft')?.addEventListener('click', () => {
+	    function insertFromDraftJson(scrollToForm = false) {
 	      const txt = document.getElementById('draft-json')?.value.trim();
-	      if (!txt) return;
-	      try {
-	        const parsed = JSON.parse(txt);
-	        applyDraftToForm(parsed);
-	        showAlert('Bozza applicata al form.');
+	      if (!txt) throw new Error('Incolla prima una bozza JSON.');
+	      const parsed = JSON.parse(txt);
+	      applyDraftToForm(parsed);
+	      showAlert('Bozza inserita nel form.');
+	      if (scrollToForm) {
+	        document.getElementById('insert-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	      } else {
 	        window.scrollTo({ top: 0, behavior: 'smooth' });
+	      }
+	    }
+
+	    document.getElementById('btn-apply-draft')?.addEventListener('click', () => {
+	      try {
+	        insertFromDraftJson(false);
+	      } catch (err) {
+	        showAlert(err.message || 'Errore parsing bozza JSON.', 'error');
+	      }
+	    });
+
+	    document.getElementById('btn-insert-from-draft')?.addEventListener('click', () => {
+	      try {
+	        insertFromDraftJson(true);
 	      } catch (err) {
 	        showAlert(err.message || 'Errore parsing bozza JSON.', 'error');
 	      }
@@ -1339,12 +1369,12 @@
 	      });
 	    }
 
-		    function setButtonsDisabled(disabled) {
-		      ['btn-gh-upload-images', 'btn-ai-autofill', 'btn-publish-ad'].forEach((id) => {
-		        const el = document.getElementById(id);
-		        if (el) el.disabled = !!disabled;
-		      });
-		    }
+			    function setButtonsDisabled(disabled) {
+			      ['btn-gh-upload-images', 'btn-ai-autofill', 'btn-publish-ad', 'btn-publish-ad-inline'].forEach((id) => {
+			        const el = document.getElementById(id);
+			        if (el) el.disabled = !!disabled;
+			      });
+			    }
 
 	    async function ensureImagesUploaded() {
 	      if (lastUploadedImages.length) return lastUploadedImages;
@@ -1497,13 +1527,13 @@
 		      if (imagesStatus) imagesStatus.textContent = 'Nessuna foto caricata.';
 		    }
 
-		    document.getElementById('btn-publish-ad')?.addEventListener('click', async () => {
-		      try {
-		        // Persist token even if mobile doesn't fire "change" reliably.
-		        try {
-		          const tokenInput = document.getElementById('gh-token');
-		          const remember = document.getElementById('gh-remember');
-		          if (tokenInput) saveGithubToken(tokenInput.value.trim(), !!remember?.checked);
+			    async function publishCurrentFormOnline() {
+			      try {
+			        // Persist token even if mobile doesn't fire "change" reliably.
+			        try {
+			          const tokenInput = document.getElementById('gh-token');
+			          const remember = document.getElementById('gh-remember');
+			          if (tokenInput) saveGithubToken(tokenInput.value.trim(), !!remember?.checked);
 		        } catch {}
 
 		        const product = readProductFromForm();
@@ -1536,7 +1566,10 @@
 			      } finally {
 			        setButtonsDisabled(false);
 			      }
-			    });
+			    }
+
+			    document.getElementById('btn-publish-ad')?.addEventListener('click', publishCurrentFormOnline);
+			    document.getElementById('btn-publish-ad-inline')?.addEventListener('click', publishCurrentFormOnline);
 
 	    function buildChatgptPrompt() {
 	      if (!lastUploadedImages.length) {
@@ -1887,9 +1920,9 @@
 
       count.textContent = products.length;
 
-      container.innerHTML = products.map(product => `
-        <div class="product-card">
-          <img src="${product.image || 'assets/brand/og-1200x630.jpg'}" alt="${product.name}" onerror="this.src='assets/brand/og-1200x630.jpg'">
+	      container.innerHTML = products.map(product => `
+	        <div class="product-card">
+	          <img src="${product.image || 'assets/brand/og-1200x630.jpg'}" alt="${product.name}" onerror="this.src='assets/brand/og-1200x630.jpg'">
           <h3>${product.name}</h3>
           <p><strong>Sezione:</strong> ${product.section || 'antiquariato'}</p>
           <p><strong>Categoria:</strong> ${product.category}</p>
@@ -1903,14 +1936,15 @@
           <p><strong>Condizione:</strong> ${product.condition || 'N/A'}</p>
           <p><strong>Data:</strong> ${product.postedAt || 'N/A'}</p>
           <p><strong>Periodo:</strong> ${product.year || 'N/A'}</p>
-          <div class="product-actions">
-            <button class="btn-edit" onclick="editProduct(${product.id})">✏️ Modifica</button>
-            <button class="btn-ad" onclick="copyAdText(${product.id})">📋 Copia Annuncio</button>
-            <button class="btn-delete" onclick="deleteProduct(${product.id})">🗑️ Elimina</button>
-          </div>
-        </div>
-      `).join('');
-      updatePublishStatus();
+	          <div class="product-actions">
+	            <button class="btn-edit" onclick="editProduct(${product.id})">✏️ Modifica</button>
+	            <button class="btn-ad" onclick="copyAdText(${product.id})">📋 Copia Annuncio</button>
+	            <button class="btn-online" onclick="publishDraftOnline(${product.id})">🚀 Inserisci online</button>
+	            <button class="btn-delete" onclick="deleteProduct(${product.id})">🗑️ Elimina</button>
+	          </div>
+	        </div>
+	      `).join('');
+	      updatePublishStatus();
     }
 
     function editProduct(id) {
@@ -1953,14 +1987,44 @@
 	      window.scrollTo({ top: 0, behavior: 'smooth' });
 	    }
 
-    function deleteProduct(id) {
-      if (!confirm("Sei sicuro di voler eliminare questo annuncio?")) return;
+	    function deleteProduct(id) {
+	      if (!confirm("Sei sicuro di voler eliminare questo annuncio?")) return;
 
-      let products = loadProducts();
-      products = products.filter(p => p.id !== id);
-      saveProducts(products);
-      showAlert('✅ Annuncio eliminato!');
-    }
+	      let products = loadProducts();
+	      products = products.filter(p => p.id !== id);
+	      saveProducts(products);
+	      showAlert('✅ Annuncio eliminato!');
+	    }
+
+	    async function publishDraftOnline(id) {
+	      const products = loadProducts();
+	      const product = products.find(p => p.id === id);
+	      if (!product) {
+	        showAlert('Bozza non trovata.', 'error');
+	        return;
+	      }
+	      if (!confirm(`Pubblicare online solo questo annuncio?\n\n${product.name}`)) return;
+
+	      try {
+	        const tokenInput = document.getElementById('gh-token');
+	        const remember = document.getElementById('gh-remember');
+	        if (tokenInput) saveGithubToken(tokenInput.value.trim(), !!remember?.checked);
+	      } catch {}
+
+	      try {
+	        const liveProducts = await loadLiveProducts();
+	        const next = Array.isArray(liveProducts) ? [...liveProducts] : [];
+	        const index = next.findIndex(p => p.id === product.id);
+	        if (index >= 0) next[index] = product;
+	        else next.push(product);
+
+	        const result = await publishProductsToGithub(next);
+	        const commitUrl = result && result.commit && result.commit.html_url ? result.commit.html_url : '';
+	        showAlert(commitUrl ? `✅ Annuncio pubblicato online. Commit: ${commitUrl}` : '✅ Annuncio pubblicato online.');
+	      } catch (err) {
+	        showAlert(err.message || 'Errore durante la pubblicazione del singolo annuncio.', 'error');
+	      }
+	    }
 
 	    // Load products on page load
 	    (function initFormDefaults() {
