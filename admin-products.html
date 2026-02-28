@@ -397,10 +397,11 @@
 		                <input type="file" id="gh-images-input" accept="image/*,.heic,.HEIC,.heif,.HEIF" multiple>
 		              </div>
 		            </div>
-		            <div class="publish-actions">
-		              <button type="button" id="btn-ai-autofill" class="btn-secondary">Riempi tutti i campi (AI)</button>
-		              <button type="button" id="btn-publish-ad" class="btn-secondary">Pubblica annuncio</button>
-		            </div>
+	            <div class="publish-actions">
+	              <button type="button" id="btn-gh-upload-images" class="btn-secondary">Carica foto adesso</button>
+	              <button type="button" id="btn-ai-autofill" class="btn-secondary">Riempi tutti i campi (AI)</button>
+	              <button type="button" id="btn-publish-ad" class="btn-secondary">Pubblica annuncio</button>
+	            </div>
 	            <div id="gh-upload-preview" class="upload-preview"></div>
 	            <p id="gh-upload-status" class="status-note">Nessuna foto caricata.</p>
 	            <div id="gh-upload-links" class="helper-note"></div>
@@ -1376,6 +1377,20 @@
 			      });
 			    }
 
+			    function syncImageFieldsFromUploads() {
+			      if (!lastUploadedImages.length) return;
+			      const cfg = loadGithubConfig();
+			      const useRaw = cfg.useRawUrls !== false;
+			      const values = lastUploadedImages
+			        .map((u) => (useRaw && u.rawUrl) ? u.rawUrl : (u.path || u.pagesUrl || ''))
+			        .filter(Boolean);
+			      if (!values.length) return;
+			      const imageEl = document.getElementById('image-url');
+			      const galleryEl = document.getElementById('gallery-urls');
+			      if (imageEl && !String(imageEl.value || '').trim()) imageEl.value = values[0];
+			      if (galleryEl && !String(galleryEl.value || '').trim()) galleryEl.value = values.join(', ');
+			    }
+
 	    async function ensureImagesUploaded() {
 	      if (lastUploadedImages.length) return lastUploadedImages;
 
@@ -1535,6 +1550,13 @@
 			          const remember = document.getElementById('gh-remember');
 			          if (tokenInput) saveGithubToken(tokenInput.value.trim(), !!remember?.checked);
 		        } catch {}
+
+			        // If user selected photos but did not run AI/upload yet, upload now automatically.
+			        const selectedFiles = getSelectedImages(10);
+			        if (selectedFiles.length && !lastUploadedImages.length) {
+			          await ensureImagesUploaded();
+			        }
+			        syncImageFieldsFromUploads();
 
 		        const product = readProductFromForm();
 		        const missing = getFirstMissingFieldId(product);
